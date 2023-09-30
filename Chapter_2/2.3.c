@@ -6,6 +6,7 @@
 
 #define RADIUS 1000
 #define LOOP 10000
+
 double calculate_pi(int circle_hits, int all_points);
 double generate_random_value(int side_len);
 bool is_inside_circle(double x, double y, double r);
