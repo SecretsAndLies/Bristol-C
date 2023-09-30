@@ -9,8 +9,17 @@ int main(void)
 {
     printf("Enter characters (enter 1 to stop");
     char c;
-    do {scanf("%c",&c)}
-    while (
+    while (scanf("%c",&c)==1){
+        if c=='1'{
+            printf("\n");
+            return 0;
+        }
+        if (is_vowel(to_lower(c))){
+            c=toupper(c);
+        }
+        printf("%c",c);
+    }
+    printf("\n");
     return 0;
 }
 
