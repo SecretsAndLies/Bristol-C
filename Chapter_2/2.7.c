@@ -1,20 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <assert.h>
 
+bool is_vowel(char c);
 void test(void);
 int main(void)
 {
-    printf("Enter characters (enter 1 to stop");
+    printf("Enter characters (enter 1 to stop \n");
     char c;
     while (scanf("%c",&c)==1){
-        if c=='1'{
+        if (c=='1'){
             printf("\n");
             return 0;
         }
-        if (is_vowel(to_lower(c))){
+        if (is_vowel(tolower(c))){
             c=toupper(c);
         }
         printf("%c",c);
@@ -39,7 +40,7 @@ bool is_vowel(char c)
         default:
             return false;
     }
-
+}
 
 void test(void)
 {
