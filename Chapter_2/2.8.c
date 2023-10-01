@@ -7,18 +7,33 @@ bool is_vowel(char c);
 void test(void);
 int main(void)
 {
+    char f='a';
+    char s='a';
+    char t='a';
     
     return 0;
 }
 
-void print_vowels_or_non_vowels(int type){
-    if (type == 1)
-    char first_char = 'a';
-        for (int i = 0; i<26; i++){
-            printf("%c",first_char+i);
-            printf("\n");
+char get_next_vowel(char c){
+    while (c<='z'){
+        if (is_vowel(c)){
+            return c;
+        }
+        c=c++;
     }
+    return '!';
 }
+
+char get_next_const(char c){
+    while (c<='z'){
+        if (!is_vowel(c)){
+            return c;
+        }
+        c=c++;
+    }
+    return '!';
+}
+
 bool is_vowel(char c)
 {
     switch (c){
@@ -39,4 +54,10 @@ bool is_vowel(char c)
 
 void test(void)
 {
+    assert(get_next_vowel('a')=='e');
+    assert(get_next_vowel('u')=='!');
+    assert(get_next_const('a')=='b');
+    assert(get_next_const('g')=='h');
+    assert(get_next_const('z')=='!');
+
 }
