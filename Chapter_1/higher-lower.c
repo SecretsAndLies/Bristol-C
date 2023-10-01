@@ -25,8 +25,8 @@ int main(void)
         {
             printf("too low! \n");
         }
-    	
-	goes_remaining--;
+        
+    goes_remaining--;
     }
     printf("hahaa, I win. You ran out of goes.\n");
     return 0;
