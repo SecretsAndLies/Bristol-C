@@ -1,16 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <assert.h>
 #include <stdbool.h>
 
+char get_next_vowel(char c);
+char get_next_const(char c);
 bool is_vowel(char c);
 void test(void);
 int main(void)
 {
-    char f='a';
-    char s='a';
-    char t='a';
-    
+    test();
+    int i = 1;
+    char first = get_next_const('a');
+    char second = get_next_vowel('a');
+    char third = get_next_const('a');
+    while (first!='!'){
+        while (second!='!'){
+            while (third!='!'){
+                printf("%i %c%c%c \n",i,first,second,third);
+                third=get_next_const(third+1);
+                i++;
+            }
+            third = get_next_const('a');
+            second = get_next_vowel(second+1);
+        }
+        third=get_next_const('a');
+        second=get_next_vowel('a');
+        first = get_next_const(first+1);
+    }
     return 0;
 }
 
@@ -19,7 +36,7 @@ char get_next_vowel(char c){
         if (is_vowel(c)){
             return c;
         }
-        c=c++;
+        c++;
     }
     return '!';
 }
@@ -29,7 +46,7 @@ char get_next_const(char c){
         if (!is_vowel(c)){
             return c;
         }
-        c=c++;
+        c++;
     }
     return '!';
 }
@@ -54,10 +71,11 @@ bool is_vowel(char c)
 
 void test(void)
 {
-    assert(get_next_vowel('a')=='e');
-    assert(get_next_vowel('u')=='!');
+    assert(get_next_vowel('a')=='a');
+    assert(get_next_vowel('b')=='e');
+    assert(get_next_vowel('v')=='!');
     assert(get_next_const('a')=='b');
-    assert(get_next_const('g')=='h');
-    assert(get_next_const('z')=='!');
+    assert(get_next_const('g')=='g');
+    assert(get_next_const('z')=='z');
 
 }
