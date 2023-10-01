@@ -7,23 +7,18 @@ bool is_vowel(char c);
 void test(void);
 int main(void)
 {
-    int char_num = 1;
-    char first_char = 'a';
-    for (int i = 0; i<26; i++){
-      printf("%i",char_num);
-      char_num++;
-      printf("%c", first_char+i);
-        for (int j=0; j<26; j++){
-          printf("%c", first_char+j);
-        }
-          for (int k=0; k<26; k++){
-            printf("%c", first_char+k);
-          }
-      printf("\n");
-    }
+    
     return 0;
 }
 
+void print_vowels_or_non_vowels(int type){
+    if (type == 1)
+    char first_char = 'a';
+        for (int i = 0; i<26; i++){
+            printf("%c",first_char+i);
+            printf("\n");
+    }
+}
 bool is_vowel(char c)
 {
     switch (c){
