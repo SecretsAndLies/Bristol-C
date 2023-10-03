@@ -8,6 +8,7 @@ bool const_vow_const_or_vow_const_vow(char c, char d, char e);
 bool is_vowel(char c);
 bool is_prime(int n);
 void test(void);
+
 int main(void)
 {
     test();
