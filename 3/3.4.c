@@ -7,8 +7,8 @@
 #define NUMDICE 5
 #define TESTS 10000000
 
-void shuffle_array(int numbers[], int length);
-
+/* Prints out the array */
+void printarr(int d[NUMDICE]);
 /* Fill the array d with random numbers 1..6 */
 void randomthrow(int d[NUMDICE]);
 /* Decide if the number n occurs anywhere in the histogram h */
@@ -45,28 +45,76 @@ int main(void) {
   return 0;
 }
 
+bool is4ofakind(const int d[NUMDICE])
+{
+    int h[MAXTHROW] = {0};
+    makehist(d,h);
+    if (histo_has(h,4)){
+        return true;
+    }
+    return false;
+}
+
+bool isfullhouse(const int d[NUMDICE])
+{
+    int h[MAXTHROW] = {0};
+    makehist(d,h);
+
+    if (histo_has(h,2) && histo_has(h,3))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool hists_same(const int h1[MAXTHROW], const int h2[MAXTHROW])
+{
+   for (int i=0; i<MAXTHROW; i++){
+        if (h1[i]!=h2[i]){
+            return false;
+        }
+   }
+   return true;
+}
+
+
+void makehist(const int d[NUMDICE], int h[MAXTHROW])
+{
+    // reset histogram to zeros
+    for (int i=0; i < MAXTHROW; i++){
+        h[i]=0;
+    }
+   
+    // write the histogram values.
+    for (int i = 0; i < NUMDICE; i++){
+       int dice_value_index = d[i]-1;
+       h[dice_value_index] = h[dice_value_index] + 1;
+    }
+}
+
+
+bool histo_has(const int h[MAXTHROW], const int n){
+    for (int i=0; i<MAXTHROW; i++){
+        if(h[i]==n){
+            return true;
+        }
+    }
+    return false;
+}
+
+void printarr(int d[NUMDICE]){
+    for (int i=0; i<NUMDICE; i++){
+        printf("%d",d[i]);
+    }
+}
+
 /* Fill the array d with random numbers 1..6 */
 void randomthrow(int d[NUMDICE])
 {
-    for (int i=0; i<MAXTHROW; i++){
-        d[i]=i+1;
-    }
-    shuffle_array(d,MAXTHROW);
-}
-
-void shuffle_array(int numbers[], int length){
-
-    for (int i=0; i<length; i++) {
-        int random1 = rand() % length;
-        int random2 = rand() % length;
-
-        int temp = numbers[random1];
-        numbers[random1] = numbers[random2];
-        numbers[random2] = temp;
+    for (int i=0; i<NUMDICE; i++){
+        d[i]=(rand()%MAXTHROW)+1;
     }
 }
-
-
 
 void test(void) {
   int i, j;
