@@ -6,3 +6,6 @@ CFLAGS=-Wall -Wextra -Wfloat-equal -Wvla -pedantic -std=c99 -fsanitize=undefined
 
 3.4: 3.4.c
 	$(CC) $(CFLAGS) 3.4.c -o 3.4
+
+3.6: 3.6.c
+	$(CC) $(CFLAGS) 3.6.c -o 3.6
