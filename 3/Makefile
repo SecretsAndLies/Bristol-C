@@ -19,4 +19,10 @@ CFLAGS=-Wall -Wextra -Wfloat-equal -Wvla -pedantic -std=c99 -fsanitize=undefined
 3.11: 3.11.c
 	$(CC) $(CFLAGS) 3.11.c -o 3.11
 
+3.12: 3.12.c
+	$(CC) $(CFLAGS) 3.12.c -o 3.12
+
+3.13: 3.13.c
+	$(CC) $(CFLAGS) 3.13.c -o 3.13
+
 

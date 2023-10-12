@@ -13,6 +13,18 @@ void test(void);
 int main(void)
 {
     test();
+    char a[MAX];
+    printf("Give me a string and I'll "
+            "tell you if it's a palindrome.");
+    fgets(a, MAX, stdin);
+    
+    if (is_palindrome(a)){
+        printf("yes! \n");
+    }
+    else {
+        printf("no. \n");
+    }
+
     return 0;
 }
 
