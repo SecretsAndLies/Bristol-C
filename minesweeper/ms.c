@@ -14,47 +14,135 @@ bool are_2d_arrays_equal(
                                 );
 bool str_contains_correct_characters(int len, char inp[MAXSQ*MAXSQ+1]);
 bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ*MAXSQ+1], int len);
-void rule_1(board b);
-void mark_all_unknowns_as_mines(board b);
-int get_number_item(board b, char item_to_find);
-
-
+board rule_1(board b);
+int count_item(board b, char item_to_find);
+int items_next_to_cell(board b, int r, int c, char item_to_find);
+bool is_valid_pos(board b, int r, int c);
+board number_all_with_count_of_ajacent_mines(board b);
 
 board solve_board(board b)
 {
-    // rule_1(board b);
+    b = rule_1(b);
     return b;
 }
 
 /*
-if there's N unknown spots left on the board, and you know there's 
-N mines remaining (totmines - found_mines) 
-you can fill every question mark with mines
-*/
-void rule_1(board b)
+takes in a pointer to a board (so you can change it.)
+returns a boolean if the board was changed.
+Rule 2: for a cell with a number in it (n), 
+with m unknowns and n−m mines in its Moore
+neighbourhood, then those unknown squares must be mines.
+*/ 
+bool rule_2(board* b)
 {
-    int found_mines = get_number_item(b, MINE);
-    int mines_remaining = b.totmines - found_mines;
-    int unknowns =  get_number_item(b, UNK);
-    if (unknowns == mines_remaining){
-        mark_all_unknowns_as_mines(b);
-    }
+    b->h=1;
+    // loop through board.
+    int m = 
+    return false;
 }
 
-void mark_all_unknowns_as_mines(board b)
+/*
+If we’ve discovered all the mines on the board already,
+ then any unknown cell can simply
+be numbered with the count of mines in its Moore neighbourhood.
+already.
+*/
+board rule_1(board b)
 {
-    // TODO: this won't work - you must return the board.
+    int found_mines = count_item(b, MINE);
+    int mines_remaining = b.totmines - found_mines;
+    if (mines_remaining==0){
+        b = number_all_with_count_of_ajacent_mines(b);
+    }
+    return b;
+}
+
+board number_all_with_count_of_ajacent_mines(board b)
+{
     for (int j=0; j<b.h; j++){
         for (int i=0; i<b.w; i++){
             if (b.grid[j][i]==UNK){
-                b.grid[j][i] = MINE;
+            b.grid[j][i] = items_next_to_cell(b, j, i, MINE) + '0';
             }
         }
     }
-
+    return b;
 }
 
-int get_number_item(board b, char item_to_find)
+bool is_valid_pos(board b, int r, int c)
+{
+    if (r >= 0 && c >= 0 && r < b.w && c < b.w){
+        return true;    
+    }
+    return false;
+}
+
+int items_next_to_cell(board b, int r, int c, char item_to_find)
+{
+    int count = 0;
+
+    // TODO: they'll be a loop way to do this. 
+    // but you need to watch out you don't get the centre cell.
+    // top_left
+    if (is_valid_pos(b,r-1,c-1)){
+        if(b.grid[r-1][c-1]==item_to_find){
+            count++;
+        }
+    }
+
+    // top_right
+    if (is_valid_pos(b,r-1,c+1)){
+        if(b.grid[r-1][c+1]==item_to_find){
+            count++;
+        }
+    }
+
+    //top_middle
+    if (is_valid_pos(b,r-1,c)){
+        if(b.grid[r-1][c]==item_to_find){
+            count++;
+        }
+    }
+
+    // left
+    if (is_valid_pos(b,r,c-1)){
+        if(b.grid[r][c-1]==item_to_find){
+            count++;
+        }
+    }
+
+    // right
+    if (is_valid_pos(b,r,c+1)){
+        if(b.grid[r][c+1]==item_to_find){
+            count++;
+        }
+    }
+
+    // bottom_left
+    if (is_valid_pos(b,r+1,c-1)){
+        if(b.grid[r+1][c-1]==item_to_find){
+            count++;
+        }
+    }
+
+    // bottom_right
+    if (is_valid_pos(b,r+1,c+1)){
+        if(b.grid[r+1][c+1]==item_to_find){
+            count++;
+        }
+    }
+
+    // bottom_middle
+    if (is_valid_pos(b,r+1,c)){
+        if(b.grid[r+1][c]==item_to_find){
+            count++;
+        }
+    }
+
+    return count;
+}
+
+int count_item(board b, char item_to_find)
 {
     int found = 0;
     for (int j=0; j<b.h; j++){
@@ -67,14 +155,13 @@ int get_number_item(board b, char item_to_find)
     return found;
 }
 
-
-
 void board2str(char s[MAXSQ*MAXSQ+1], board b)
 {
     int pos = 0;
     for (int j=0; j<b.h; j++){
         for(int i=0; i<b.w; i++){
            s[pos] = b.grid[j][i];
+           pos++;
         }
     }
     s[pos] = '\0';
@@ -192,6 +279,9 @@ bool are_2d_arrays_equal(
 
 void test(void)
 {
+
+    // TODO: consider breaking tests into test functions: eg test_2_d_arrays etc.
+    // you can pass grid1, grid2 in as needed.
     int grid1[MAXSQ][MAXSQ] = {
                                       {'X','X','X'},
                                       {'?','?','X'},
@@ -203,6 +293,7 @@ void test(void)
                                       {'?','?','X'},
                                       {'?','X','1'},
                                       };
+    char grid_2_str[] = "X????X?X1";
 
     // TESTS FOR are_2d_arrays_equal
     assert(are_2d_arrays_equal(grid1,grid1,3,3));
@@ -227,7 +318,7 @@ void test(void)
     board d = make_board(5,3,3,grid_1_str);
     char output_str_1[MAXSQ*MAXSQ+1];
     board2str(output_str_1,d);
-    assert(strcmp(output_str_1,grid_1_str));
+    assert(strcmp(output_str_1,grid_1_str)==0);
     // TODO add more tests
 
     // TESTS FOR bool char_is_correct(char c)
@@ -285,12 +376,54 @@ void test(void)
     // has invalid characters
     assert(syntax_check(3,3,3,"XXXa?????")==false);
 
+    // TESTS FOR count_item
+    board e = make_board(5,3,3,grid_1_str);
+    assert(count_item(e,MINE)==5);
+    assert(count_item(e,UNK)==3);
 
-// UNTESTED:
-// void rule_1(board b);
-// void mark_all_unknowns_as_mines(board b);
-// int get_number_of_found_mines(board b);
-// int get_number_of_unknowns(board b);
+    board f = make_board(5,3,3,grid_2_str);
+    assert(count_item(f,MINE)==3);
+    assert(count_item(f,UNK)==5);
 
+    // TESTS FOR is_valid_pos
+    board g = make_board(5,3,3,grid_2_str);
+    assert(is_valid_pos(g,1,1)==true);
+    assert(is_valid_pos(g,-1,0)==false);
+    assert(is_valid_pos(g,0,-1)==false);
+    assert(is_valid_pos(g,2,3)==false);
+    assert(is_valid_pos(g,3,2)==false);
+    assert(is_valid_pos(g,2,3)==false);
 
+    // TESTS FOR items_next_to_cell
+    board h = make_board(5,3,3,"??X??X??X");
+    assert(items_next_to_cell(h,1,1,MINE)==3);
+    assert(items_next_to_cell(h,0,0,MINE)==0);
+    assert(items_next_to_cell(h,2,0,MINE)==0);
+    assert(items_next_to_cell(h,2,1,MINE)==2);
+    assert(items_next_to_cell(h,0,2,MINE)==1);
+    assert(items_next_to_cell(h,1,1,UNK)==5);
+    assert(items_next_to_cell(h,0,0,UNK)==3);
+    assert(items_next_to_cell(h,2,0,UNK)==3);
+    assert(items_next_to_cell(h,2,1,UNK)==3);
+    assert(items_next_to_cell(h,0,2,UNK)==2);
+
+    // TESTS FOR number_all_with_count_of_ajacent_mines
+    board i = make_board(4, 3, 3, "XX??XX???");
+    board ir = number_all_with_count_of_ajacent_mines(i);
+    char outputi[MAXSQ*MAXSQ+1];
+    board2str(outputi,ir);
+    assert(strcmp(outputi,"XX33XX122")==0);
+
+    // TESTS FOR board rule_1;
+    board k = make_board(5, 5, 5, "011?013X311XXX113X3101110");
+    board kr = rule_1(k);
+    char outputk[MAXSQ*MAXSQ+1];
+    board2str(outputk,kr);
+    assert(strcmp(outputk,"0111013X311XXX113X3101110")==0);
+
+    board l = make_board(2, 3, 3, "XX???????");
+    board lr = rule_1(l);
+    char outputl[MAXSQ*MAXSQ+1];
+    board2str(outputl,lr);
+    assert(strcmp(outputl,"XX1221000")==0);
 }
