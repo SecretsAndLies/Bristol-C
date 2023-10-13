@@ -43,6 +43,7 @@ void rule_1(board b)
 
 void mark_all_unknowns_as_mines(board b)
 {
+    // TODO: this won't work - you must return the board.
     for (int j=0; j<b.h; j++){
         for (int i=0; i<b.w; i++){
             if (b.grid[j][i]==UNK){
