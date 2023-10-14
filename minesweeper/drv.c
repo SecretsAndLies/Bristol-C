@@ -3,7 +3,7 @@
 int main(void)
 {
    test();
-   // driver(); // TOOD: Add back in!!! 
+   driver();
    return 0;
 }
 

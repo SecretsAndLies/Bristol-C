@@ -22,15 +22,35 @@ board number_all_with_count_of_ajacent_mines(board b);
 bool rule_2(board* b);
 bool cell_is_a_number(board b, int r, int c);
 void change_adj_unk_to_mines(board* b, int r, int c);
+void print_board(board b);
 
 board solve_board(board b)
 {
     // continously implements rule 2 until no more changes
     // are made.
-    while (rule_2(&b));
-    // then implements rule 1.
+    printf("Solving new board \n");
+    print_board(b);
+    while (rule_2(&b)){
+        print_board(b);
+    }
+    printf("BOARD AS OF RULE 2 COMPLETION \n");
+
+    // then implement rule 1.
     b = rule_1(b);
+    print_board(b);
     return b;
+}
+
+void print_board(board b)
+{
+    printf("------- \n");
+    for (int j = 0; j < b.h; j++){
+        for (int i = 0; i < b.w; i++){
+            printf("%c ",b.grid[j][i]);
+        }
+        printf("\n");
+    }
+    printf("------- \n");
 }
 
 /*
@@ -45,14 +65,14 @@ bool rule_2(board* b)
     for (int j = 0; j < b->h; j++){
         for (int i = 0; i < b->w; i++){
             if(cell_is_a_number(*b, j, i)){
-                int mines_around_cell = b->grid[j][i] - '0'; 
+                int tot_mines_around_cell = b->grid[j][i] - '0'; 
+                int discovered_mines_around_cell = items_next_to_cell(*b, j, i, MINE);
                 int unk_around_cell = items_next_to_cell(*b, j, i,UNK);
-                // TODO think about this var name.
-                int mines_left = mines_around_cell-unk_around_cell;
-                if (mines_left){
-                    change_adj_unk_to_mines(&b, j, i);
+                int mines_left = tot_mines_around_cell-discovered_mines_around_cell;
+                if (mines_left && unk_around_cell){
+                    change_adj_unk_to_mines(b, j, i);
                     return true;
-                }
+                    }
             }
         }
     }
@@ -61,7 +81,18 @@ bool rule_2(board* b)
 
 void change_adj_unk_to_mines(board* b, int r, int c)
 {
-
+    for (int j=r-1; j<=r+1; j++){
+        for (int i=c-1; i<=c+1; i++){
+            // don't include the center cell itself.
+            if (!(j==r && i==c)){
+                if(is_valid_pos(*b,j,i)){
+                    if(b->grid[j][i]==UNK) {
+                        b->grid[j][i] = MINE;
+                    }
+                }
+            }
+        }
+    }
 }
 
 bool cell_is_a_number(board b, int r, int c)
@@ -420,4 +451,58 @@ void test(void)
 
 
     // TESTS FOR change_adj_unk_to_mines
+    board m = make_board(2, 3, 3, "XX3??????");
+    change_adj_unk_to_mines(&m, 0, 2);
+    char outputm[MAXSQ*MAXSQ+1];
+    board2str(outputm,m);
+    assert(strcmp(outputm,"XX3?XX???")==0);
+
+    board m1 = make_board(5, 5, 5, "0111013X311XXX113?3101110");
+    change_adj_unk_to_mines(&m1, 3, 1);
+    char outputm1[MAXSQ*MAXSQ+1];
+    board2str(outputm1,m1);
+    assert(strcmp(outputm1,"0111013X311XXX113X3101110")==0);
+
+
+    // TESTS FOR rule_2
+    board n = make_board(5, 5, 5, "0111013X311XXX113?3101110");
+    assert(rule_2(&n)==true);
+    char outputn[MAXSQ*MAXSQ+1];
+    board2str(outputn,n);
+    assert(strcmp(outputn,"0111013X311XXX113X3101110")==0);
+    assert(rule_2(&n)==false);
+
+/*
+START:
+------- 
+1 1 ? 0 ? 
+X 1 1 1 1 
+1 1 1 X ? 
+1 1 ? 1 1 
+? X 1 0 ? 
+------- 
+------- 
+1 1 X 0 X 
+X 1 1 1 1 
+1 1 1 X ? 
+1 1 ? 1 1 
+? X 1 0 ? 
+------- 
+------- 
+1 1 X 0 X 
+X 1 1 1 1 
+1 1 1 X ? 
+1 1 X 1 1 
+X X 1 0 ? 
+------- 
+------- 
+1 1 X 0 X 
+X 1 1 1 1 
+1 1 1 X X 
+1 1 X 1 1 
+X X 1 0 X 
+------- 
+
+ 
+ */
 }
