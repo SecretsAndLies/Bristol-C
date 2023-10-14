@@ -28,16 +28,10 @@ board solve_board(board b)
 {
     // continously implements rule 2 until no more changes
     // are made.
-    printf("Solving new board \n");
-    print_board(b);
-    while (rule_2(&b)){
-        print_board(b);
-    }
-    printf("BOARD AS OF RULE 2 COMPLETION \n");
+    while (rule_2(&b));
 
     // then implement rule 1.
     b = rule_1(b);
-    print_board(b);
     return b;
 }
 
