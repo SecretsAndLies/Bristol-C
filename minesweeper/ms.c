@@ -56,23 +56,29 @@ void print_board(board b)
 /*
 takes in a pointer to a board (so you can change it.)
 returns a boolean if the board was changed.
-Rule 2: for a cell with a number in it (n), 
-with m unknowns and n−m mines in its Moore
-neighbourhood, then those unknown squares must be mines.
+Rule 2: 
+if a cell contains a number and has unknown values around it
+
+get number of mines around cell -  mines_around_cell  3
+and the number of unknwons around the cell - unk_around_cell   1
+if (mines_around_cell-unk_around_cell) == discovered_mines_around_cell
+then those unknown squares must be mines.
 */ 
 bool rule_2(board* b)
 {
     for (int j = 0; j < b->h; j++){
         for (int i = 0; i < b->w; i++){
             if(cell_is_a_number(*b, j, i)){
-                int tot_mines_around_cell = b->grid[j][i] - '0'; 
-                int discovered_mines_around_cell = items_next_to_cell(*b, j, i, MINE);
                 int unk_around_cell = items_next_to_cell(*b, j, i,UNK);
-                int mines_left = tot_mines_around_cell-discovered_mines_around_cell;
-                if (mines_left && unk_around_cell){
-                    change_adj_unk_to_mines(b, j, i);
-                    return true;
-                    }
+                if(unk_around_cell){
+                    int mines_around_cell = b->grid[j][i] - '0'; 
+                    int discovered_mines_around_cell = items_next_to_cell(*b, j, i, MINE);
+                    int mines_left = mines_around_cell-unk_around_cell;
+                    if (mines_left==discovered_mines_around_cell){
+                        change_adj_unk_to_mines(b, j, i);
+                        return true;
+                        }
+                }
             }
         }
     }
