@@ -19,9 +19,16 @@ int count_item(board b, char item_to_find);
 int items_next_to_cell(board b, int r, int c, char item_to_find);
 bool is_valid_pos(board b, int r, int c);
 board number_all_with_count_of_ajacent_mines(board b);
+bool rule_2(board* b);
+bool cell_is_a_number(board b, int r, int c);
+void change_adj_unk_to_mines(board* b, int r, int c);
 
 board solve_board(board b)
 {
+    // continously implements rule 2 until no more changes
+    // are made.
+    while (rule_2(&b));
+    // then implements rule 1.
     b = rule_1(b);
     return b;
 }
@@ -35,15 +42,41 @@ neighbourhood, then those unknown squares must be mines.
 */ 
 bool rule_2(board* b)
 {
-    b->h=1;
-    // loop through board.
-    int m = 
+    for (int j = 0; j < b->h; j++){
+        for (int i = 0; i < b->w; i++){
+            if(cell_is_a_number(*b, j, i)){
+                int mines_around_cell = b->grid[j][i] - '0'; 
+                int unk_around_cell = items_next_to_cell(*b, j, i,UNK);
+                // TODO think about this var name.
+                int mines_left = mines_around_cell-unk_around_cell;
+                if (mines_left){
+                    change_adj_unk_to_mines(&b, j, i);
+                    return true;
+                }
+            }
+        }
+    }
     return false;
 }
 
+void change_adj_unk_to_mines(board* b, int r, int c)
+{
+
+}
+
+bool cell_is_a_number(board b, int r, int c)
+{
+    char cell = b.grid[r][c];
+    if (cell==UNK || cell == MINE)
+    {
+        return false;
+    }
+    return true;
+}
+
 /*
-If we’ve discovered all the mines on the board already,
- then any unknown cell can simply
+Rule 1: If we’ve discovered all the mines on the board already,
+then any unknown cell can simply
 be numbered with the count of mines in its Moore neighbourhood.
 already.
 */
@@ -81,64 +114,18 @@ int items_next_to_cell(board b, int r, int c, char item_to_find)
 {
     int count = 0;
 
-    // TODO: they'll be a loop way to do this. 
-    // but you need to watch out you don't get the centre cell.
-    // top_left
-    if (is_valid_pos(b,r-1,c-1)){
-        if(b.grid[r-1][c-1]==item_to_find){
-            count++;
+    for (int j=r-1; j<=r+1; j++){
+        for (int i=c-1; i<=c+1; i++){
+            // don't include the center cell itself.
+            if (!(j==r && i==c)){
+                if(is_valid_pos(b,j,i)){
+                    if(b.grid[j][i]==item_to_find) {
+                        count++;
+                    }
+                }
+            }
         }
     }
-
-    // top_right
-    if (is_valid_pos(b,r-1,c+1)){
-        if(b.grid[r-1][c+1]==item_to_find){
-            count++;
-        }
-    }
-
-    //top_middle
-    if (is_valid_pos(b,r-1,c)){
-        if(b.grid[r-1][c]==item_to_find){
-            count++;
-        }
-    }
-
-    // left
-    if (is_valid_pos(b,r,c-1)){
-        if(b.grid[r][c-1]==item_to_find){
-            count++;
-        }
-    }
-
-    // right
-    if (is_valid_pos(b,r,c+1)){
-        if(b.grid[r][c+1]==item_to_find){
-            count++;
-        }
-    }
-
-    // bottom_left
-    if (is_valid_pos(b,r+1,c-1)){
-        if(b.grid[r+1][c-1]==item_to_find){
-            count++;
-        }
-    }
-
-    // bottom_right
-    if (is_valid_pos(b,r+1,c+1)){
-        if(b.grid[r+1][c+1]==item_to_find){
-            count++;
-        }
-    }
-
-    // bottom_middle
-    if (is_valid_pos(b,r+1,c)){
-        if(b.grid[r+1][c]==item_to_find){
-            count++;
-        }
-    }
-
     return count;
 }
 
@@ -313,6 +300,10 @@ void test(void)
     assert(c.w==3);
     assert(c.totmines==5);
 
+    // TESTS FOR cell_is_a_number
+    assert(cell_is_a_number(c,0,0)==false);
+    assert(cell_is_a_number(c,2,2));
+    assert(cell_is_a_number(c,1,0)==false);
 
     // TESTS FOR board2str
     board d = make_board(5,3,3,grid_1_str);
@@ -426,4 +417,7 @@ void test(void)
     char outputl[MAXSQ*MAXSQ+1];
     board2str(outputl,lr);
     assert(strcmp(outputl,"XX1221000")==0);
+
+
+    // TESTS FOR change_adj_unk_to_mines
 }
