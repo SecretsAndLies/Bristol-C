@@ -32,8 +32,9 @@ void test_char_is_correct(void);
 board solve_board(board b)
 {
     // continously implements rule 2 until no more changes are made.
-    // TODO: check with Neil if I should use braces even if the output is empty?
-    while (rule_2(&b));
+    while (rule_2(&b)){
+        // Do nothing. (Function is already and output checked above.)
+    }
 
     // then implement rule 1.
     b = rule_1(b);
