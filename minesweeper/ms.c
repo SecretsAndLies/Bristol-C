@@ -54,17 +54,16 @@ void print_board(board b)
 }
 
 /*
-TODO: rewrite and delete this text.
-takes in a pointer to a board (so you can change it.)
-returns a boolean if the board was changed.
-Rule 2: 
-if a cell contains a number and has unknown values around it
+Returns a boolean if the board was changed.
 
-get number of mines around cell -  true_ajc_mines  3
-and the number of unknwons around the cell - ajc_unk   1
-if (true_ajc_mines-ajc_unk) == ajc_mines
-then those unknown squares must be mines.
+Rule 2: 
+For a known square having the number (true_ajc_mines), with (ajc_unk) unknown 
+and (known_ajc_mines) known mines in its
+Moore neighbourhood, 
+if true_ajc_mines = known_ajc_mines+ajc_unk 
+and ajc_unk > 0 then all unknown squares must be mines.
 */ 
+
 bool rule_2(board* b)
 {
     for (int j = 0; j < b->h; j++){
@@ -73,9 +72,8 @@ bool rule_2(board* b)
                 int ajc_unk = count_ajc_items(*b, j, i, UNK);
                 if (ajc_unk){
                     int true_ajc_mines = b->grid[j][i] - '0';
-                    int ajc_mines = count_ajc_items(*b, j, i, MINE);
-                    int mines_left = true_ajc_mines - ajc_unk;
-                    if (mines_left == ajc_mines){
+                    int known_ajc_mines = count_ajc_items(*b, j, i, MINE);
+                    if (true_ajc_mines == known_ajc_mines+ajc_unk){
                         change_adj_unk_to_mines(b, j, i);
                         return true;
                     }
@@ -241,7 +239,7 @@ bool str_contains_correct_characters(
 
 bool char_is_correct(char c)
 {
-    if (c == UNK || c == MINE || (c >= '0' && c <= '9')){
+    if (c == UNK || c == MINE || (c >= '0' && c <= '8')){
         return true;
     }
     return false;
@@ -324,7 +322,6 @@ void test_char_is_correct(void)
     assert(char_is_correct('6'));
     assert(char_is_correct('7'));
     assert(char_is_correct('8'));
-    assert(char_is_correct('9'));
     assert(char_is_correct('x') == false);
     assert(char_is_correct('!') == false);
     assert(char_is_correct('[') == false);
@@ -385,7 +382,7 @@ void test(void)
     assert(str_contains_correct_characters(5, "aaaaa") == false);
     assert(str_contains_correct_characters(5, "?????"));
     assert(str_contains_correct_characters(5, "???XX"));
-    assert(str_contains_correct_characters(12, "0123456789?X"));
+    assert(str_contains_correct_characters(11, "012345678?X"));
 
     // TESTS FOR str_mines_leq_totmines
     assert(str_mines_leq_totmines(3, "XXX", 3));
