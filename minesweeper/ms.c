@@ -41,7 +41,6 @@ board solve_board(board b)
     return b;
 }
 
-// TODO: check - should you have useless funcs in final solution?
 void print_board(board b)
 {
     printf("------- \n");
