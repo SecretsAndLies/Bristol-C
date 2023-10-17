@@ -1,23 +1,11 @@
 #include "ms.h"
 
 bool char_is_correct(char c);
-bool str_is_correct_length(
-    int width,
-    int height,
-    int input_len);
+bool str_is_correct_length(int width, int height, int input_len);
 board populate_grid(board b, char inp[MAXSQ * MAXSQ + 1]);
-bool are_2d_arrays_equal(
-    int grid1[MAXSQ][MAXSQ],
-    int grid2[MAXSQ][MAXSQ],
-    int height,
-    int width);
-bool str_contains_correct_characters(
-    int len,
-    char inp[MAXSQ * MAXSQ + 1]);
-bool str_mines_leq_totmines(
-    unsigned totmines,
-    char inp[MAXSQ * MAXSQ + 1],
-    int len);
+bool are_2d_arrays_equal(int grid1[MAXSQ][MAXSQ], int grid2[MAXSQ][MAXSQ], int height, int width);
+bool str_contains_correct_characters(int len, char inp[MAXSQ * MAXSQ + 1]);
+bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1], int len);
 board rule_1(board b);
 int count_item(board b, char item_to_find);
 int count_ajc_items(board b, int r, int c, char item_to_find);
@@ -207,11 +195,7 @@ void board2str(char s[MAXSQ*MAXSQ+1], board b)
     s[pos] = '\0';
 }
 
-bool syntax_check(
-    unsigned totmines,
-    unsigned width,
-    unsigned height,
-    char inp[MAXSQ * MAXSQ + 1])
+bool syntax_check(unsigned totmines, unsigned width, unsigned height,char inp[MAXSQ * MAXSQ + 1])
 {
     int input_len = strlen(inp);
     if (!str_is_correct_length(width, height, input_len)){
@@ -226,10 +210,7 @@ bool syntax_check(
     return true;
 }
 
-bool str_mines_leq_totmines(
-    unsigned totmines,
-    char inp[MAXSQ * MAXSQ + 1],
-    int len)
+bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1], int len)
 {
     unsigned mine_count = 0;
     for (int i = 0; i < len; i++){
@@ -241,9 +222,7 @@ bool str_mines_leq_totmines(
     return mine_count <= totmines;
 }
 
-bool str_contains_correct_characters(
-    int len,
-    char inp[MAXSQ * MAXSQ + 1])
+bool str_contains_correct_characters(int len, char inp[MAXSQ * MAXSQ + 1])
 {
     for (int i = 0; i < len; i++){
         char c = inp[i];
@@ -262,10 +241,7 @@ bool char_is_correct(char c)
     return false;
 }
 
-bool str_is_correct_length(
-    int width,
-    int height,
-    int input_len)
+bool str_is_correct_length(int width, int height, int input_len)
 {
     if (height *  width != input_len){
         return false;
@@ -273,11 +249,7 @@ bool str_is_correct_length(
     return true;
 }
 
-board make_board(
-    int totmines,
-    int width, 
-    int height, 
-    char inp[MAXSQ*MAXSQ+1])
+board make_board(int totmines, int width, int height, char inp[MAXSQ*MAXSQ+1])
 {
     board b;
     b.w = width;
@@ -301,16 +273,12 @@ board populate_grid(board b, char inp[MAXSQ*MAXSQ+1])
             }
         }
     }
-    // This line should never be reached but compiler warns. 
-    // (TODO ask - should I use exit instead?)
+
+    // This line should never be reached. 
     return b;
 }
 
-bool are_2d_arrays_equal(
-    int grid1[MAXSQ][MAXSQ],
-    int grid2[MAXSQ][MAXSQ],
-    int height,
-    int width)
+bool are_2d_arrays_equal(int grid1[MAXSQ][MAXSQ], int grid2[MAXSQ][MAXSQ], int height, int width)
 {
     for (int j = 0; j < height; j++){
         for (int i = 0; i < width; i++){
@@ -320,25 +288,6 @@ bool are_2d_arrays_equal(
         }
     }
     return true;
-}
-
-void test_char_is_correct(void)
-{
-    assert(char_is_correct(UNK));
-    assert(char_is_correct(MINE));
-    assert(char_is_correct('0'));
-    assert(char_is_correct('1'));
-    assert(char_is_correct('2'));
-    assert(char_is_correct('3'));
-    assert(char_is_correct('4'));
-    assert(char_is_correct('5'));
-    assert(char_is_correct('6'));
-    assert(char_is_correct('7'));
-    assert(char_is_correct('8'));
-    assert(char_is_correct('x') == false);
-    assert(char_is_correct('!') == false);
-    assert(char_is_correct('[') == false);
-    assert(char_is_correct('#') == false);
 }
 
 void test(void)
@@ -361,6 +310,25 @@ void test(void)
     test_change_adj_unk_to_mines();
     test_rule_2();
     test_solve_board();
+}
+
+void test_char_is_correct(void)
+{
+    assert(char_is_correct(UNK));
+    assert(char_is_correct(MINE));
+    assert(char_is_correct('0'));
+    assert(char_is_correct('1'));
+    assert(char_is_correct('2'));
+    assert(char_is_correct('3'));
+    assert(char_is_correct('4'));
+    assert(char_is_correct('5'));
+    assert(char_is_correct('6'));
+    assert(char_is_correct('7'));
+    assert(char_is_correct('8'));
+    assert(char_is_correct('x') == false);
+    assert(char_is_correct('!') == false);
+    assert(char_is_correct('[') == false);
+    assert(char_is_correct('#') == false);
 }
 
 void test_populate_grid(void)
@@ -397,14 +365,19 @@ void test_are_2d_arrays_equal(void)
 void test_count_item(void)
 {
     char grid_1_str[] = "XXX??X?X1";
-    char grid_2_str[] = "X????X?X1";
     board e = make_board(5, 3, 3, grid_1_str);
     assert(count_item(e, MINE) == 5);
     assert(count_item(e, UNK) == 3);
 
+    char grid_2_str[] = "X????X?X1";
     board f = make_board(5, 3, 3, grid_2_str);
     assert(count_item(f, MINE) == 3);
     assert(count_item(f, UNK) == 5);
+
+    char grid_3_str[] = "?????????";
+    board g = make_board(5, 3, 3, grid_3_str);
+    assert(count_item(g, MINE) == 0);
+    assert(count_item(g, UNK) == 9);    
 }
 
 void test_is_valid_pos(void)
@@ -452,6 +425,7 @@ void test_str_is_correct_length(void)
 {
     assert(str_is_correct_length(3, 3, 9));
     assert(str_is_correct_length(4, 4, 16));
+    assert(str_is_correct_length(4, 4, 17)==false);
 }
 
 void test_count_ajc_items(void)
@@ -496,23 +470,101 @@ void test_change_adj_unk_to_mines(void)
 
 void test_board2str(void)
 {
-    char grid_1_str[] = "XXX??X?X1";
-    board d = make_board(5, 3, 3, grid_1_str);
-    char output_str_1[MAXSQ * MAXSQ + 1];
-    board2str(output_str_1, d);
-    assert(strcmp(output_str_1, grid_1_str) == 0);
-    // TODO add more tests
+    // 3 x 3 
+    char grid_d_str[] = "XXX??X?X1";
+    board d = make_board(5, 3, 3, grid_d_str);
+    char output_str_d[MAXSQ * MAXSQ + 1];
+    board2str(output_str_d, d);
+    assert(strcmp(output_str_d, grid_d_str) == 0);
+
+    // 1 x 1
+    char grid_e_str[] = "?";
+    board e = make_board(1, 1, 1, grid_e_str);
+    char output_str_e[MAXSQ * MAXSQ + 1];
+    board2str(output_str_e, e);
+    assert(strcmp(output_str_e, grid_e_str) == 0);
+
+    // 2 x 9
+    char grid_g_str[] = "?12345678X12345678";
+    board g = make_board(2, 2, 9, grid_g_str);
+    char output_str_g[MAXSQ * MAXSQ + 1];
+    board2str(output_str_g, g);
+    assert(strcmp(output_str_g, grid_g_str) == 0);
+
+    // 10 x 10
+    char grid_h_str[] = 
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?";
+    board h = make_board(2, 10, 10, grid_h_str);
+    char output_str_h[MAXSQ * MAXSQ + 1];
+    board2str(output_str_h, h);
+    assert(strcmp(output_str_h, grid_h_str) == 0);
 }
 
 void test_make_board(void)
 {
-    char grid_1_str[] = "XXX??X?X1";
-    board c = make_board(5, 3, 3, grid_1_str);
-    assert(c.h == 3);
-    assert(c.w == 3);
-    assert(c.totmines == 5);
+    //  3 x 3
+    board d = make_board(5, 3, 3, "123??X?X8");
+    assert(d.h == 3);
+    assert(d.w == 3);
+    assert(d.totmines == 5);
+    assert(d.grid[0][0]=='1');
+    assert(d.grid[1][0]=='?');
+    assert(d.grid[1][2]=='X');
+    assert(d.grid[2][2]=='8');
+    
+    // 1 x 1
+    board e = make_board(1, 1, 1, "?");
+    assert(e.h == 1);
+    assert(e.w == 1);
+    assert(e.totmines == 1);
+    assert(e.grid[0][0]=='?');
 
-    // TODO add more tests.
+    // 2 x 9
+    board g = make_board(2, 2, 9, "?12345678X12345678");
+    assert(g.h == 9);
+    assert(g.w == 2);
+    assert(g.totmines == 2);
+    assert(g.grid[0][0]=='?');
+    assert(g.grid[0][1]=='1');
+    assert(g.grid[1][0]=='2');
+    assert(g.grid[2][1]=='5');
+    assert(g.grid[8][0]=='7');
+    assert(g.grid[8][1]=='8');
+
+    // 10 x 10
+    board h = make_board(2, 10, 10, 
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    "?12345678X"
+    "876543210?"
+    );
+    assert(h.h == 10);
+    assert(h.w == 10);
+    assert(h.totmines == 2);
+    assert(h.grid[0][0]=='?');
+    assert(h.grid[0][1]=='1');
+    assert(h.grid[1][0]=='8');
+    assert(h.grid[2][1]=='1');
+    assert(h.grid[8][0]=='?');
+    assert(h.grid[8][1]=='1');
+    assert(h.grid[9][9]=='?');
+    assert(h.grid[3][9]=='?');
+    assert(h.grid[4][5]=='5');
 }
 
 void test_syntax_check(void)
@@ -534,25 +586,42 @@ void test_syntax_check(void)
 
 void test_rule_1(void)
 {
+    // 5 x 5
     board k = make_board(5, 5, 5, "011?013X311XXX113X3101110");
     board kr = rule_1(k);
     char outputk[MAXSQ * MAXSQ + 1];
     board2str(outputk, kr);
     assert(strcmp(outputk, "0111013X311XXX113X3101110") == 0);
 
+    // 3 x 3
     board l = make_board(2, 3, 3, "XX???????");
     board lr = rule_1(l);
     char outputl[MAXSQ * MAXSQ + 1];
     board2str(outputl, lr);
     assert(strcmp(outputl, "XX1221000") == 0);
 
-    // TODO more tests
+    // 3 x 3 
+    // rule one doesn't apply because not all mines have been found
+    // so (board doesn't change)
+    board m = make_board(2, 3, 3, "111?1????");
+    board mr = rule_1(m);
+    char outputm[MAXSQ * MAXSQ + 1];
+    board2str(outputm, mr);
+    assert(strcmp(outputm, "111?1????") == 0);
+
+    // TODO test rule 1 more.
+
+    // 2 x 4
+    
+    // 10 x 10
+
 }
 
 void test_rule_2(void)
 {
     // todo: include more tests here.
 
+    // 5 x 5
     board n = make_board(5, 5, 5, "0111013X311XXX113?3101110");
     assert(rule_2(&n) == true);
     char outputn[MAXSQ * MAXSQ + 1];
@@ -560,7 +629,8 @@ void test_rule_2(void)
     assert(strcmp(outputn, "0111013X311XXX113X3101110") == 0);
     assert(rule_2(&n) == false);
 
-
+    // Test where rule 2 doesn't apply so it doesn't change.
+    // 3 x 3
 
 }
 
@@ -582,13 +652,30 @@ void test_solve_board(void)
 
     // 10 x 10 grid
     board j = make_board(6, 10, 10, 
-    "000000000011111111101?11?11?1011111111100000000000000000000011111111101?11?11?1011111111100000000000");
+    "0000000000"
+    "1111111110"
+    "1?11?11?10"
+    "1111111110"
+    "0000000000"
+    "0000000000"
+    "1111111110"
+    "1?11?11?10"
+    "1111111110"
+    "0000000000");
     board sj = solve_board(j);
     char outputj[MAXSQ * MAXSQ + 1];
     board2str(outputj, sj);
     assert(strcmp(outputj,
-    "000000000011111111101X11X11X1011111111100000000000000000000011111111101X11X11X1011111111100000000000"
-    )==0);
+    "0000000000"
+    "1111111110"
+    "1X11X11X10"
+    "1111111110"
+    "0000000000"
+    "0000000000"
+    "1111111110"
+    "1X11X11X10"
+    "1111111110"
+    "0000000000")==0);
 
     // already solved board.
     board k = make_board(5, 4, 5, "X111222X1X32123X11X2");
@@ -626,13 +713,31 @@ void test_solve_board(void)
     assert(strcmp(outputa,"XXXX1233210000011000X1000")==0);
 
     board c = make_board(20, 10, 10, 
-    "XXX?1XX?X1233212332100000000001100011000X3322X3321X?XX3XX?X1233222332100000000001?00111000X1001?1000"
+    "XXX?1XX?X1"
+    "2332123321"
+    "0000000000"
+    "1100011000"
+    "X3322X3321"
+    "X?XX3XX?X1"
+    "2332223321"
+    "0000000000"
+    "1?00111000"
+    "X1001?1000"
     );
     board sc = solve_board(c);
     char outputc[MAXSQ * MAXSQ + 1];
     board2str(outputc, sc);
     assert(strcmp(outputc,
-    "XXXX1XXXX1233212332100000000001100011000X3322X3321XXXX3XXXX1233222332100000000001100111000X1001X1000"
+    "XXXX1XXXX1"
+    "2332123321"
+    "0000000000"
+    "1100011000"
+    "X3322X3321"
+    "XXXX3XXXX1"
+    "2332223321"
+    "0000000000"
+    "1100111000"
+    "X1001X1000"
     )==0);
 
 
