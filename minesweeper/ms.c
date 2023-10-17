@@ -68,7 +68,6 @@ Moore neighbourhood,
 if true_ajc_mines = known_ajc_mines+ajc_unk 
 and ajc_unk > 0 then all unknown squares must be mines.
 */ 
-
 bool rule_2(board* b)
 {
     for (int j = 0; j < b->h; j++){
@@ -255,7 +254,6 @@ board make_board(int totmines, int width, int height, char inp[MAXSQ*MAXSQ+1])
     b.w = width;
     b.h = height;
     b.totmines = totmines;
-
     return populate_grid(b, inp);
 }
 
@@ -383,7 +381,6 @@ void test_count_item(void)
     board h = make_board(4, 4, 2, grid_4_str);
     assert(count_item(h, MINE) == 4);
     assert(count_item(h, UNK) == 0);    
-
 }
 
 void test_is_valid_pos(void)
@@ -462,9 +459,6 @@ void test_count_ajc_items(void)
     assert(count_ajc_items(g, 1, 1, MINE) == 3);
     assert(count_ajc_items(g, 1, 2, MINE) == 3);
     assert(count_ajc_items(g, 1, 3, MINE) == 2);
-
-
-
 }
 
 void test_number_cells_with_count_of_ajc_mines(void)
@@ -480,7 +474,6 @@ void test_number_cells_with_count_of_ajc_mines(void)
     char outputj[MAXSQ * MAXSQ + 1];
     board2str(outputj, jr);
     assert(strcmp(outputj, "XXXX2332") == 0);
-
 }
 
 
@@ -606,13 +599,21 @@ void test_syntax_check(void)
     assert(syntax_check(3, 3, 3, "XX1?2??46"));
     assert(syntax_check(3, 4, 4, "XX1?2??46213????"));
     assert(syntax_check(3, 4, 4, "XXXX2??46213????") == false);
-
     // too many mines
     assert(syntax_check(3, 3, 3, "XXXX?????") == false);
     // too long string
     assert(syntax_check(3, 3, 3, "XXXXXXXXX") == false);
     // has invalid characters
     assert(syntax_check(3, 3, 3, "XXXa?????") == false);
+
+    // testing irregular but valid boards
+    assert(syntax_check(1, 1, 1, "X") == true);
+    assert(syntax_check(3, 10, 1, "XX??000000") == true);
+    assert(syntax_check(7, 6, 3, 
+    "XX??00"
+    "XX??00"
+    "XX??00") == true);
+
 }
 
 void test_rule_1(void)
@@ -828,6 +829,4 @@ void test_solve_board(void)
     "1100111000"
     "X1001X1000"
     )==0);
-
-
 }
