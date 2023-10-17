@@ -145,7 +145,7 @@ board number_cells_with_count_of_ajc_mines(board b)
 
 bool is_valid_pos(board b, int r, int c)
 {
-    if (r >= 0 && c >= 0 && r < b.w && c < b.w){
+    if (r >= 0 && c >= 0 && r < b.h && c < b.w){
         return true;    
     }
     return false;
@@ -378,6 +378,12 @@ void test_count_item(void)
     board g = make_board(5, 3, 3, grid_3_str);
     assert(count_item(g, MINE) == 0);
     assert(count_item(g, UNK) == 9);    
+
+    char grid_4_str[] = "XXXX2332";
+    board h = make_board(4, 4, 2, grid_4_str);
+    assert(count_item(h, MINE) == 4);
+    assert(count_item(h, UNK) == 0);    
+
 }
 
 void test_is_valid_pos(void)
@@ -390,6 +396,16 @@ void test_is_valid_pos(void)
     assert(is_valid_pos(g, 2, 3) == false);
     assert(is_valid_pos(g, 3, 2) == false);
     assert(is_valid_pos(g, 2, 3) == false);
+
+    char grid_3_str[] = "XXXX2???";
+    board h = make_board(4, 4, 2, grid_3_str);
+    assert(is_valid_pos(h, 1, 1) == true);
+    assert(is_valid_pos(h, 0, 0) == true);
+    assert(is_valid_pos(h, -1, 0) == false);
+    assert(is_valid_pos(h, 0, -1) == false);
+    assert(is_valid_pos(h, 2, 0) == false);
+    assert(is_valid_pos(h, 0, 4) == false);
+    assert(is_valid_pos(h, 2, 4) == false);
 }
 
 void test_cell_is_a_number(void){
@@ -441,6 +457,14 @@ void test_count_ajc_items(void)
     assert(count_ajc_items(h, 2, 0, UNK) == 3);
     assert(count_ajc_items(h, 2, 1, UNK) == 3);
     assert(count_ajc_items(h, 0, 2, UNK) == 2);
+
+    board g = make_board(4, 4, 2, "XXXX2???");
+    assert(count_ajc_items(g, 1, 1, MINE) == 3);
+    assert(count_ajc_items(g, 1, 2, MINE) == 3);
+    assert(count_ajc_items(g, 1, 3, MINE) == 2);
+
+
+
 }
 
 void test_number_cells_with_count_of_ajc_mines(void)
@@ -450,6 +474,13 @@ void test_number_cells_with_count_of_ajc_mines(void)
     char outputi[MAXSQ * MAXSQ + 1];
     board2str(outputi, ir);
     assert(strcmp(outputi, "XX33XX122") == 0);
+
+    board j = make_board(4, 4, 2, "XXXX2???");
+    board jr = number_cells_with_count_of_ajc_mines(j);
+    char outputj[MAXSQ * MAXSQ + 1];
+    board2str(outputj, jr);
+    assert(strcmp(outputj, "XXXX2332") == 0);
+
 }
 
 
@@ -609,18 +640,37 @@ void test_rule_1(void)
     board2str(outputm, mr);
     assert(strcmp(outputm, "111?1????") == 0);
 
-    // TODO test rule 1 more.
+    // 4 x 2 
+    board n = make_board(4, 4, 2, "XXXX2???");
+    board nr = rule_1(n);
+    char outputn[MAXSQ * MAXSQ + 1];
+    board2str(outputn, nr);
+    assert(strcmp(outputn, "XXXX2332") == 0);
 
-    // 2 x 4
-    
-    // 10 x 10
-
+    // 9 x 7 
+    board o = make_board(32, 9, 7, 
+    "XXXX?XXXX"
+    "4664?4664"
+    "XXXX?XXXX"
+    "?????????"
+    "XXXX?XXXX"
+    "4664?4664"
+    "XXXX?XXXX");
+    board or = rule_1(o);
+    char outputo[MAXSQ * MAXSQ + 1];
+    board2str(outputo, or);
+    assert(strcmp(outputo, 
+    "XXXX2XXXX"
+    "466444664"
+    "XXXX2XXXX"
+    "466444664"
+    "XXXX2XXXX"
+    "466444664"
+    "XXXX2XXXX") == 0);
 }
 
 void test_rule_2(void)
 {
-    // todo: include more tests here.
-
     // 5 x 5
     board n = make_board(5, 5, 5, "0111013X311XXX113?3101110");
     assert(rule_2(&n) == true);
@@ -629,9 +679,22 @@ void test_rule_2(void)
     assert(strcmp(outputn, "0111013X311XXX113X3101110") == 0);
     assert(rule_2(&n) == false);
 
-    // Test where rule 2 doesn't apply so it doesn't change.
-    // 3 x 3
+    // 4 x 2 
+    board m = make_board(4, 4, 2, "XXXX3???");
+    assert(rule_2(&m)==true);
+    char outputm[MAXSQ * MAXSQ + 1];
+    board2str(outputm, m);
+    assert(strcmp(outputm, "XXXX3X??") == 0);
 
+    // Test where rule 2 doesn't apply so it doesn't change.
+    board p = make_board(4, 2, 4, "XX5XXXX?");
+    assert(rule_2(&p)==false);
+    char outputp[MAXSQ * MAXSQ + 1];
+    board2str(outputp, p);
+    assert(strcmp(outputp, "XX5XXXX?") == 0);
+
+
+    // 10 x 10  TODO
 }
 
 void test_solve_board(void)
