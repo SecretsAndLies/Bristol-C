@@ -693,8 +693,34 @@ void test_rule_2(void)
     board2str(outputp, p);
     assert(strcmp(outputp, "XX5XXXX?") == 0);
 
+    // 10 x 10 
+    board q = make_board(12, 10, 10, 
+    "1110011100"
+    "1?2101X210"
+    "02X2002X20"
+    "012X1012X1"
+    "0011100111"
+    "1110011100"
+    "1X2101X210"
+    "02X2002X20"
+    "012X1012X1"
+    "0011100111"
+    );
+    assert(rule_2(&q));
+    char outputq[MAXSQ * MAXSQ + 1];
+    board2str(outputq, q);
+    assert(strcmp(outputq, 
+    "1110011100"
+    "1X2101X210"
+    "02X2002X20"
+    "012X1012X1"
+    "0011100111"
+    "1110011100"
+    "1X2101X210"
+    "02X2002X20"
+    "012X1012X1"
+    "0011100111") == 0);
 
-    // 10 x 10  TODO
 }
 
 void test_solve_board(void)
