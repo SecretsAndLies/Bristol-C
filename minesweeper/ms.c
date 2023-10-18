@@ -4,8 +4,8 @@ bool char_is_correct(char c);
 bool str_is_correct_length(int width, int height, int input_len);
 board populate_grid(board b, char inp[MAXSQ * MAXSQ + 1]);
 bool are_2d_arrays_equal(int grid1[MAXSQ][MAXSQ], int grid2[MAXSQ][MAXSQ], int height, int width);
-bool str_contains_correct_characters(int len, char inp[MAXSQ * MAXSQ + 1]);
-bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1], int len);
+bool str_contains_correct_characters(char inp[MAXSQ * MAXSQ + 1]);
+bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1]);
 board rule_1(board b);
 int count_item(board b, char item_to_find);
 int count_ajc_items(board b, int r, int c, char item_to_find);
@@ -150,6 +150,7 @@ bool is_valid_pos(board b, int r, int c)
     return false;
 }
 
+/* Returns how many of an item are ajacent to specified cell. */
 int count_ajc_items(board b, int r, int c, char item_to_find)
 {
     int count = 0;
@@ -169,6 +170,7 @@ int count_ajc_items(board b, int r, int c, char item_to_find)
     return count;
 }
 
+/* Returns the number of that item found in the board. */
 int count_item(board b, char item_to_find)
 {
     int found = 0;
@@ -200,19 +202,19 @@ bool syntax_check(unsigned totmines, unsigned width, unsigned height,char inp[MA
     if (!str_is_correct_length(width, height, input_len)){
         return false;
     }
-    if (!str_contains_correct_characters(input_len, inp)){
+    if (!str_contains_correct_characters(inp)){
         return false;
     }
-    if (!str_mines_leq_totmines(totmines, inp, input_len)){
+    if (!str_mines_leq_totmines(totmines, inp)){
         return false;
     }
     return true;
 }
 
-bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1], int len)
+bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1])
 {
     unsigned mine_count = 0;
-    for (int i = 0; i < len; i++){
+    for (int i = 0; inp[i]; i++){
         char c = inp[i];
         if (c == MINE){
             mine_count++;
@@ -221,9 +223,9 @@ bool str_mines_leq_totmines(unsigned totmines, char inp[MAXSQ * MAXSQ + 1], int 
     return mine_count <= totmines;
 }
 
-bool str_contains_correct_characters(int len, char inp[MAXSQ * MAXSQ + 1])
+bool str_contains_correct_characters(char inp[MAXSQ * MAXSQ + 1])
 {
-    for (int i = 0; i < len; i++){
+    for (int i = 0; inp[i]; i++){
         char c = inp[i];
         if (!char_is_correct(c)){
             return false;
@@ -415,23 +417,23 @@ void test_cell_is_a_number(void){
 
 void test_str_contains_correct_characters(void)
 {
-    assert(str_contains_correct_characters(5, "????i") == false);
-    assert(str_contains_correct_characters(5, "aaaaa") == false);
-    assert(str_contains_correct_characters(5, "?????"));
-    assert(str_contains_correct_characters(5, "???XX"));
-    assert(str_contains_correct_characters(11, "012345678?X"));
+    assert(str_contains_correct_characters("????i") == false);
+    assert(str_contains_correct_characters("aaaaa") == false);
+    assert(str_contains_correct_characters("?????"));
+    assert(str_contains_correct_characters("???XX"));
+    assert(str_contains_correct_characters("012345678?X"));
 }
 
 void test_str_mines_leq_totmines(void)
 {
-    assert(str_mines_leq_totmines(3, "XXX", 3));
-    assert(str_mines_leq_totmines(2, "XXX", 3) == false);
-    assert(str_mines_leq_totmines(0, "???", 3));
-    assert(str_mines_leq_totmines(1, "???", 3));
-    assert(str_mines_leq_totmines(2, "X?X13", 5));
-    assert(str_mines_leq_totmines(1, "X??13", 5));
-    assert(str_mines_leq_totmines(2, "X??13", 5));
-    assert(str_mines_leq_totmines(1, "XXX31", 5) == false);
+    assert(str_mines_leq_totmines(3, "XXX"));
+    assert(str_mines_leq_totmines(2, "XXX") == false);
+    assert(str_mines_leq_totmines(0, "???"));
+    assert(str_mines_leq_totmines(1, "???"));
+    assert(str_mines_leq_totmines(2, "X?X13"));
+    assert(str_mines_leq_totmines(1, "X??13"));
+    assert(str_mines_leq_totmines(2, "X??13"));
+    assert(str_mines_leq_totmines(1, "XXX31") == false);
 }
 
 void test_str_is_correct_length(void)
