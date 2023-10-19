@@ -72,7 +72,7 @@ bool rule_2(board* b)
 {
     for (int j = 0; j < b->h; j++){
         for (int i = 0; i < b->w; i++){
-            if (cell_is_a_number(*b[j][i]){
+            if (cell_is_a_number(*b, j, i)){
                 int ajc_unk = count_ajc_items(*b, j, i, UNK);
                 if (ajc_unk){
                     int true_ajc_mines = b->grid[j][i] - '0';
