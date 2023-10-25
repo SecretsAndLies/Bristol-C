@@ -1,15 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <assert.h>
 
 #define BIGSTR 100
 #define NUMWORDS 129000
 
 void addToIndex(char str_arr[NUMWORDS][BIGSTR], int i, char str[BIGSTR]);
 void swap(char str_arr[NUMWORDS][BIGSTR], int i, int j);
+bool word_in_list(char * word, char str_arr[NUMWORDS][BIGSTR], int len);
+int build_and_sort_arr(char str_arr[NUMWORDS][BIGSTR], FILE * fp);
+void test(void);
+bool b_word_in_list(char * word, char str_arr[NUMWORDS][BIGSTR], int len);
 
 int main (int argc, char **argv)
 {
+    test();
     if (argc!=2)
     {
         fprintf(stderr, "%s", "Wrong number of args. \n");
@@ -23,9 +30,62 @@ int main (int argc, char **argv)
         exit(1);
     }
 
-    char str[BIGSTR];
-    // avoid stack issues with static you could also str_arr = malloc(NUMWORDS * BIGSTR).
+// avoid stack issues with static you could also str_arr = malloc(NUMWORDS * BIGSTR).
     static char str_arr[NUMWORDS][BIGSTR];
+    int len = build_and_sort_arr(str_arr, fp);
+    fclose(fp);
+
+    assert(word_in_list("a", str_arr, len));
+    assert(word_in_list("xx", str_arr, len)==false);
+    assert(b_word_in_list("a", str_arr, len));
+    assert(b_word_in_list("xx", str_arr, len)==false);
+     
+    
+    return 0;
+}
+
+void test(void)
+{
+}
+
+bool b_word_in_list(char * word, char str_arr[NUMWORDS][BIGSTR], int len)
+{
+    int r = 0;
+    int l = len-1;
+    while (l<=r)
+    {
+        int m = (l+r)/ 2;
+        int dis = strcmp(word, str_arr[m]);
+        if(dis==0){
+            return true;
+        }
+        if(dis<0)
+        {
+            r=m-1;
+        }
+        if(dis>0)
+        {
+            l=m+1;
+        }
+    }
+return false;
+}
+
+bool word_in_list(char * word, char str_arr[NUMWORDS][BIGSTR], int len)
+{
+    for (int i=0; i<len; i++)
+    {
+        if(strcmp(str_arr[i],word)==0){
+            return true;
+        }
+    }
+    return false;
+}
+
+int build_and_sort_arr(char str_arr[NUMWORDS][BIGSTR], FILE * fp)
+{
+    char str[BIGSTR];
+
     int len = 0;
 
     while(fscanf(fp, "%s", str)==1)
@@ -44,19 +104,9 @@ int main (int argc, char **argv)
         }
   
     }
-
-
-    printf("%s \n", str_arr[0]);
-    printf("%s \n", str_arr[1]);
-    printf("%s \n", str_arr[2]);
-    printf("%s \n", str_arr[3]);
-    printf("%s \n", str_arr[4]);
-    printf("%s \n", str_arr[5]);
-
-    fclose(fp);
-
-    return 0;
+    return len;
 }
+
 
 void swap(char str_arr[NUMWORDS][BIGSTR], int i, int j)
 {
