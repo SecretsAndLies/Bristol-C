@@ -7,13 +7,13 @@ OPTIM := $(GENFLAGS) -O2
 # In the labs you'll proably use clang, but make sure to try gcc too
 CC := clang
 
-all: ms
+all: spellchecker
 
-ms: ms.c drv.c ms.h
-	$(CC) ms.c drv.c $(OPTIM) -o ms
+spellchecker: 
+	$(CC) spellchecker.c $(OPTIM) -o spellchecker
 
 clean:
-	rm -f ms
+	rm -f spellchecker
 
 run: all
-	./ms
+	./spellchecker
