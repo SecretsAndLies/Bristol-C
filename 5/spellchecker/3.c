@@ -7,20 +7,12 @@
 #define BIGSTR 100
 #define NUMWORDS 129000
 
-typedef struct Node{
-    char word[BIGSTR];
-    struct Node* next;
-} Node;
-
-void printllist(Node * st);
 void addToIndex(char str_arr[NUMWORDS][BIGSTR], int i, char str[BIGSTR]);
 void swap(char str_arr[NUMWORDS][BIGSTR], int i, int j);
 bool word_in_list(char * word, char str_arr[NUMWORDS][BIGSTR], int len);
 int build_and_sort_arr(char str_arr[NUMWORDS][BIGSTR], FILE * fp);
 void test(void);
 bool b_word_in_list(char * word, char str_arr[NUMWORDS][BIGSTR], int len);
-void add_to_linked_list(Node * tail, char * word, Node * head);
-bool word_in_llist(char * word, Node* start);
 
 int main (int argc, char **argv)
 {
@@ -38,72 +30,19 @@ int main (int argc, char **argv)
         exit(1);
     }
 
-    // build the linked list.
-    Node *p;
-    Node *start;
-    start = p = calloc(1, sizeof(Node));
-    assert(p); // check p was correctly malloc'd.
-
-    char str[BIGSTR];
-    if(fscanf(fp, "%s", str)!=1){
-        exit(1);
-    }
-    strcpy(start->word, str);
-    
-    while(fscanf(fp, "%s", str)==1)
-    {
-        add_to_linked_list(p, str, start);
-        p = p->next;
-    }
-
-    printllist(start);
-
-    // int len = build_and_sort_arr(str_arr, fp);
+// avoid stack issues with static you could also str_arr = malloc(NUMWORDS * BIGSTR).
+    static char str_arr[NUMWORDS][BIGSTR];
+    int len = build_and_sort_arr(str_arr, fp);
     fclose(fp);
 
-    //assert(word_in_llist("a", start));
-    //assert(word_in_llist("xx", start)==false);
+    assert(word_in_list("a", str_arr, len));
+    assert(word_in_list("xx", str_arr, len)==false);
+    assert(b_word_in_list("a", str_arr, len));
+    assert(b_word_in_list("xx", str_arr, len)==false);
      
+    
     return 0;
 }
-
-
-void printllist(Node * st)
-{
-    while (st != NULL){
-        printf("%s ", st->word);
-        st = st->next;
-    };
-    printf("\n");
-}
-
-/* adds to the place in the linked list depending on alphabetical order */
-void add_to_linked_list(Node * tail, char * word, Node * head)
-{
-    // look through linked list.
-    // If 
-    Node * curr = head;
-    while (curr != NULL){
-        if (curr->next == NULL){
-            // you're at the end, so do a normal add.
-            // TODO: adapt this so that it adds either before or after, depending on what's needed. (this adds after.)
-            tail->next = calloc(1, sizeof(Node));
-            tail = tail->next;
-            assert(tail);
-            strcpy(tail->word, word);
-            return;
-        }
-        // if next word is after word alphabetically (or is this letter)
-        if(strcmp(curr->next->word,word)>=0)
-        {
-            Node * new = calloc(1, sizeof(Node));
-            strcpy(new->word, word);
-            new->next = curr->next;
-            curr->next = new;
-            return;
-        }
-    }
-    }
 
 void test(void)
 {
