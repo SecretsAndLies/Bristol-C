@@ -2,41 +2,110 @@
 
 int main(void)
 {
+    test();
     // todo eventually you'll need to use the command line args.
     // two possible arguments the number and - verbose
     // eg: ./8q -verbose 6 or ./8q 6
 // // TODO take in the arguments. Get the size, and set the verbose flag.
     // //bool is_verbose = true;
-    // int size = 8;
-    // int num_solutions = 0;
-    // Board start = create_empty_board(size);
-    // Board boards[BOARDS_IN_LIST];
-    // int start_index = 0;
-    // int end_index = 0;
 
+    int size = 8;
+    int num_solutions = 0;
+    static Board boards[BOARDS_IN_LIST];
+    int start_index = 0;
+    int end_index = 1;
+    boards[start_index]=create_empty_board(size);
+    // then we add 1 to the start index. 
+    // we keep doing this until the start index catches up
+    // with end index. (indicating that we have no more boards to add)
+    while (start_index<end_index){
+        end_index = add_child_boards(boards[start_index], boards, end_index);
+        start_index++;
+    }
 
+    printf("%i %i \n", num_solutions, end_index);
 
-    test();
 }
 
-/* Loops through coordinates on a board. Places queen in valid location.
-Returns true if changes board, false if there's no valid position. */
-bool place_queen(Board * b)
+// TODO test.
+bool board_is_unique(Board a, Board boards[BOARDS_IN_LIST], int size)
 {
-    for (int r=0; r<b->size; r++){
-        for (int c=0; c<b->size; c++){
-            if(can_place_queen(r,c,*b)){
-                b->grid[r][c]='Q';
-                return true;
-            }
+    for (int i=0; i<size; i++){
+        if(are_boards_identical(a, boards[i])){
+            return false;
         }
+    }
+    return true;
+}
+
+// TODO test
+bool is_solved_board(Board b)
+{
+    if (b.num_queens==b.size){
+        return true;
     }
     return false;
 }
 
-void test_place_queen(void)
+/* Adds all possible next 
+child boards from the specified board b
+ to the given array.
+ Returns the size of the array (ie the next_index)
+ Also checks if a board is a solution and modifies that number.
+  */
+int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index)
+{
+    for (int r=0; r<b.size; r++){
+        for (int c=0; c<b.size; c++){
+            if(can_place_queen(r,c,b)){
+                Board temp = copy_board(b);
+                if (board_is_unique(temp, boards, next_index)){
+                    temp.grid[r][c]='Q';
+                    temp.num_queens++;
+                    boards[next_index] = temp;
+                    next_index++;
+                    if(is_solved_board(temp)){
+                    // TODO: increment a number.
+                    }                  
+                }
+            }
+        }
+    }
+    return next_index;
+}
+
+// TODO: check if this is the best way to do this?
+Board copy_board(Board source)
+{
+    Board dest;
+    dest.size = source.size;
+    dest.num_queens = source.num_queens;
+
+    for (int r=0; r<source.size; r++){
+        for (int c=0; c<source.size; c++){
+            dest.grid[r][c]=source.grid[r][c];
+        }
+    }
+    return dest;
+}
+
+void print_board(Board b)
+{
+    printf("================");
+    for (int r=0; r<b.size; r++){
+        for (int c=0; c<b.size; c++){
+            printf("%c",b.grid[r][c]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    printf("================");
+}
+
+void test_add_child_boards(void)
 {
     // this is a solved board.
+    static Board boards[BOARDS_IN_LIST];
     Board c;
     c.num_queens = 8;
     c.size = 8;
@@ -48,9 +117,10 @@ void test_place_queen(void)
     strcpy(c.grid[5], "---Q----");
     strcpy(c.grid[6], "-----Q--");
     strcpy(c.grid[7], "--Q-----");
-    assert(place_queen(&c)==false);
+    int next_index = 0;
+    assert(add_child_boards(c, boards, next_index)==0);
 
-    // this is a solved board.
+    // board with only one child board.
     Board d;
     d.num_queens = 8;
     d.size = 8;
@@ -62,8 +132,20 @@ void test_place_queen(void)
     strcpy(d.grid[5], "---Q----");
     strcpy(d.grid[6], "-----Q--");
     strcpy(d.grid[7], "--------");
-    assert(place_queen(&d)==true);
-    assert(d.grid[7][2]=='Q');
+    next_index = 0;
+    next_index = add_child_boards(d, boards, next_index);
+    assert(next_index==1);
+    assert(boards[0].grid[7][2]=='Q');
+    
+    // boards2
+    // Empty board (checks that it has created n*n boards)
+    // and spot checks some.
+    Board e = create_empty_board(3);
+    next_index = 0;
+    next_index = add_child_boards(e, boards, next_index);
+    assert(next_index==9);
+
+
 }
 
 /* Returns if it's possible to place a queen at the given
@@ -397,5 +479,5 @@ void test(void)
     test_create_empty_board();
     test_is_valid_cord();
     test_queen_in_row();
-    test_place_queen();
+    test_add_child_boards();
 }
