@@ -45,9 +45,9 @@ void test_queen_in_col(void);
 bool queen_in_diagonals(int r, int c, Board b);
 void test_queen_in_diagonals(void);
 
-bool (int r, int c, Board b);
+bool can_place_queen (int r, int c, Board b);
 void test_can_place_queen(void);
 
-int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index);
+int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index, int * num_solutions);
 void test_add_child_boards(void);
 

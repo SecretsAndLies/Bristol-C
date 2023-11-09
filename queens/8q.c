@@ -19,11 +19,11 @@ int main(void)
     // we keep doing this until the start index catches up
     // with end index. (indicating that we have no more boards to add)
     while (start_index<end_index){
-        end_index = add_child_boards(boards[start_index], boards, end_index);
+        end_index = add_child_boards(boards[start_index], boards, end_index, &num_solutions);
         start_index++;
     }
 
-    printf("%i %i \n", num_solutions, end_index);
+    printf("%i solutions \n", num_solutions);
 
 }
 
@@ -53,7 +53,7 @@ child boards from the specified board b
  Returns the size of the array (ie the next_index)
  Also checks if a board is a solution and modifies that number.
   */
-int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index)
+int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index, int * num_solutions)
 {
     for (int r=0; r<b.size; r++){
         for (int c=0; c<b.size; c++){
@@ -65,7 +65,7 @@ int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index)
                     boards[next_index] = temp;
                     next_index++;
                     if(is_solved_board(temp)){
-                    // TODO: increment a number.
+                       (*num_solutions)++;
                     }                  
                 }
             }
@@ -91,7 +91,7 @@ Board copy_board(Board source)
 
 void print_board(Board b)
 {
-    printf("================");
+    printf("================\n");
     for (int r=0; r<b.size; r++){
         for (int c=0; c<b.size; c++){
             printf("%c",b.grid[r][c]);
@@ -99,7 +99,7 @@ void print_board(Board b)
         printf("\n");
     }
     printf("\n");
-    printf("================");
+    printf("================\n");
 }
 
 void test_add_child_boards(void)
@@ -118,11 +118,13 @@ void test_add_child_boards(void)
     strcpy(c.grid[6], "-----Q--");
     strcpy(c.grid[7], "--Q-----");
     int next_index = 0;
-    assert(add_child_boards(c, boards, next_index)==0);
+    int num_solutions = 0;
+    assert(add_child_boards(c, boards, next_index, &num_solutions)==0);
+    assert(num_solutions==0);
 
     // board with only one child board.
     Board d;
-    d.num_queens = 8;
+    d.num_queens = 7;
     d.size = 8;
     strcpy(d.grid[0], "Q-------");
     strcpy(d.grid[1], "------Q-");
@@ -133,19 +135,23 @@ void test_add_child_boards(void)
     strcpy(d.grid[6], "-----Q--");
     strcpy(d.grid[7], "--------");
     next_index = 0;
-    next_index = add_child_boards(d, boards, next_index);
+    num_solutions=0;
+    next_index = add_child_boards(d, boards, next_index, &num_solutions);
     assert(next_index==1);
     assert(boards[0].grid[7][2]=='Q');
-    
+    assert(num_solutions==1);
+
     // boards2
     // Empty board (checks that it has created n*n boards)
     // and spot checks some.
     Board e = create_empty_board(3);
     next_index = 0;
-    next_index = add_child_boards(e, boards, next_index);
+    num_solutions=0;
+    next_index = add_child_boards(e, boards, next_index, &num_solutions);
     assert(next_index==9);
+    assert(num_solutions==0);
 
-
+    // TODO: test a board that has multiple solutions.
 }
 
 /* Returns if it's possible to place a queen at the given
