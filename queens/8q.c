@@ -5,40 +5,89 @@ int main(void)
     // todo eventually you'll need to use the command line args.
     // two possible arguments the number and - verbose
     // eg: ./8q -verbose 6 or ./8q 6
-    // int num_solutions = 0;
+// // TODO take in the arguments. Get the size, and set the verbose flag.
     // //bool is_verbose = true;
     // int size = 8;
+    // int num_solutions = 0;
     // Board start = create_empty_board(size);
     // Board boards[BOARDS_IN_LIST];
-    // int num_boards = 0;
+    // int start_index = 0;
+    // int end_index = 0;
 
-// // TODO take in the arguments. Get the number, and set the verbose flag.
+
 
     test();
 }
 
+/* Loops through coordinates on a board. Places queen in valid location.
+Returns true if changes board, false if there's no valid position. */
+bool place_queen(Board * b)
+{
+    for (int r=0; r<b->size; r++){
+        for (int c=0; c<b->size; c++){
+            if(can_place_queen(r,c,*b)){
+                b->grid[r][c]='Q';
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void test_place_queen(void)
+{
+    // this is a solved board.
+    Board c;
+    c.num_queens = 8;
+    c.size = 8;
+    strcpy(c.grid[0], "Q-------");
+    strcpy(c.grid[1], "------Q-");
+    strcpy(c.grid[2], "----Q---");
+    strcpy(c.grid[3], "-------Q");
+    strcpy(c.grid[4], "-Q------");
+    strcpy(c.grid[5], "---Q----");
+    strcpy(c.grid[6], "-----Q--");
+    strcpy(c.grid[7], "--Q-----");
+    assert(place_queen(&c)==false);
+
+    // this is a solved board.
+    Board d;
+    d.num_queens = 8;
+    d.size = 8;
+    strcpy(d.grid[0], "Q-------");
+    strcpy(d.grid[1], "------Q-");
+    strcpy(d.grid[2], "----Q---");
+    strcpy(d.grid[3], "-------Q");
+    strcpy(d.grid[4], "-Q------");
+    strcpy(d.grid[5], "---Q----");
+    strcpy(d.grid[6], "-----Q--");
+    strcpy(d.grid[7], "--------");
+    assert(place_queen(&d)==true);
+    assert(d.grid[7][2]=='Q');
+}
+
 /* Returns if it's possible to place a queen at the given
 coordinates. */
-// bool can_place_queen(int r, int c, Board b)
-// {
-//     if (!is_valid_cord(r, c, b)){
-//         return false;
-//     }   
-//     // queen in square already.
-//     if(b.grid[r][c]=='Q'){
-//         return false;
-//     }
-//     if (queen_in_row(r,c,b)){
-//         return false;
-//     }
-//     if (queen_in_col(r,c,b)){
-//         return false;
-//     }
-//     if (queen_in_diagonals(r,c,b)){
-//         return false;
-//     }
-//     return true;
-// }
+bool can_place_queen(int r, int c, Board b)
+{
+  if (!is_valid_cord(r, c, b)){
+    return false;
+  }
+  // queen in square already.
+  if (b.grid[r][c] == 'Q'){
+    return false;
+  }
+  if (queen_in_row(r, b)){
+    return false;
+  }
+  if (queen_in_col(c, b)){
+    return false;
+  }
+  if (queen_in_diagonals(r, c, b)){
+    return false;
+  }
+  return true;
+}
 
 // TODO. you have a lot of functions that copy structs. 
 // Using pointers might make all of them more efficient.
@@ -52,7 +101,8 @@ bool queen_in_row(int r, Board b)
     return false;
 }
 
-void test_queen_in_row(void){
+void test_queen_in_row(void)
+{
     Board b;
     b.num_queens =8;
     b.size = 8;
@@ -71,19 +121,106 @@ void test_queen_in_row(void){
 
 }
 
-// bool queen_in_col(int c, Board b)
-// {
-//     // increase the row count until you go off the board.
+bool queen_in_col(int c, Board b)
+{
+    for (int i=0; i<b.size; i++){
+        if(b.grid[i][c]=='Q'){
+            return true;
+        }
+    }
+    return false;
+}
 
-//     // descrese the row count till you go off the board.
-//     return false;
-// }
+void test_queen_in_col(void)
+{
+    Board b;
+    b.num_queens =8;
+    b.size = 8;
+    strcpy(b.grid[0], "-Q------");
+    strcpy(b.grid[1], "--------");
+    strcpy(b.grid[2], "---Q----");
+    strcpy(b.grid[3], "--------");
+    strcpy(b.grid[4], "--------");
+    strcpy(b.grid[5], "--------");
+    strcpy(b.grid[6], "--------");
+    strcpy(b.grid[7], "-------Q");
+    assert(queen_in_col(0,b)==false);
+    assert(queen_in_col(1,b));
+    assert(queen_in_col(3,b));
+    assert(queen_in_col(4,b)==false);
+    assert(queen_in_col(7,b));
+}
 
-// bool queen_in_diagonals(int r, int c, Board b)
-// {
-//     return false;
-// }
+// TODO: this is too long. Split it up.
+bool queen_in_diagonals(int r, int c, Board b)
+{
+    // up and left
+    // TODO: if you wanted you could start at r-1 and c-1
+    // since you've already checked that.
+    int j = r;
+    int i = c;
+    while (is_valid_cord(j, i, b)){
+        if(b.grid[j][i]=='Q'){
+            return true;
+        }
+        j--;
+        i--;
+    }
 
+    // up and right
+    j = r;
+    i = c;
+    while (is_valid_cord(j, i, b)){
+        if(b.grid[j][i]=='Q'){
+            return true;
+        }
+        j--;
+        i++;
+    }
+
+    // down and left
+    j = r;
+    i = c;
+    while (is_valid_cord(j, i, b)){
+        if(b.grid[j][i]=='Q'){
+            return true;
+        }
+        j++;
+        i--;
+    }
+
+    // down and right
+    j = r;
+    i = c;
+    while (is_valid_cord(j, i, b)){
+        if(b.grid[j][i]=='Q'){
+            return true;
+        }
+        j++;
+        i++;
+    }
+    return false;
+}
+
+void test_queen_in_diagonals(void)
+{
+    Board b;
+    b.num_queens =8;
+    b.size = 8;
+    strcpy(b.grid[0], "--------");
+    strcpy(b.grid[1], "--------");
+    strcpy(b.grid[2], "--Q-----");
+    strcpy(b.grid[3], "--------");
+    strcpy(b.grid[4], "--------");
+    strcpy(b.grid[5], "--------");
+    strcpy(b.grid[6], "--------");
+    strcpy(b.grid[7], "--------");
+    assert(queen_in_diagonals(0,0,b)); //down and right
+    assert(queen_in_diagonals(4,0,b)); // up and right
+    assert(queen_in_diagonals(0,4,b)); // down and left 
+    assert(queen_in_diagonals(4,4,b)); // up and left
+    assert(queen_in_diagonals(3,2,b)==false);
+}
 
 void test_is_valid_cord(void)
 {
@@ -124,6 +261,7 @@ bool are_boards_identical(Board b, Board c)
 }
 
 // TODO create a testable version?
+// also this prints a new line at the end.
 void print_board_string(Board b)
 {
     // loop through every row in each collumns. 
@@ -207,26 +345,49 @@ void test_create_empty_board(void)
 
 void test_can_place_queen(void)
 {
-    // Board b;
-    // b.num_queens =8;
-    // b.size = 8;
-    // strcpy(b.grid[0], "Q-------");
-    // strcpy(b.grid[1], "--------");
-    // strcpy(b.grid[2], "--------");
-    // strcpy(b.grid[3], "--------");
-    // strcpy(b.grid[4], "--------");
-    // strcpy(b.grid[5], "--------");
-    // strcpy(b.grid[6], "--------");
-    // strcpy(b.grid[7], "--------");
+    Board b;
+    b.num_queens =8;
+    b.size = 8;
+    strcpy(b.grid[0], "Q-------");
+    strcpy(b.grid[1], "--------");
+    strcpy(b.grid[2], "--------");
+    strcpy(b.grid[3], "--------");
+    strcpy(b.grid[4], "--------");
+    strcpy(b.grid[5], "--------");
+    strcpy(b.grid[6], "--------");
+    strcpy(b.grid[7], "--------");
     
-    // assert(can_place_queen(1,7,b)); // nothing in row, col, or diagonal
-    // assert(can_place_queen(0,8,b)==false); // off the board
-    // assert(can_place_queen(2,0,b)==false); // off the board
-    // assert(can_place_queen(0,0,b)==false); // Q already there.
-    // assert(can_place_queen(0,6,b)==false); // Q in col (right above)
-    // assert(can_place_queen(1,0,b)==false); // Q in this row.
-    // assert(can_place_queen(2,0,b)==false); // Q in this row.
+    assert(can_place_queen(1,7,b)); // nothing in row, col, or diagonal
+    assert(can_place_queen(6,3,b)); // nothing in row, col, or diagonal
+    assert(can_place_queen(0,8,b)==false); // off the board
+    assert(can_place_queen(2,0,b)==false); // off the board
+    assert(can_place_queen(0,0,b)==false); // Q already there.
+    assert(can_place_queen(0,6,b)==false); // Q in col (right above)
+    assert(can_place_queen(1,0,b)==false); // Q in this col.
+    assert(can_place_queen(2,0,b)==false); // Q in this row.
 
+    Board c;
+    c.num_queens = 8;
+    c.size = 8;
+    strcpy(c.grid[0], "Q-------");
+    strcpy(c.grid[1], "------Q-");
+    strcpy(c.grid[2], "----Q---");
+    strcpy(c.grid[3], "-------Q");
+    strcpy(c.grid[4], "-Q------");
+    strcpy(c.grid[5], "---Q----");
+    strcpy(c.grid[6], "-----Q--");
+    strcpy(c.grid[7], "--Q-----");
+    // this board is already solved, 
+    // so whereever you put a queen it should be false.
+    assert(can_place_queen(0,0,c)==false);
+    assert(can_place_queen(3,0,c)==false);
+    assert(can_place_queen(8,0,c)==false);
+    assert(can_place_queen(0,2,c)==false);
+    assert(can_place_queen(3,1,c)==false);
+    assert(can_place_queen(4,2,c)==false);
+    assert(can_place_queen(7,4,c)==false);
+    assert(can_place_queen(1,1,c)==false);
+    assert(can_place_queen(4,3,c)==false);
 
     }
 
@@ -236,8 +397,5 @@ void test(void)
     test_create_empty_board();
     test_is_valid_cord();
     test_queen_in_row();
-    // test_queen_in_diagonals();
-    // test_queen_in_col();
-    // test_can_place_queen();
-
+    test_place_queen();
 }

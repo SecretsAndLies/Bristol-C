@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define MAX_BOARD 11
-#define BOARDS_IN_LIST 1000
+#define BOARDS_IN_LIST 10000000 //10M
 
 typedef struct Board{
     int num_queens;
@@ -38,4 +38,6 @@ void test_queen_in_diagonals(void);
 bool can_place_queen(int r, int c, Board b);
 void test_can_place_queen(void);
 
+bool place_queen(Board * b);
+void test_place_queen(void);
 
