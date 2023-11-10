@@ -1,6 +1,6 @@
 #include "8q.h"
 
-int main(void)
+int main(int argc, char * argv[])
 {
     test();
     // todo eventually you'll need to use the command line args.
@@ -9,25 +9,113 @@ int main(void)
 // // TODO take in the arguments. Get the size, and set the verbose flag.
     // //bool is_verbose = true;
 
-    int size = 8;
+    if(argc<2 || argc>3){
+        prompt_correct_usage();
+        return 1;
+    }
+
+    bool is_verbose=false;
+    int size;
+    parse_args(argc, argv, &size, &is_verbose);
+    
     int num_solutions = 0;
     static Board boards[BOARDS_IN_LIST];
     int start_index = 0;
     int end_index = 1;
     boards[start_index]=create_empty_board(size);
-    // then we add 1 to the start index. 
-    // we keep doing this until the start index catches up
-    // with end index. (indicating that we have no more boards to add)
+    
     while (start_index<end_index){
-        end_index = add_child_boards(boards[start_index], boards, end_index, &num_solutions);
+        end_index = add_child_boards(boards[start_index], boards, end_index, &num_solutions, is_verbose);
         start_index++;
     }
 
     printf("%i solutions \n", num_solutions);
-
+    return 0;
 }
 
-// TODO test.
+// TODO; idk if this needs testing...)
+void parse_args(int argc, char * argv[], int * size, bool * is_vebose)
+{
+    // TODO move the size logic into it's own func since it's repeated.
+    if (argc==2){
+        *size = convert_and_verify_size(argv[1]);
+    }
+    if(argc==3){
+        if(strcmp("-verbose", argv[1])!=0){
+            prompt_correct_usage();
+        }
+        *size = convert_and_verify_size(argv[2]);
+        *is_vebose = true; 
+    }
+}
+
+// TODO test
+int convert_and_verify_size(char * size_str)
+{
+    // atoi returns 0 if it can't do the convert, so this
+    // also covers user doing weird inputs (eg floats, non numbers)
+    int size = atoi(size_str);
+    if(size<=0 || size>10){
+        prompt_correct_usage();
+        exit(EXIT_FAILURE);
+    }
+    return size;
+}
+
+void prompt_correct_usage(void)
+{
+        printf("You must supply one or two arguments. \n"
+                "You must give the size of the board as an int between 1-10 \n"
+                "Optionally, you can also add a verbose flag. \n"
+                "Example usage: ./8q 6 OR ./8q -verbose 3 \n");
+}
+
+//    Board f = create_empty_board(8);
+//    num_index = 0;
+//    num_solutions=0;
+//    add_child_boards(f, boards, next_index, &num_solutions);
+//    assert(num_solutions==92)
+
+/* Adds all possible next 
+child boards from the specified board b
+ to the given array.
+ Returns the size of the array (ie the next_index)
+ Also checks if a board is a solution and modifies that number.
+  */
+int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index, int * num_solutions, bool is_verbose)
+{
+    for (int r=0; r<b.size; r++){
+        for (int c=0; c<b.size; c++){
+            // TODO: move this into own func to avoid nested ifs
+            if(can_place_queen(r,c,b)){
+                Board temp = copy_board(b);
+                temp.grid[r][c]='Q';
+                temp.num_queens++;
+                if (board_is_unique(temp, boards, next_index)){
+                    boards[next_index] = temp;
+                    next_index++;
+                    if(is_solved_board(temp)){
+                        if(is_verbose){
+                            print_board_string(temp);
+                        }
+                        (*num_solutions)++;
+                    }                  
+                }
+            }
+        }
+    }
+    return next_index;
+}
+
+// TODO: potentially createa a create_child_board funct.
+// This should do the logic bit from add child board, and determine
+// if you should add the board you just made (temp) to the array or not.
+// (ie can you place queen, is it unique.)
+
+// TODO: you might want to create funcs that return boards for testing. 
+// eg: create solved board_8
+// this way you don't need to have the same strings in different tests? Ask Neil.
+
 bool board_is_unique(Board a, Board boards[BOARDS_IN_LIST], int size)
 {
     for (int i=0; i<size; i++){
@@ -38,7 +126,32 @@ bool board_is_unique(Board a, Board boards[BOARDS_IN_LIST], int size)
     return true;
 }
 
-// TODO test
+void test_board_is_unique(void)
+{
+    Board boards[SMALL_LIST];
+    Board c;
+    c.num_queens = 8;
+    c.size = 8;
+    strcpy(c.grid[0], "Q-------");
+    strcpy(c.grid[1], "------Q-");
+    strcpy(c.grid[2], "----Q---");
+    strcpy(c.grid[3], "-------Q");
+    strcpy(c.grid[4], "-Q------");
+    strcpy(c.grid[5], "---Q----");
+    strcpy(c.grid[6], "-----Q--");
+    strcpy(c.grid[7], "--Q-----");
+   
+    boards[0] = c;
+    // since you've already added this board
+    // should be false.
+    assert(board_is_unique(c, boards, 1)==false);
+    strcpy(c.grid[7], "--------");
+    // now we've modified c to be a different board and test again.
+    assert(board_is_unique(c, boards, 1));
+    // TODO: ideally we'd add more to this function.
+}
+
+
 bool is_solved_board(Board b)
 {
     if (b.num_queens==b.size){
@@ -47,32 +160,24 @@ bool is_solved_board(Board b)
     return false;
 }
 
-/* Adds all possible next 
-child boards from the specified board b
- to the given array.
- Returns the size of the array (ie the next_index)
- Also checks if a board is a solution and modifies that number.
-  */
-int add_child_boards(Board b, Board boards[BOARDS_IN_LIST], int next_index, int * num_solutions)
+void test_is_solved_board(void)
 {
-    for (int r=0; r<b.size; r++){
-        for (int c=0; c<b.size; c++){
-            if(can_place_queen(r,c,b)){
-                Board temp = copy_board(b);
-                if (board_is_unique(temp, boards, next_index)){
-                    temp.grid[r][c]='Q';
-                    temp.num_queens++;
-                    boards[next_index] = temp;
-                    next_index++;
-                    if(is_solved_board(temp)){
-                       (*num_solutions)++;
-                    }                  
-                }
-            }
-        }
-    }
-    return next_index;
+    Board c;
+    c.num_queens = 4;
+    c.size = 4;
+    strcpy(c.grid[0], "--Q-");
+    strcpy(c.grid[1], "Q---");
+    strcpy(c.grid[2], "---Q");
+    strcpy(c.grid[3], "-Q--");
+    assert(is_solved_board(c));
+    // modifying c.
+    c.num_queens = 3;
+    // technically this line isn't needed for test to pass
+    // but future code might be different.
+    strcpy(c.grid[2], "----");
+    assert(is_solved_board(c)==false);
 }
+
 
 // TODO: check if this is the best way to do this?
 Board copy_board(Board source)
@@ -91,7 +196,9 @@ Board copy_board(Board source)
 
 void print_board(Board b)
 {
-    printf("================\n");
+    printf("================y\n");
+    printf("Size: %i\n", b.size);
+    printf("Queens: %i\n", b.num_queens);
     for (int r=0; r<b.size; r++){
         for (int c=0; c<b.size; c++){
             printf("%c",b.grid[r][c]);
@@ -105,7 +212,7 @@ void print_board(Board b)
 void test_add_child_boards(void)
 {
     // this is a solved board.
-    static Board boards[BOARDS_IN_LIST];
+    Board boards[SMALL_LIST];
     Board c;
     c.num_queens = 8;
     c.size = 8;
@@ -119,7 +226,7 @@ void test_add_child_boards(void)
     strcpy(c.grid[7], "--Q-----");
     int next_index = 0;
     int num_solutions = 0;
-    assert(add_child_boards(c, boards, next_index, &num_solutions)==0);
+    assert(add_child_boards(c, boards, next_index, &num_solutions, false)==0);
     assert(num_solutions==0);
 
     // board with only one child board.
@@ -136,7 +243,7 @@ void test_add_child_boards(void)
     strcpy(d.grid[7], "--------");
     next_index = 0;
     num_solutions=0;
-    next_index = add_child_boards(d, boards, next_index, &num_solutions);
+    next_index = add_child_boards(d, boards, next_index, &num_solutions, false);
     assert(next_index==1);
     assert(boards[0].grid[7][2]=='Q');
     assert(num_solutions==1);
@@ -147,11 +254,10 @@ void test_add_child_boards(void)
     Board e = create_empty_board(3);
     next_index = 0;
     num_solutions=0;
-    next_index = add_child_boards(e, boards, next_index, &num_solutions);
+    next_index = add_child_boards(e, boards, next_index, &num_solutions, false);
     assert(next_index==9);
     assert(num_solutions==0);
-
-    // TODO: test a board that has multiple solutions.
+    
 }
 
 /* Returns if it's possible to place a queen at the given
@@ -293,7 +399,7 @@ bool queen_in_diagonals(int r, int c, Board b)
 void test_queen_in_diagonals(void)
 {
     Board b;
-    b.num_queens =8;
+    b.num_queens = 8;
     b.size = 8;
     strcpy(b.grid[0], "--------");
     strcpy(b.grid[1], "--------");
@@ -486,4 +592,6 @@ void test(void)
     test_is_valid_cord();
     test_queen_in_row();
     test_add_child_boards();
+    test_is_solved_board();
+    test_board_is_unique();
 }
