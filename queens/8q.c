@@ -32,34 +32,39 @@ void parse_args(int argc, char * argv[], int * size, bool * is_vebose)
 {
     if (argc==2){
         *size = convert_and_verify_size(argv[1]);
+        if(*size==0){
+            prompt_correct_usage();
+        }
     }
     if(argc==3){
         if(strcmp("-verbose", argv[1])!=0){
             prompt_correct_usage();
         }
         *size = convert_and_verify_size(argv[2]);
+        if(*size==0){
+            prompt_correct_usage();
+        }
         *is_vebose = true; 
     }
 }
 
-// TODO test
 int convert_and_verify_size(char * size_str)
 {
     // atoi returns 0 if it can't do the convert, so this
     // also covers user doing weird inputs (eg floats, non numbers)
     int size = atoi(size_str);
     if(size<=0 || size>10){
-        prompt_correct_usage();
+        return 0;
     }
     return size;
 }
 
 void prompt_correct_usage(void)
 {
-    printf("You must supply one or two arguments. \n"
+    fprintf(stderr, "Error. You must supply one or two arguments. \n"
             "You must give the size of the board as an int between 1-10 \n"
             "Optionally, you can also add a verbose flag. \n"
-            "Example usage: ./8q 6 OR ./8q -verbose 3 \n");
+            "Example usages:\n ./8q 6 \n ./8q -verbose 3 \n");
     exit(EXIT_FAILURE);
 }
 
