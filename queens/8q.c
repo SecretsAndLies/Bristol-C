@@ -3,15 +3,9 @@
 int main(int argc, char * argv[])
 {
     test();
-    // todo eventually you'll need to use the command line args.
-    // two possible arguments the number and - verbose
-    // eg: ./8q -verbose 6 or ./8q 6
-// // TODO take in the arguments. Get the size, and set the verbose flag.
-    // //bool is_verbose = true;
-
+    
     if(argc<2 || argc>3){
         prompt_correct_usage();
-        return 1;
     }
 
     bool is_verbose=false;
@@ -36,7 +30,6 @@ int main(int argc, char * argv[])
 // TODO; idk if this needs testing...)
 void parse_args(int argc, char * argv[], int * size, bool * is_vebose)
 {
-    // TODO move the size logic into it's own func since it's repeated.
     if (argc==2){
         *size = convert_and_verify_size(argv[1]);
     }
@@ -57,17 +50,17 @@ int convert_and_verify_size(char * size_str)
     int size = atoi(size_str);
     if(size<=0 || size>10){
         prompt_correct_usage();
-        exit(EXIT_FAILURE);
     }
     return size;
 }
 
 void prompt_correct_usage(void)
 {
-        printf("You must supply one or two arguments. \n"
-                "You must give the size of the board as an int between 1-10 \n"
-                "Optionally, you can also add a verbose flag. \n"
-                "Example usage: ./8q 6 OR ./8q -verbose 3 \n");
+    printf("You must supply one or two arguments. \n"
+            "You must give the size of the board as an int between 1-10 \n"
+            "Optionally, you can also add a verbose flag. \n"
+            "Example usage: ./8q 6 OR ./8q -verbose 3 \n");
+    exit(EXIT_FAILURE);
 }
 
 //    Board f = create_empty_board(8);
