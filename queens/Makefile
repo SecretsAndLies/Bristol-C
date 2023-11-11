@@ -1,6 +1,8 @@
 # General flags we'll always use (-Werror to prevent code generation if *any* errors)
-# TODO delete starting with Wmissing-prototypes
-GENFLAGS := -Wall -Wextra -pedantic -std=c99 -Wvla -Wfloat-equal -Werror -Wmissing-prototypes -Wstrict-prototypes -Wunused -Wuninitialized
+GENFLAGS := -Wall -Wextra -pedantic -std=c99 -Wvla -Wfloat-equal -Werror
+
+# TODO delete
+ALI_EXTRA_FLAGS := -Wmissing-prototypes -Wstrict-prototypes -Wunused -Wuninitialized
 
 # -O3 means optimise compiled code for execution speed
 OPTIM := $(GENFLAGS) -O3
@@ -16,6 +18,15 @@ CC := clang
 
 8q_san: 8q.c 8q.h
 	$(CC) 8q.c $(SANITIZE) -o 8q_san
+
+extension: extension.c extension.h
+	$(CC) extension.c $(OPTIM) -o extension
+
+extension_san: extension.c extension.h
+	$(CC) extension.c $(SANITIZE) -o extension_san
+
+ext_run:
+	./extension
 
 all: 8q 8q_san
 
