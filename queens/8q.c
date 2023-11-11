@@ -1,5 +1,14 @@
 #include "8q.h" 
 
+/*
+TODO:
+- Speed
+- creating a "solutions_data" struct that stores the board list
+- returning a string from solutions. This allows testing.
+- Testing
+- clean up formatting / style.
+*/
+
 int main(int argc, char * argv[])
 {
     test();
@@ -252,11 +261,17 @@ void test_board_is_unique(void)
     // since you've already added this board
     // should be false.
     assert(board_is_unique(&c, boards, 1)==false);
-    strcpy(c.grid[7], "--------");
+    Board d = copy_board(c);
+    strcpy(d.grid[7], "--------");
     // now we've modified c to be a 
     // different board and test again.
-    assert(board_is_unique(&c, boards, 1));
-    // TODO: ideally we'd add more to this function.
+    assert(board_is_unique(&d, boards, 1));
+    boards[1] = d;
+    boards[2] = create_empty_board(8);
+    boards[3] = create_empty_board(8);
+    boards[4] = create_empty_board(8);
+    // d is now in the list.
+    assert(board_is_unique(&d, boards, 5)==false);
 }
 
 
@@ -382,6 +397,10 @@ bool can_place_queen(int r, int c, Board * b)
     if (!is_valid_cord(r, c, b)){
         return false;
     }
+    // optimization: if no queens, any placement is valid.
+    if(b->num_queens==0){
+        return true;
+    }
     // queen in square already.
     if (b->grid[r][c] == 'Q'){
         return false;
@@ -398,8 +417,6 @@ bool can_place_queen(int r, int c, Board * b)
     return true;
 }
 
-// TODO. you have a lot of functions that copy structs. 
-// Using pointers might make all of them more efficient.
 bool queen_in_row(int r, Board * b)
 {
     for (int i=0; i<b->size; i++){
@@ -460,75 +477,48 @@ void test_queen_in_col(void)
     assert(queen_in_col(7,&b));
 }
 
-// TODO: this is too long. Split it up.
-bool queen_in_diagonals(int r, int c, Board * b)
+bool queen_in_diagonals(int orig_r, int orig_c, Board * b)
 {
-    // up and left
-    // TODO: if you wanted you could start at r-1 and c-1
-    // since you've already checked that.
-    int j = r;
-    int i = c;
-    while (is_valid_cord(j, i, b)){
-        if(b->grid[j][i]=='Q'){
-            return true;
+    // up and left, up and right, down and left, down and right
+    int directions[NUM_DIAGONALS][ROW_COL] =
+     {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+    
+    for (int d = 0; d < NUM_DIAGONALS; d++){
+        int r = orig_r;
+        int c = orig_c;
+        while (is_valid_cord(r, c, b)){
+            if (b->grid[r][c] == 'Q'){
+                return true;
+            }
+            r += directions[d][0];
+            c += directions[d][1];
         }
-        j--;
-        i--;
     }
-
-    // up and right
-    j = r;
-    i = c;
-    while (is_valid_cord(j, i, b)){
-        if(b->grid[j][i]=='Q'){
-            return true;
-        }
-        j--;
-        i++;
-    }
-
-    // down and left
-    j = r;
-    i = c;
-    while (is_valid_cord(j, i, b)){
-        if(b->grid[j][i]=='Q'){
-            return true;
-        }
-        j++;
-        i--;
-    }
-
-    // down and right
-    j = r;
-    i = c;
-    while (is_valid_cord(j, i, b)){
-        if(b->grid[j][i]=='Q'){
-            return true;
-        }
-        j++;
-        i++;
-    }
+    
     return false;
 }
 
 void test_queen_in_diagonals(void)
 {
-    Board b;
-    b.num_queens = 8;
-    b.size = 8;
-    strcpy(b.grid[0], "--------");
-    strcpy(b.grid[1], "--------");
+    Board b = create_empty_board(8);
     strcpy(b.grid[2], "--Q-----");
-    strcpy(b.grid[3], "--------");
-    strcpy(b.grid[4], "--------");
-    strcpy(b.grid[5], "--------");
-    strcpy(b.grid[6], "--------");
-    strcpy(b.grid[7], "--------");
     assert(queen_in_diagonals(0,0,&b)); //down and right
     assert(queen_in_diagonals(4,0,&b)); // up and right
     assert(queen_in_diagonals(0,4,&b)); // down and left 
     assert(queen_in_diagonals(4,4,&b)); // up and left
     assert(queen_in_diagonals(3,2,&b)==false);
+
+    Board c = create_empty_board(10);
+    assert(queen_in_diagonals(0,0,&c)==false); // board is empty
+    strcpy(c.grid[0], "Q---------");
+    assert(queen_in_diagonals(9,9,&c)==true); // up and left
+    strcpy(c.grid[0], "---------Q");
+    assert(queen_in_diagonals(9,0,&c)==true);  // up and right
+    strcpy(c.grid[0], "----------"); // reset old top
+    strcpy(c.grid[9], "Q---------");
+    assert(queen_in_diagonals(0,9,&c)==true); // down and left
+    strcpy(c.grid[9], "---------Q");
+    assert(queen_in_diagonals(0,0,&c)==true); // down and right 
 }
 
 void test_is_valid_cord(void)

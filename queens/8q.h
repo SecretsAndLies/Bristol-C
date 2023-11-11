@@ -10,6 +10,8 @@
 #define STRING_LEN 2000
 #define MAX_ARGS 5 // for testing only.
 #define CORRECT_USAGE "Usage:\n ./8q 6 \n ./8q -verbose 3 \n"
+#define NUM_DIAGONALS 4
+#define ROW_COL 2
 
 typedef struct Board{
     int num_queens;

@@ -6,6 +6,9 @@
         "initializer_list": "c",
         "utility": "c",
         "stdbool.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "assert.h": "c",
+        "string.h": "c",
+        "random": "c"
     }
 }
