@@ -652,14 +652,24 @@ void test_can_place_queen(void)
     strcpy(b.grid[6], "--------");
     strcpy(b.grid[7], "--------");
 
-    assert(can_place_queen(1, 7, &b));    // nothing in row, col, or diagonal
-    assert(can_place_queen(6, 3, &b));    // nothing in row, col, or diagonal
-    assert(can_place_queen(0, 8, &b) == false);    // off the board
-    assert(can_place_queen(2, 0, &b) == false);    // off the board
-    assert(can_place_queen(0, 0, &b) == false);    // Q already there.
-    assert(can_place_queen(0, 6, &b) == false);    // Q in col (right above)
-    assert(can_place_queen(1, 0, &b) == false);    // Q in this col.
-    assert(can_place_queen(2, 0, &b) == false);    // Q in this row.
+    // nothing in row, col, or diagonal
+    assert(can_place_queen(1, 7, &b)); 
+    // nothing in row, col, or diagonal
+    assert(can_place_queen(6, 3, &b));    
+    // off the board
+    assert(can_place_queen(0, 8, &b) == false);   
+    // off the board
+    assert(can_place_queen(2, 0, &b) == false);    
+    // Q already there.
+    assert(can_place_queen(0, 0, &b) == false);   
+    // Q in col (right above)
+    assert(can_place_queen(0, 6, &b) == false);    
+    // Q in this col.
+    assert(can_place_queen(1, 0, &b) == false);   
+    // Q in this row.
+    assert(can_place_queen(2, 0, &b) == false);   
+    // Q in this diagonal.
+    assert(can_place_queen(7, 7, &b) == false);   
 
     Board c;
     c.num_queens = 8;
