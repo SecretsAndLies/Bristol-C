@@ -1,5 +1,6 @@
 # General flags we'll always use (-Werror to prevent code generation if *any* errors)
-GENFLAGS := -Wall -Wextra -pedantic -std=c99 -Wvla -Wfloat-equal -Werror
+# TODO delete starting with Wmissing-prototypes
+GENFLAGS := -Wall -Wextra -pedantic -std=c99 -Wvla -Wfloat-equal -Werror -Wmissing-prototypes -Wstrict-prototypes -Wunused -Wuninitialized
 
 # -O3 means optimise compiled code for execution speed
 OPTIM := $(GENFLAGS) -O3
