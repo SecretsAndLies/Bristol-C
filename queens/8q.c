@@ -1,7 +1,7 @@
 #include "8q.h"
 
 /*
-TODO:
+TODO possibles:
 - creating a "solutions_data" struct that stores the board list
 - returning a string from solutions. This allows testing.
 - clean up formatting / style.
@@ -37,6 +37,7 @@ int get_solutions(int is_verbose, int size)
     return sols;
 }
 
+// TODO: ASK - this makes the program run pretty slowly 20seconds ish in the sanitizer mode.
 /* To avoid the program runnning too slowly for the user
  we only test from 1 - 7. */
 void test_get_solutions(void) 
@@ -48,10 +49,6 @@ void test_get_solutions(void)
     assert(get_solutions(false, 5) == 10);
     assert(get_solutions(false, 6) == 4);
     assert(get_solutions(false, 7) == 40);
-    // TODO remove.
-    // assert(get_solutions(false, 8)==92);
-    // assert(get_solutions(false, 9)==352);
-    // assert(get_solutions(false, 10)==724);
 }
 
 void validate_arg_count(int argc) 

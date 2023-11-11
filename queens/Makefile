@@ -1,9 +1,6 @@
 # General flags we'll always use (-Werror to prevent code generation if *any* errors)
 GENFLAGS := -Wall -Wextra -pedantic -std=c99 -Wvla -Wfloat-equal -Werror
 
-# TODO delete
-ALI_EXTRA_FLAGS := -Wmissing-prototypes -Wstrict-prototypes -Wunused -Wuninitialized
-
 # -O3 means optimise compiled code for execution speed
 OPTIM := $(GENFLAGS) -O3
 
@@ -13,6 +10,21 @@ SANITIZE := $(GENFLAGS) -g3 -fsanitize=address -fsanitize=undefined
 # In the labs you'll probably use clang, but make sure to try gcc too
 CC := clang
 
+## THESE FLAGS ARE FOR SDL AND THE EXTENSION CODE.
+# Optimise code, but allow no warnings during compilation
+# pkg-config is accesible after you install SDL2 - on my machine it's equaivalent to the flags : -I/usr/include/SDL2 -D_REENTRANT
+PRODFLAGS=$(BASEFLAGS) -O1 -Werror `pkg-config sdl2 --cflags`
+
+# Not optimisation, add in Sanitizer code -> huge executable file but will tell you if an array goes out-of-bounds etc.
+DEVFLAGS=$(BASEFLAGS) -fsanitize=address -fsanitize=undefined -g3 
+LDLIBS= -lm
+
+# Library linking : maths and SDL2
+# pkg-config is accesible after you install SDL2 - on my machine it's equaivalent to the flags : -lSDL2
+LIBS =  -lm `pkg-config sdl2 --libs`
+
+## ACTUAL STUFFF STARTS HERE
+
 8q: 8q.c 8q.h
 	$(CC) 8q.c $(OPTIM) -o 8q
 
@@ -20,10 +32,7 @@ CC := clang
 	$(CC) 8q.c $(SANITIZE) -o 8q_san
 
 extension: extension.c extension.h
-	$(CC) extension.c $(OPTIM) -o extension
-
-extension_san: extension.c extension.h
-	$(CC) extension.c $(SANITIZE) -o extension_san
+	$(CC) extension.c -o extension $(PRODFLAGS) $(LIBS)
 
 ext_run:
 	./extension
@@ -38,4 +47,4 @@ clean:
 
 # Crete a .zip file using ALL files in this directory
 zip: 8q.c 8q.h 
-	zip -r 8q.zip 8q.c 8q.h # extension.txt extension.c Makefile 
+	zip -r 8q.zip 8q.c 8q.h extension.txt extension.c Makefile extension.h
