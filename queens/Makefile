@@ -32,8 +32,8 @@ LIBS =  -lm `pkg-config sdl2 --libs`
 8q_san: 8q.c 8q.h
 	$(CC) 8q.c $(SANITIZE) -o 8q_san
 
-extension: extension.c extension.h
-	$(CC) extension.c -o extension $(PRODFLAGS) $(LIBS)
+extension: extension.c neillsdl2.c neillsdl2.h
+	$(CC) extension.c neillsdl2.c -o extension  $(PRODFLAGS) $(LIBS)
 
 ext_run:
 	./extension
