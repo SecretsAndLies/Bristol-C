@@ -36,7 +36,7 @@ extension: extension.c extension.h neillsdl2.c neillsdl2.h 8q.c 8q.h
 	$(CC) extension.c neillsdl2.c 8q.c -o extension  $(PRODFLAGS) $(LIBS)
 
 ext_run:
-	./extension
+	./extension -verbose 6
 
 all: 8q 8q_san extension
 
@@ -44,8 +44,8 @@ run:
 	./8q 4
 
 clean:
-	rm -f 8q 8q_san 8q.zip
+	rm -f 8q 8q_san extension 8q.zip
 
 # Crete a .zip file using ALL files in this directory
-zip: 8q.c 8q.h 
-	zip -r 8q.zip 8q.c 8q.h extension.txt extension.c Makefile extension.h
+zip: 8q.c 8q.h extension.txt extension.c Makefile extension.h neillsdl2.c neillsdl2.h
+	zip -r 8q.zip 8q.c 8q.h extension.txt extension.c Makefile extension.h neillsdl2.c neillsdl2.h

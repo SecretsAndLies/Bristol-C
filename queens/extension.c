@@ -56,7 +56,6 @@ void draw_queen(SDL_Simplewin * sw, int y, int x)
     draw_yellow_rectangle(QUEEN_BASE_W, QUEEN_BASE_H, 
                           QUEEN_BASE_X_OFFSET + x,
                           QUEEN_BASE_Y_OFFSET + y, sw);
-
     draw_yellow_rectangle(QUEEN_SPINE_W, QUEEN_SPINE_H,
                           QUEEN_SPINE_1_X_OFFSET + x,
                           QUEEN_SPINE_1_Y_OFFSET + y, sw);

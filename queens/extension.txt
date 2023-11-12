@@ -1,4 +1,8 @@
 This extension first utilized the code from https://github.com/csnwc/Exercises-In-C/tree/f3803259aa6a0bfc210d6bf07c8d7e578bde9333/Code/Week5/SDL
 as starter code for understanding SDL.
 
-It uses 
+It generates the solutions using the previous code,
+and if the verbose flag is set, 
+then displays one board every 2 seconds graphically. 
+
+The queen is pixel art using three rectangles.
