@@ -11,6 +11,7 @@ SANITIZE := $(GENFLAGS) -g3 -fsanitize=address -fsanitize=undefined
 CC := clang
 
 ## THESE FLAGS ARE FOR SDL AND THE EXTENSION CODE.
+# ------------------------------
 # Optimise code, but allow no warnings during compilation
 # pkg-config is accesible after you install SDL2 - on my machine it's equaivalent to the flags : -I/usr/include/SDL2 -D_REENTRANT
 PRODFLAGS=$(BASEFLAGS) -O1 -Werror `pkg-config sdl2 --cflags`
@@ -23,7 +24,7 @@ LDLIBS= -lm
 # pkg-config is accesible after you install SDL2 - on my machine it's equaivalent to the flags : -lSDL2
 LIBS =  -lm `pkg-config sdl2 --libs`
 
-## ACTUAL STUFFF STARTS HERE
+# -------------------------------
 
 8q: 8q.c 8q.h
 	$(CC) 8q.c $(OPTIM) -o 8q
@@ -37,10 +38,10 @@ extension: extension.c extension.h
 ext_run:
 	./extension
 
-all: 8q 8q_san
+all: 8q 8q_san extension
 
 run:
-	./8q_san 4
+	./8q 4
 
 clean:
 	rm -f 8q 8q_san 8q.zip

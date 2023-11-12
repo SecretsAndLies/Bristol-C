@@ -1,3 +1,7 @@
+This extension first utilized the code from https://github.com/csnwc/Exercises-In-C/tree/f3803259aa6a0bfc210d6bf07c8d7e578bde9333/Code/Week5/SDL
+as starter code for understanding SDL.
+
+// TODO DELETE
 Uses a more efficient algorithm (backtracking)
 Uses SDL to represent the board solutions.
 
