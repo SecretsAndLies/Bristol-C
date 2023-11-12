@@ -1,8 +1,8 @@
 #include <SDL.h>
 #include <math.h>
 
-#define WWIDTH 800
-#define WHEIGHT 600
+#define WWIDTH 1000
+#define WHEIGHT 1000
 
 /* Font stuff */
 typedef unsigned short fntrow;
@@ -37,3 +37,8 @@ void Neill_SDL_DrawString(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT
                           char *str, int ox, int oy);
 void Neill_SDL_ReadFont(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname);
 void Neill_SDL_UpdateScreen(SDL_Simplewin *sw);
+
+// MY FUNCTION HEADERS
+void draw_chess_board(int size, SDL_Rect rectangle, SDL_Simplewin sw);
+void draw_queen(SDL_Simplewin sw, int x, int y);
+void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin sw);
