@@ -9,6 +9,8 @@
         "stdlib.h": "c",
         "assert.h": "c",
         "string.h": "c",
-        "random": "c"
+        "random": "c",
+        "neillsdl2.h": "c",
+        "8q.h": "c"
     }
 }

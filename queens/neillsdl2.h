@@ -38,7 +38,3 @@ void Neill_SDL_DrawString(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT
 void Neill_SDL_ReadFont(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname);
 void Neill_SDL_UpdateScreen(SDL_Simplewin *sw);
 
-// MY FUNCTION HEADERS
-void draw_chess_board(int size, SDL_Rect rectangle, SDL_Simplewin sw);
-void draw_queen(SDL_Simplewin sw, int x, int y);
-void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin sw);

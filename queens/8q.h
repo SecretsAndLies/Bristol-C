@@ -23,7 +23,7 @@ void test(void);
 
 void on_error(const char* s);
 
-int get_solutions(int is_verbose, int size);
+int get_solutions(int size, Board solutions[SMALL_LIST]);
 void test_get_solutions(void);
 
 void validate_arg_count(int argc);
@@ -73,10 +73,13 @@ void test_queen_in_diagonals(void);
 bool can_place_queen(int r, int c, Board* b);
 void test_can_place_queen(void);
 
-int add_child_boards(Board* b, Board boards[BOARD_NUM], int next_index,
-                     int* num_solutions, bool is_verbose);
+int add_child_boards(Board* b, 
+                    Board boards[BOARD_NUM], 
+                    int next_index,
+                    int* num_solutions, 
+                    Board solutions[SMALL_LIST]);
 void test_add_child_boards(void);
 
 int add_child_board(Board* b, Board boards[BOARD_NUM], int next_index,
-                    int* num_solutions, bool is_verbose, int r, int c);
+                    int* num_solutions, int r, int c, Board solutions[SMALL_LIST]);
 void test_add_child_board(void);

@@ -7,21 +7,9 @@ TODO possibles:
 - clean up formatting / style.
 */
 
-int main(int argc, char* argv[]) 
-{
-    test();
-    validate_arg_count(argc);
-    bool is_verbose = false;
-    int size;
-    parse_args(argc, argv, &size, &is_verbose);
-    int solutions = get_solutions(is_verbose, size);
-    printf("%i solutions \n", solutions);
-    return 0;
-}
-
-/* Returns the number of solutions.
-Prints the boards if the verbose flag is set. */
-int get_solutions(int is_verbose, int size) 
+/* Returns the number of solutions and populates
+the given array with solution boards. */
+int get_solutions(int size, Board solutions[SMALL_LIST]) 
 {
     int sols = 0;
 
@@ -31,9 +19,14 @@ int get_solutions(int is_verbose, int size)
     boards[start] = create_empty_board(size);
 
     while (start < end) {
-        end = add_child_boards(&boards[start], boards, end, &sols, is_verbose);
+        end = add_child_boards(&boards[start], 
+                                boards, 
+                                end, 
+                                &sols, 
+                                solutions);
         start++;
     }
+
     return sols;
 }
 
@@ -42,13 +35,14 @@ int get_solutions(int is_verbose, int size)
  we only test from 1 - 7. */
 void test_get_solutions(void) 
 {
-    assert(get_solutions(false, 1) == 1);
-    assert(get_solutions(false, 2) == 0);
-    assert(get_solutions(false, 3) == 0);
-    assert(get_solutions(false, 4) == 2);
-    assert(get_solutions(false, 5) == 10);
-    assert(get_solutions(false, 6) == 4);
-    assert(get_solutions(false, 7) == 40);
+    Board solutions[SMALL_LIST];
+    assert(get_solutions(1,solutions) == 1);
+    assert(get_solutions(2,solutions) == 0);
+    assert(get_solutions(3,solutions) == 0);
+    assert(get_solutions(4,solutions) == 2);
+    assert(get_solutions(5,solutions) == 10);
+    assert(get_solutions(6,solutions) == 4);
+    assert(get_solutions(7,solutions) == 40);
 }
 
 void validate_arg_count(int argc) 
@@ -144,12 +138,11 @@ int add_child_boards(Board* b,
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
-                    bool is_verbose) 
+                    Board solutions[SMALL_LIST]) 
 {
     for (int r = 0; r < b->size; r++) {
         for (int c = 0; c < b->size; c++) {
-            next_index = add_child_board(b, boards, next_index, num_solutions,
-                                                                     is_verbose, r, c);
+            next_index = add_child_board(b, boards, next_index, num_solutions, r, c, solutions);
         }
     }
     return next_index;
@@ -163,8 +156,8 @@ int add_child_board(Board* b,
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
-                    bool is_verbose, 
-                    int r, int c) 
+                    int r, int c,
+                    Board solutions[SMALL_LIST]) 
 {
     if (can_place_queen(r, c, b)) {
         Board temp = copy_board(*b);
@@ -174,9 +167,7 @@ int add_child_board(Board* b,
             boards[next_index] = temp;
             next_index++;
             if (is_solved_board(temp)) {
-                if (is_verbose) {
-                    print_board_string(&temp);
-                }
+                solutions[*num_solutions] = temp;
                 (*num_solutions)++;
             }
         }
@@ -187,6 +178,7 @@ int add_child_board(Board* b,
 void test_add_child_board(void)
 {
     Board boards[SMALL_LIST];
+    Board solutions[SMALL_LIST];
     Board c;    // solved board.
     c.num_queens = 8;
     c.size = 8;
@@ -200,16 +192,16 @@ void test_add_child_board(void)
     strcpy(c.grid[7], "--Q-----");
 
     // no new boards should be added because board is solved.
-    assert(add_child_board(&c, boards, 0, 0, false, 0, 1) == 0);
+    assert(add_child_board(&c, boards, 0, 0, 0, 1, solutions) == 0);
     // modify the board to have one solution left.
     c.num_queens = 7;
     strcpy(c.grid[7], "--------");
     int num_solutions = 0;
     // add a queen in the wrong position.
-    assert(add_child_board(&c, boards, 0, &num_solutions, false, 0, 1) == 0);
+    assert(add_child_board(&c, boards, 0, &num_solutions, 0, 1, solutions) == 0);
     assert(num_solutions == 0);
     // add a queen in the right position.
-    assert(add_child_board(&c, boards, 0, &num_solutions, false, 7, 2) == 1);
+    assert(add_child_board(&c, boards, 0, &num_solutions, 7, 2, solutions) == 1);
     assert(boards[0].grid[7][2] == 'Q');
     assert(num_solutions == 1);
 }
@@ -318,10 +310,12 @@ void print_board(Board b)
     printf("================\n");
 }
 
+// TODO validate that the solutions array are correct.
 void test_add_child_boards(void) 
 {
     // this is a solved board.
     Board boards[SMALL_LIST];
+    Board solutions[SMALL_LIST];
     Board c;
     c.num_queens = 8;
     c.size = 8;
@@ -335,7 +329,7 @@ void test_add_child_boards(void)
     strcpy(c.grid[7], "--Q-----");
     int nxt = 0;
     int sols = 0;
-    assert(!add_child_boards(&c, boards, nxt, &sols, false));
+    assert(!add_child_boards(&c, boards, nxt, &sols, solutions));
     assert(sols == 0);
 
     // board with only one child board.
@@ -352,7 +346,7 @@ void test_add_child_boards(void)
     strcpy(d.grid[7], "--------");
     nxt = 0;
     sols = 0;
-    nxt = add_child_boards(&d, boards, nxt, &sols, false);
+    nxt = add_child_boards(&d, boards, nxt, &sols, solutions);
     assert(nxt == 1);
     assert(boards[0].grid[7][2] == 'Q');
     assert(sols == 1);
@@ -362,7 +356,7 @@ void test_add_child_boards(void)
     Board e = create_empty_board(3);
     nxt = 0;
     sols = 0;
-    nxt = add_child_boards(&e, boards, nxt, &sols, false);
+    nxt = add_child_boards(&e, boards, nxt, &sols, solutions);
     assert(nxt == 9);
     assert(sols == 0);
     assert(boards[0].grid[0][0]=='Q');
