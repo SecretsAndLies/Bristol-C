@@ -80,6 +80,10 @@ int add_child_boards(Board* b,
                     Board solutions[SMALL_LIST]);
 void test_add_child_boards(void);
 
-int add_child_board(Board* b, Board boards[BOARD_NUM], int next_index,
-                    int* num_solutions, int r, int c, Board solutions[SMALL_LIST]);
+int add_child_board(Board* b, 
+                    Board boards[BOARD_NUM], 
+                    int next_index,
+                    int* num_solutions, 
+                    int r, int c, 
+                    Board solutions[SMALL_LIST]);
 void test_add_child_board(void);

@@ -67,7 +67,8 @@ void draw_queen(SDL_Simplewin * sw, int y, int x)
                           QUEEN_SPINE_3_Y_OFFSET + y, sw);
 }
 
-void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin * sw){
+void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin * sw)
+{
     Neill_SDL_SetDrawColour(sw, YELLOW);
 
     SDL_Rect rect;

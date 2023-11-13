@@ -4,11 +4,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void draw_chess_board(int size, SDL_Rect rectangle, SDL_Simplewin * sw);
+void draw_chess_board(int size, 
+                    SDL_Rect rectangle, 
+                    SDL_Simplewin * sw);
 void draw_queen(SDL_Simplewin * sw, int x, int y);
-void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin * sw);
+void draw_yellow_rectangle( int w, int h, 
+                            int x, int y, 
+                            SDL_Simplewin * sw);
 void sdl_draw_board(Board b, SDL_Simplewin * sw);
-void draw_boards(Board solutions[SMALL_LIST], int num_solutions);
+void draw_boards(Board solutions[SMALL_LIST], 
+                int num_solutions);
 
 #define RECTSIZE 100
 #define MILLISECONDDELAY 2000
