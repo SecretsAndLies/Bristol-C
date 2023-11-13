@@ -7,6 +7,7 @@
 #define MAX_BOARD 11
 #define BOARD_NUM 10000000
 #define SMALL_LIST 100
+#define MEDIUM_LIST 1000
 #define STRING_LEN 2000
 #define MAX_ARGS 5 
 #define CORRECT_USAGE "Usage:\n ./8q 6 \n ./8q -verbose 3 \n"

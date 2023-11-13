@@ -2,21 +2,82 @@
 
 int main(int argc, char* argv[]) 
 {
-    test();
     validate_arg_count(argc);
-    bool is_verbose = false;
+    bool is_visualize = false;
     int size;
-    parse_args(argc, argv, &size, &is_verbose);
-    Board solutions[SMALL_LIST];
-    int solution_count = get_solutions(size, solutions);
-    if(is_verbose){
-        draw_boards(solutions, solution_count);
+    parse_ext_args(argc, argv, &size, &is_visualize);
+    Board solutions[MEDIUM_LIST];
+    Board start = create_empty_board(size);
+    int num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    for(int i=0; i<num_solutions; i++){
+        print_board_string(&solutions[i]);
     }
-    printf("%i solutions \n", solution_count);
+    printf("%i solutions \n", num_solutions);
+    if(is_visualize){
+        draw_boards(solutions, num_solutions);
+    }
     return 0;
 }
 
-void draw_boards(Board solutions[SMALL_LIST], int num_solutions)
+void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int *num_solutions)
+{
+    // base case, found a solution, add to the list.
+    if (row == current_board->size) {
+        solutions[*num_solutions] = *current_board;
+        (*num_solutions)++;
+        return;
+    }
+
+    // otherwise, place queens in each col.
+    for (int col = 0; col < current_board->size; col++) {
+        if (can_place_queen(row, col, current_board)) {
+            // place queens
+            current_board->grid[row][col] = 'Q';
+            current_board->num_queens++;
+
+            // Recurse to the next row (which will place queens etc)
+            ext_solve(row + 1, current_board, solutions, num_solutions);
+
+            // Backtrack: remove the queen so it can be used
+            // in the next loop.
+            current_board->grid[row][col] = '-';
+            current_board->num_queens--;
+        }
+    }
+    return;
+}
+
+void parse_ext_args(int argc, char* argv[], int* size, 
+                        bool * is_visualize) 
+{
+    if (argc == 2) {
+        *size = convert_and_verify_size(argv[1]);
+        if (*size == 0) {
+            on_error(
+                    "Error: invalid size -"
+                    " must be between 1 and 10. \n" 
+                    CORRECT_EXT_USAGE);
+        }
+    }
+    if (argc == 3) {
+        if (strcmp("-visualize", argv[1]) != 0) {
+            on_error("Error, only valid flag is -visualize. \n" 
+            CORRECT_EXT_USAGE);
+        }
+        *size = convert_and_verify_size(argv[2]);
+        if (*size == 0) {
+            on_error(
+                    "Error: invalid size -"
+                    " must be between 1 and 10. \n" 
+                    CORRECT_EXT_USAGE);
+        }
+        *is_visualize = true;
+    }
+}
+
+
+void draw_boards(Board solutions[MEDIUM_LIST], int num_solutions)
 {
     SDL_Simplewin sw;        
     Neill_SDL_Init(&sw);

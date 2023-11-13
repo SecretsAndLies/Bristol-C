@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
     bool is_verbose = false;
     int size;
     parse_args(argc, argv, &size, &is_verbose);
-    Board solutions[SMALL_LIST];
+    Board solutions[MEDIUM_LIST];
     int solution_count = get_solutions(size, solutions);
     if(is_verbose){
         for(int i=0; i<solution_count; i++){

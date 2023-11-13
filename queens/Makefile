@@ -36,7 +36,7 @@ extension: extension.c extension.h neillsdl2.c neillsdl2.h 8q.c 8q.h
 	$(CC) extension.c neillsdl2.c 8q.c -o extension  $(PRODFLAGS) $(LIBS)
 
 ext_run:
-	./extension -verbose 6
+	./extension -visualize 6
 
 all: 8q 8q_san extension
 

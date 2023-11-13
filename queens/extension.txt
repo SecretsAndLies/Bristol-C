@@ -1,8 +1,18 @@
-This extension first utilized the code from https://github.com/csnwc/Exercises-In-C/tree/f3803259aa6a0bfc210d6bf07c8d7e578bde9333/Code/Week5/SDL
+This extension uses a better algorithm (backtracking)
+and visualizes the results.
+
+first utilized the code from https://github.com/csnwc/Exercises-In-C/tree/f3803259aa6a0bfc210d6bf07c8d7e578bde9333/Code/Week5/SDL
 as starter code for understanding SDL.
 
 It generates the solutions using the previous code,
-and if the verbose flag is set, 
+and if the -visualize flag is set, 
 then displays one board every 2 seconds graphically. 
 
 The queen is pixel art using three rectangles.
+
+I also use a recursive backtracking algorithm to generate
+my solution. Note: I was heaviliy inspired by 
+https://www.geeksforgeeks.org/n-queen-problem-backtracking-3/
+and other resources that discussed backtracking in this exact problem
+however, my solution is adapted to use my existing solutions array
+rather than returning a boolean.

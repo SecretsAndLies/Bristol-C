@@ -2,7 +2,7 @@
 
 /* Returns the number of solutions and populates
 the given array with solution boards. */
-int get_solutions(int size, Board solutions[SMALL_LIST]) 
+int get_solutions(int size, Board solutions[MEDIUM_LIST]) 
 {
     int sols = 0;
 
@@ -29,7 +29,7 @@ int get_solutions(int size, Board solutions[SMALL_LIST])
  we only test from 1 - 7. */
 void test_get_solutions(void) 
 {
-    Board solutions[SMALL_LIST];
+    Board solutions[MEDIUM_LIST];
     assert(get_solutions(1,solutions) == 1);
     assert(solutions[0].grid[0][0] == 'Q');
     assert(solutions[0].num_queens == 1);
@@ -155,10 +155,6 @@ void test_convert_and_verify_size(void)
  * Returns 0 if invalid number is entered. */
 int convert_and_verify_size(char* size_str) 
 {
-    // atoi returns 0 if it can't do the convert, so this
-    // does do some (possibly unspected)
-    // things, eg: converts 1.1
-    // to 1, but I think reasonable for now.
     int size = atoi(size_str);
     if (size <= 0 || size > 10) {
         return 0;
@@ -170,8 +166,12 @@ int add_child_boards(Board* b,
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
-                    Board solutions[SMALL_LIST]) 
+                    Board solutions[MEDIUM_LIST]) 
 {
+    // no action required for already solved boards.
+    if (is_solved_board(*b)){
+        return next_index;
+    }
     for (int r = 0; r < b->size; r++) {
         for (int c = 0; c < b->size; c++) {
             next_index = add_child_board(b, 
@@ -188,13 +188,14 @@ int add_child_boards(Board* b,
 /* Adds a single child board to the list,
  * iff adding a queen at row, col creates a
  * valid, unique board.
- * Returns the next empty index. Increments num_solutions.*/
+ * Returns the next empty index in boards. 
+ * Increments num_solutions.*/
 int add_child_board(Board* b, 
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
                     int r, int c,
-                    Board solutions[SMALL_LIST]) 
+                    Board solutions[MEDIUM_LIST]) 
 {
     if (can_place_queen(r, c, b)) {
         Board temp = copy_board(*b);
@@ -340,7 +341,6 @@ void test_copy_board(void)
     // check that these boards are
     // pointing to a different spot in memory
     assert(&d != &c);
-    // Do they have the same values
     assert(are_boards_identical(&d, &c));
 }
 
@@ -359,10 +359,8 @@ void print_board(Board b)
     printf("================\n");
 }
 
-// TODO validate that the solutions array are correct.
 void test_add_child_boards(void) 
 {
-    // this is a solved board.
     Board boards[SMALL_LIST];
     Board solutions[SMALL_LIST];
     Board c;
@@ -381,7 +379,7 @@ void test_add_child_boards(void)
     assert(!add_child_boards(&c, boards, nxt, &sols, solutions));
     assert(sols == 0);
 
-    // board with only one child board.
+    // board with only one child board. (modification of c)
     Board d;
     d.num_queens = 7;
     d.size = 8;
@@ -643,8 +641,6 @@ bool are_boards_identical(Board* b, Board* c)
 
 void board2str(Board* b, char line[STRING_LEN]) 
 {
-    // loop through every row in each collumns.
-    // If a queen is present write the row to arr.
     int i = 0;
     for (int c = 0; c < b->size; c++) {
         for (int r = 0; r < b->size; r++) {
