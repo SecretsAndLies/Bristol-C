@@ -16,7 +16,8 @@ int get_solutions(int size, Board solutions[MEDIUM_LIST])
                                 boards, 
                                 end, 
                                 &sols, 
-                                solutions);
+                                solutions,
+                                start);
         start++;
     }
 
@@ -29,7 +30,7 @@ void test_get_solutions(void)
 {
     Board solutions[MEDIUM_LIST];
     assert(get_solutions(1,solutions) == 1);
-    assert(solutions[0].grid[0][0] == 'Q');
+    assert(solutions[0].grid[0][0] == QUEEN);
     assert(solutions[0].num_queens == 1);
     assert(solutions[0].size == 1);
 
@@ -37,7 +38,7 @@ void test_get_solutions(void)
     assert(get_solutions(3,solutions) == 0);
 
     assert(get_solutions(4,solutions) == 2);
-    assert(solutions[0].grid[0][0]=='-');
+    assert(solutions[0].grid[0][0]==BLANK);
     Board d;
     d.num_queens = 4;
     d.size = 4;
@@ -75,7 +76,8 @@ void test_get_solutions(void)
 void validate_arg_count(int argc) 
 {
     if (argc < 2 || argc > 3) {
-        on_error("Error: wrong number of args. \n" CORRECT_USAGE);
+        on_error("Error: wrong number of args. \n" 
+                CORRECT_USAGE);
     }
 }
 
@@ -114,7 +116,8 @@ void test_parse_args(void)
     assert(is_verbose == false);
 }
 
-void parse_args(int argc, char* argv[], int* size, bool* is_vebose) 
+void parse_args(int argc, char* argv[], 
+                int* size, bool* is_vebose) 
 {
     if (argc == 2) {
         *size = convert_and_verify_size(argv[1]);
@@ -165,7 +168,8 @@ int add_child_boards(Board* b,
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
-                    Board solutions[MEDIUM_LIST]) 
+                    Board solutions[MEDIUM_LIST],
+                    int start) 
 {
     // no action required for already solved boards.
     if (is_solved_board(*b)){
@@ -178,7 +182,8 @@ int add_child_boards(Board* b,
                                         next_index, 
                                         num_solutions, 
                                         r, c, 
-                                        solutions);
+                                        solutions,
+                                        start);
         }
     }
     return next_index;
@@ -194,13 +199,15 @@ int add_child_board(Board* b,
                     int next_index,
                     int* num_solutions, 
                     int r, int c,
-                    Board solutions[MEDIUM_LIST]) 
+                    Board solutions[MEDIUM_LIST],
+                    int start) 
 {
     if (can_place_queen(r, c, b)) {
         Board temp = copy_board(*b);
-        temp.grid[r][c] = 'Q';
+        temp.grid[r][c] = QUEEN;
         temp.num_queens++;
-        if (board_is_unique(&temp, boards, next_index)) {
+        if (board_is_unique(&temp, boards, 
+                            next_index, start)) {
             boards[next_index] = temp;
             next_index++;
             if (is_solved_board(temp)) {
@@ -229,7 +236,9 @@ void test_add_child_board(void)
     strcpy(c.grid[7], "--Q-----");
 
     // no new boards should be added because board is solved.
-    assert(add_child_board(&c, boards, 0, 0, 0, 1, solutions) == 0);
+    assert(add_child_board(&c, boards, 
+                            0, 0, 0, 1, 
+                            solutions, 0) == 0);
     // modify the board to have one solution left.
     c.num_queens = 7;
     strcpy(c.grid[7], "--------");
@@ -241,7 +250,7 @@ void test_add_child_board(void)
                             &num_solutions, 
                             0, 
                             1, 
-                            solutions) == 0);
+                            solutions, 0) == 0);
     assert(num_solutions == 0);
     // add a queen in the right position.
     assert(add_child_board( &c, 
@@ -250,17 +259,17 @@ void test_add_child_board(void)
                             &num_solutions, 
                             7, 
                             2, 
-                            solutions) == 1);
-    assert(boards[0].grid[7][2] == 'Q');
+                            solutions, 0) == 1);
+    assert(boards[0].grid[7][2] == QUEEN);
     assert(num_solutions == 1);
 }
-// TODO pass in 
-bool board_is_unique(Board* a, Board boards[BOARD_NUM], int size) 
+bool board_is_unique(Board* a, Board boards[BOARD_NUM], 
+                    int size, int start) 
 {
     int i=size-1;
     // we loop through backwards, because
     // similar boards are most likely to be next.
-    while (i>=0){
+    while (i>=start){
         // stop the loop when the number of queens is
         // different to the board we're on.
         if (a->num_queens<boards[i].num_queens){
@@ -292,20 +301,37 @@ void test_board_is_unique(void)
     boards[0] = c;
     // since you've already added this board
     // should be false.
-    assert(board_is_unique(&c, boards, 1) == false);
+    assert(board_is_unique(&c, boards, 1, 0) == false);
     Board d = copy_board(c);
     strcpy(d.grid[7], "--------");
     // now we've modified c to be a
     // different board and test again.
-    assert(board_is_unique(&d, boards, 1));
+    assert(board_is_unique(&d, boards, 1, 0));
     boards[1] = d;
     boards[2] = create_empty_board(8);
+    boards[2].num_queens = 8;
     boards[3] = create_empty_board(8);
+    boards[3].num_queens = 8;
     boards[4] = create_empty_board(8);
+    boards[4].num_queens = 8;
     // d is now in the list.
-    assert(board_is_unique(&d, boards, 5) == false);
+    assert(board_is_unique(&d, boards, 5, 0) == false);
 
-    // TODO add a 9x9 and a 10x10 board
+    // add 9x9 and 10x10 boards
+    // The number of queens is important in these boards 
+    // as it's used for the algorithm.
+    boards[5] = create_empty_board(9);
+    boards[5].num_queens = 9;
+    boards[6] = create_empty_board(10);
+    boards[6].num_queens = 10;
+    assert(board_is_unique(&d, boards, 5, 0) == false);
+
+    // don't start at zero and still find the board.
+    assert(board_is_unique(&d, boards, 5, 1) == false);
+    Board e = copy_board(d);
+    // modify board, should now be unique.
+    strcpy(d.grid[4], "--------");
+    assert(board_is_unique(&e, boards, 5, 1) == false);
 
 }
 
@@ -387,7 +413,8 @@ void test_add_child_boards(void)
     strcpy(c.grid[7], "--Q-----");
     int nxt = 0;
     int sols = 0;
-    assert(!add_child_boards(&c, boards, nxt, &sols, solutions));
+    assert(!add_child_boards(&c, boards, 
+                            nxt, &sols, solutions, 0));
     assert(sols == 0);
 
     // board with only one child board. (modification of c)
@@ -404,9 +431,10 @@ void test_add_child_boards(void)
     strcpy(d.grid[7], "--------");
     nxt = 0;
     sols = 0;
-    nxt = add_child_boards(&d, boards, nxt, &sols, solutions);
+    nxt = add_child_boards(&d, boards, nxt, 
+                        &sols, solutions, 0);
     assert(nxt == 1);
-    assert(boards[0].grid[7][2] == 'Q');
+    assert(boards[0].grid[7][2] == QUEEN);
     assert(sols == 1);
     assert(are_boards_identical(&c, &solutions[0]));
 
@@ -415,13 +443,14 @@ void test_add_child_boards(void)
     Board e = create_empty_board(3);
     nxt = 0;
     sols = 0;
-    nxt = add_child_boards(&e, boards, nxt, &sols, solutions);
+    nxt = add_child_boards(&e, boards, nxt, 
+                            &sols, solutions, 0);
     assert(nxt == 9);
     assert(sols == 0);
-    assert(boards[0].grid[0][0]=='Q');
-    assert(boards[0].grid[0][1]=='-');
-    assert(boards[1].grid[0][0]=='-');
-    assert(boards[1].grid[0][1]=='Q');
+    assert(boards[0].grid[0][0]==QUEEN);
+    assert(boards[0].grid[0][1]==BLANK);
+    assert(boards[1].grid[0][0]==BLANK);
+    assert(boards[1].grid[0][1]==QUEEN);
 
 }
 
@@ -437,7 +466,7 @@ bool can_place_queen(int r, int c, Board* b)
         return true;
     }
     // queen in square already.
-    if (b->grid[r][c] == 'Q') {
+    if (b->grid[r][c] == QUEEN) {
         return false;
     }
     if (queen_in_row(r, b)) {
@@ -455,7 +484,7 @@ bool can_place_queen(int r, int c, Board* b)
 bool queen_in_row(int r, Board* b) 
 {
     for (int i = 0; i < b->size; i++) {
-        if (b->grid[r][i] == 'Q') {
+        if (b->grid[r][i] == QUEEN) {
             return true;
         }
     }
@@ -507,7 +536,7 @@ void test_queen_in_row(void)
 bool queen_in_col(int c, Board* b) 
 {
     for (int i = 0; i < b->size; i++) {
-        if (b->grid[i][c] == 'Q') {
+        if (b->grid[i][c] == QUEEN) {
             return true;
         }
     }
@@ -564,7 +593,7 @@ bool queen_in_diagonals(int orig_r, int orig_c, Board* b)
         int r = orig_r;
         int c = orig_c;
         while (is_valid_cord(r, c, b)) {
-            if (b->grid[r][c] == 'Q') {
+            if (b->grid[r][c] == QUEEN) {
                 return true;
             }
             r += directions[d][0];
@@ -655,7 +684,7 @@ void board2str(Board* b, char line[STRING_LEN])
     int i = 0;
     for (int c = 0; c < b->size; c++) {
         for (int r = 0; r < b->size; r++) {
-            if (b->grid[r][c] == 'Q') {
+            if (b->grid[r][c] == QUEEN) {
                 int rank_pos = b->size - r;
                 if(rank_pos==10){
                     line[i] = 'A';
@@ -689,30 +718,30 @@ void test_board2str(void)
 
     Board f = create_empty_board(10);
     f.num_queens = 10;  
-    f.grid[0][4] = 'Q';
-    f.grid[1][9] = 'Q';
-    f.grid[2][3] = 'Q';
-    f.grid[3][8] = 'Q';
-    f.grid[4][2] = 'Q';
-    f.grid[5][7] = 'Q';
-    f.grid[6][1] = 'Q';
-    f.grid[7][6] = 'Q';
-    f.grid[8][0] = 'Q';
-    f.grid[9][5] = 'Q';
+    f.grid[0][4] = QUEEN;
+    f.grid[1][9] = QUEEN;
+    f.grid[2][3] = QUEEN;
+    f.grid[3][8] = QUEEN;
+    f.grid[4][2] = QUEEN;
+    f.grid[5][7] = QUEEN;
+    f.grid[6][1] = QUEEN;
+    f.grid[7][6] = QUEEN;
+    f.grid[8][0] = QUEEN;
+    f.grid[9][5] = QUEEN;
 
     board2str(&f, line);
     assert(strcmp("2468A13579", line) == 0);
 
     Board c = create_empty_board(3);
-    c.grid[0][0] = 'Q';
-    c.grid[2][1] = 'Q';
+    c.grid[0][0] = QUEEN;
+    c.grid[2][1] = QUEEN;
     board2str(&c, line);
     assert(strcmp("31", line) == 0);
 
     Board d = create_empty_board(5);
-    d.grid[2][1] = 'Q';
-    d.grid[1][3] = 'Q';
-    d.grid[0][0] = 'Q';
+    d.grid[2][1] = QUEEN;
+    d.grid[1][3] = QUEEN;
+    d.grid[0][0] = QUEEN;
     board2str(&d, line);
     assert(strcmp("534", line) == 0);
 }
@@ -753,19 +782,17 @@ void test_are_boards_indentical(void)
     strcpy(example8_2.grid[6], "-----Q--");
     strcpy(example8_2.grid[7], "--Q-----");
 
-    assert(are_boards_identical(&example8, &example8_2) == false);
+    assert(!are_boards_identical(&example8, &example8_2));
 
     Board a = create_empty_board(9);
     Board b = create_empty_board(9);
     assert(are_boards_identical(&a, &b) == true);
-    a.grid[0][0]='Q';
+    a.grid[0][0]=QUEEN;
     a.num_queens++;
     assert(are_boards_identical(&a, &b)==false);
-    b.grid[0][0]='Q';
+    b.grid[0][0]=QUEEN;
     b.num_queens++;
     assert(are_boards_identical(&a, &b)==true);
-
-
 }
 
 Board create_empty_board(int size) 
@@ -775,7 +802,7 @@ Board create_empty_board(int size)
     b.size = size;
     for (int r = 0; r < size; r++) {
         for (int c = 0; c < size; c++) {
-            b.grid[r][c] = '-';
+            b.grid[r][c] = BLANK;
         }
     }
     return b;

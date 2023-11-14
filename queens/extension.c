@@ -23,12 +23,75 @@ int main(int argc, char* argv[])
 
 void ext_test(void)
 {
-    int size = 10;
-    Board start = create_empty_board(size);
+    Board start = create_empty_board(10);
     Board solutions[MEDIUM_LIST];
     int num_solutions = 0;
     ext_solve(0, &start, solutions, &num_solutions);
     assert(num_solutions==724);
+
+    start = create_empty_board(1);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==1);
+    assert(solutions[0].grid[0][0] == QUEEN);
+
+    start = create_empty_board(2);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==0);
+
+    start = create_empty_board(3);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==0);
+
+    start = create_empty_board(4);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==2);
+    assert(solutions[0].grid[0][0]==BLANK);
+    Board d;
+    d.num_queens = 4;
+    d.size = 4;
+    strcpy(d.grid[0], "-Q--");
+    strcpy(d.grid[1], "---Q");
+    strcpy(d.grid[2], "Q---");
+    strcpy(d.grid[3], "--Q-");
+    assert(are_boards_identical(&d, &solutions[0]));
+    Board e;
+    e.num_queens = 4;
+    e.size = 4;
+    strcpy(d.grid[0], "--Q-");
+    strcpy(d.grid[1], "Q---");
+    strcpy(d.grid[2], "---Q");
+    strcpy(d.grid[3], "-Q--");
+    assert(are_boards_identical(&d, &solutions[1]));
+
+    start = create_empty_board(5);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==10);
+
+    start = create_empty_board(6);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==4);
+
+    start = create_empty_board(7);
+    num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==40);
+    Board f;
+    f.num_queens = 7;
+    f.size = 7;
+    strcpy(f.grid[0],"Q------");
+    strcpy(f.grid[1],"--Q----");
+    strcpy(f.grid[2],"----Q--");
+    strcpy(f.grid[3],"------Q");
+    strcpy(f.grid[4],"-Q-----");
+    strcpy(f.grid[5],"---Q---");
+    strcpy(f.grid[6],"-----Q-");
+    assert(are_boards_identical(&f, &solutions[0]));
 
 }
 
@@ -45,7 +108,7 @@ void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int 
     for (int col = 0; col < current_board->size; col++) {
         if (can_place_queen(row, col, current_board)) {
             // place queens
-            current_board->grid[row][col] = 'Q';
+            current_board->grid[row][col] = QUEEN;
             current_board->num_queens++;
 
             // Recurse to the next row (which will place queens etc)
@@ -53,7 +116,7 @@ void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int 
 
             // Backtrack: remove the queen so it can be used
             // in the next loop.
-            current_board->grid[row][col] = '-';
+            current_board->grid[row][col] = BLANK;
             current_board->num_queens--;
         }
     }
@@ -111,7 +174,7 @@ void sdl_draw_board(Board b, SDL_Simplewin * sw)
     draw_chess_board(b.size, rectangle, sw);
     for (int r = 0; r < b.size; r++) {
         for (int c = 0; c < b.size; c++) {
-            if (b.grid[r][c] == 'Q') {
+            if (b.grid[r][c] == QUEEN) {
                 draw_queen(sw, r, c);
             }
         }

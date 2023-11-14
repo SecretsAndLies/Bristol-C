@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define QUEEN 'Q'
+#define BLANK '-'
 #define MAX_BOARD 11
 #define BOARD_NUM 10000000
 #define MEDIUM_LIST 1000
@@ -56,7 +58,8 @@ void prompt_correct_usage(void);
 Board create_empty_board(int size);
 void test_create_empty_board(void);
 
-bool board_is_unique(Board* a, Board boards[BOARD_NUM], int size);
+bool board_is_unique(Board* a, Board boards[BOARD_NUM], 
+                    int size, int start);
 void test_board_is_unique(void);
 
 bool is_valid_cord(int r, int c, Board* b);
@@ -78,7 +81,8 @@ int add_child_boards(Board* b,
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
-                    Board solutions[MEDIUM_LIST]);
+                    Board solutions[MEDIUM_LIST],
+                    int start);
 void test_add_child_boards(void);
 
 int add_child_board(Board* b, 
@@ -86,5 +90,6 @@ int add_child_board(Board* b,
                     int next_index,
                     int* num_solutions, 
                     int r, int c, 
-                    Board solutions[MEDIUM_LIST]);
+                    Board solutions[MEDIUM_LIST],
+                    int start);
 void test_add_child_board(void);

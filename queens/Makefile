@@ -43,6 +43,9 @@ all: 8q 8q_san extension
 run:
 	./8q 4
 
+san_run:
+	./8q_san -verbose 4
+
 clean:
 	rm -f 8q 8q_san extension 8q.zip
 
