@@ -254,7 +254,7 @@ void test_add_child_board(void)
     assert(boards[0].grid[7][2] == 'Q');
     assert(num_solutions == 1);
 }
-
+// TODO pass in 
 bool board_is_unique(Board* a, Board boards[BOARD_NUM], int size) 
 {
     int i=size-1;
