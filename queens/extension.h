@@ -17,6 +17,8 @@ void draw_boards(Board solutions[MEDIUM_LIST],
 void parse_ext_args(int argc, char* argv[], int* size, 
                         bool * is_visualize);
 void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int *num_solutions);
+void ext_test(void);
+
 #define RECTSIZE 100
 #define MILLISECONDDELAY 2000
 #define WHITE 255, 255, 255

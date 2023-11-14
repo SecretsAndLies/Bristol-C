@@ -6,8 +6,8 @@
 
 #define MAX_BOARD 11
 #define BOARD_NUM 10000000
-#define SMALL_LIST 100
 #define MEDIUM_LIST 1000
+#define SMALL_STR 12
 #define STRING_LEN 2000
 #define MAX_ARGS 5 
 #define CORRECT_USAGE "Usage:\n ./8q 6 \n ./8q -verbose 3 \n"
@@ -24,7 +24,7 @@ void test(void);
 
 void on_error(const char* s);
 
-int get_solutions(int size, Board solutions[SMALL_LIST]);
+int get_solutions(int size, Board solutions[MEDIUM_LIST]);
 void test_get_solutions(void);
 
 void validate_arg_count(int argc);
@@ -78,7 +78,7 @@ int add_child_boards(Board* b,
                     Board boards[BOARD_NUM], 
                     int next_index,
                     int* num_solutions, 
-                    Board solutions[SMALL_LIST]);
+                    Board solutions[MEDIUM_LIST]);
 void test_add_child_boards(void);
 
 int add_child_board(Board* b, 
@@ -86,5 +86,5 @@ int add_child_board(Board* b,
                     int next_index,
                     int* num_solutions, 
                     int r, int c, 
-                    Board solutions[SMALL_LIST]);
+                    Board solutions[MEDIUM_LIST]);
 void test_add_child_board(void);

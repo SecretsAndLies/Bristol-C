@@ -2,6 +2,7 @@
 
 int main(int argc, char* argv[]) 
 {
+    ext_test();
     validate_arg_count(argc);
     bool is_visualize = false;
     int size;
@@ -18,6 +19,17 @@ int main(int argc, char* argv[])
         draw_boards(solutions, num_solutions);
     }
     return 0;
+}
+
+void ext_test(void)
+{
+    int size = 10;
+    Board start = create_empty_board(size);
+    Board solutions[MEDIUM_LIST];
+    int num_solutions = 0;
+    ext_solve(0, &start, solutions, &num_solutions);
+    assert(num_solutions==724);
+
 }
 
 void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int *num_solutions)

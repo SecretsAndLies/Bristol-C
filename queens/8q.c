@@ -23,8 +23,6 @@ int get_solutions(int size, Board solutions[MEDIUM_LIST])
     return sols;
 }
 
-// TODO: ASK - this makes the program run pretty slowly
-// - 20seconds ish in the sanitizer mode.
 /* To avoid the program runnning too slowly for the user
  we only test from 1 - 7. */
 void test_get_solutions(void) 
@@ -87,21 +85,22 @@ void on_error(const char* s)
     exit(EXIT_FAILURE);
 }
 
-// TODO ASK. This function doesn't work.
-//    I think it's because the argv isn't correctly copied across to the fucntion?
 void test_parse_args(void) 
 {
     // correct usage (verbose)
     int argc = 3;
     int size = 0;
     bool is_verbose = false;
-    char argv[MAX_ARGS][STRING_LEN] = {"./8q", "-verbose", "6"};
-    // the below line is needed because argv
-    // is an array of pointers,
-    // not a 2d array of strings.
-    printf("%s \n", argv[1]);
-    char* ptrArray[MAX_ARGS];
-    parse_args(argc, ptrArray, &size, &is_verbose);
+    char args[MAX_ARGS][SMALL_STR];
+    char * argv[SMALL_STR];
+    strcpy(args[0],"./8q");
+    strcpy(args[1],"-verbose");
+    strcpy(args[2],"6");
+    for (int i=0; i<MAX_ARGS; i++){
+        argv[i]=args[i];
+    }
+
+    parse_args(argc, argv, &size, &is_verbose);
     assert(size == 6);
     assert(is_verbose == true);
 
@@ -109,8 +108,8 @@ void test_parse_args(void)
     argc = 2;
     size = 0;
     is_verbose = false;
-    strcpy(argv[1], "10");
-    parse_args(argc, ptrArray, &size, &is_verbose);
+    strcpy(args[1], "10");
+    parse_args(argc, argv, &size, &is_verbose);
     assert(size == 10);
     assert(is_verbose == false);
 }
@@ -215,8 +214,8 @@ int add_child_board(Board* b,
 
 void test_add_child_board(void)
 {
-    Board boards[SMALL_LIST];
-    Board solutions[SMALL_LIST];
+    Board boards[MEDIUM_LIST];
+    Board solutions[MEDIUM_LIST];
     Board c;    // solved board.
     c.num_queens = 8;
     c.size = 8;
@@ -258,17 +257,26 @@ void test_add_child_board(void)
 
 bool board_is_unique(Board* a, Board boards[BOARD_NUM], int size) 
 {
-    for (int i = 0; i < size; i++) {
+    int i=size-1;
+    // we loop through backwards, because
+    // similar boards are most likely to be next.
+    while (i>=0){
+        // stop the loop when the number of queens is
+        // different to the board we're on.
+        if (a->num_queens<boards[i].num_queens){
+            return false;
+        }
         if (are_boards_identical(a, &boards[i])) {
             return false;
         }
+        i--;
     }
     return true;
 }
 
 void test_board_is_unique(void) 
 {
-    Board boards[SMALL_LIST];
+    Board boards[MEDIUM_LIST];
     Board c;
     c.num_queens = 8;
     c.size = 8;
@@ -296,6 +304,9 @@ void test_board_is_unique(void)
     boards[4] = create_empty_board(8);
     // d is now in the list.
     assert(board_is_unique(&d, boards, 5) == false);
+
+    // TODO add a 9x9 and a 10x10 board
+
 }
 
 bool is_solved_board(Board b) 
@@ -361,8 +372,8 @@ void print_board(Board b)
 
 void test_add_child_boards(void) 
 {
-    Board boards[SMALL_LIST];
-    Board solutions[SMALL_LIST];
+    Board boards[MEDIUM_LIST];
+    Board solutions[MEDIUM_LIST];
     Board c;
     c.num_queens = 8;
     c.size = 8;
@@ -645,7 +656,13 @@ void board2str(Board* b, char line[STRING_LEN])
     for (int c = 0; c < b->size; c++) {
         for (int r = 0; r < b->size; r++) {
             if (b->grid[r][c] == 'Q') {
-                line[i] = (b->size - r) + '0';
+                int rank_pos = b->size - r;
+                if(rank_pos==10){
+                    line[i] = 'A';
+                }
+                else {
+                    line[i] = rank_pos + '0';
+                }
                 i++;
             }
         }
@@ -669,6 +686,22 @@ void test_board2str(void)
     strcpy(b.grid[7], "--Q-----");
     board2str(&b, line);
     assert(strcmp("84136275", line) == 0);
+
+    Board f = create_empty_board(10);
+    f.num_queens = 10;  
+    f.grid[0][4] = 'Q';
+    f.grid[1][9] = 'Q';
+    f.grid[2][3] = 'Q';
+    f.grid[3][8] = 'Q';
+    f.grid[4][2] = 'Q';
+    f.grid[5][7] = 'Q';
+    f.grid[6][1] = 'Q';
+    f.grid[7][6] = 'Q';
+    f.grid[8][0] = 'Q';
+    f.grid[9][5] = 'Q';
+
+    board2str(&f, line);
+    assert(strcmp("2468A13579", line) == 0);
 
     Board c = create_empty_board(3);
     c.grid[0][0] = 'Q';
@@ -845,7 +878,7 @@ void test(void)
     test_are_boards_indentical();
     test_create_empty_board();
     test_is_valid_cord();
-    // test_parse_args();
+    test_parse_args();
     test_queen_in_row();
     test_queen_in_col();
     test_queen_in_diagonals();
