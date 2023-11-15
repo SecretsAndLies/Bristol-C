@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
     for(int i=0; i<num_solutions; i++){
         print_board_string(&solutions[i]);
     }
-    printf("%i solutions \n", num_solutions);
+    printf("%i solutions\n", num_solutions);
     if(is_visualize){
         draw_boards(solutions, num_solutions);
     }
