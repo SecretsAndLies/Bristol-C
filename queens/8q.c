@@ -25,7 +25,7 @@ int get_solutions(int size, Board solutions[MEDIUM_LIST])
 }
 
 /* To avoid the program runnning too slowly for the user
- we only test from 1 - 7. We spot check returning boards
+ we only test boards 1 - 7. We spot check returning boards
  along the way. */
 void test_get_solutions(void) 
 {
@@ -116,7 +116,8 @@ void test_parse_args(void)
     assert(size == 10);
     assert(is_verbose == false);
 
-    // incorrect usage causes errors, so can't test.
+    // incorrect usage causes errors, so is tested in 
+    // the bash script.
 }
 
 void parse_args(int argc, char* argv[], 
