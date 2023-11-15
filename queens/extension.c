@@ -69,11 +69,11 @@ void ext_test(void)
     Board e;
     e.num_queens = 4;
     e.size = 4;
-    strcpy(d.grid[0], "--Q-");
-    strcpy(d.grid[1], "Q---");
-    strcpy(d.grid[2], "---Q");
-    strcpy(d.grid[3], "-Q--");
-    assert(are_boards_identical(&d, &solutions[1]));
+    strcpy(e.grid[0], "--Q-");
+    strcpy(e.grid[1], "Q---");
+    strcpy(e.grid[2], "---Q");
+    strcpy(e.grid[3], "-Q--");
+    assert(are_boards_identical(&e, &solutions[1]));
 
     start = create_empty_board(5);
     num_solutions = 0;

@@ -8,7 +8,7 @@ OPTIM := $(GENFLAGS) -O3
 SANITIZE := $(GENFLAGS) -g3 -fsanitize=address -fsanitize=undefined
 
 # In the labs you'll probably use clang, but make sure to try gcc too
-CC := clang
+CC := gcc
 
 ## THESE FLAGS ARE FOR SDL AND THE EXTENSION CODE.
 # ------------------------------
