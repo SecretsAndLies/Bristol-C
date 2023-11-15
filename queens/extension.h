@@ -18,6 +18,7 @@ void parse_ext_args(int argc, char* argv[], int* size,
                         bool * is_visualize);
 void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int *num_solutions);
 void ext_test(void);
+void validate_ext_arg_count(int argc);
 
 #define RECTSIZE 100
 #define MILLISECONDDELAY 2000
@@ -43,4 +44,4 @@ void ext_test(void);
 #define QUEEN_SPINE_3_X_OFFSET 7
 #define QUEEN_SPINE_3_Y_OFFSET 2
 
-#define CORRECT_EXT_USAGE "Usage:\n ./8q 6 \n ./8q -visualize 3 \n"
+#define CORRECT_EXT_USAGE "Usage:\n ./extension 6 \n ./extension -visualize 3 \n"

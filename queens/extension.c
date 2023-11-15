@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]) 
 {
     ext_test();
-    validate_arg_count(argc);
+    validate_ext_arg_count(argc);
     bool is_visualize = false;
     int size;
     parse_ext_args(argc, argv, &size, &is_visualize);
@@ -19,6 +19,14 @@ int main(int argc, char* argv[])
         draw_boards(solutions, num_solutions);
     }
     return 0;
+}
+
+void validate_ext_arg_count(int argc) 
+{
+    if (argc < 2 || argc > 3) {
+        on_error("Error: wrong number of args. \n" 
+                CORRECT_EXT_USAGE);
+    }
 }
 
 void ext_test(void)
@@ -95,7 +103,9 @@ void ext_test(void)
 
 }
 
-void ext_solve(int row, Board *current_board, Board solutions[MEDIUM_LIST], int *num_solutions)
+void ext_solve(int row, Board *current_board, 
+                Board solutions[MEDIUM_LIST], 
+                int *num_solutions)
 {
     // base case, found a solution, add to the list.
     if (row == current_board->size) {
@@ -152,7 +162,8 @@ void parse_ext_args(int argc, char* argv[], int* size,
 }
 
 
-void draw_boards(Board solutions[MEDIUM_LIST], int num_solutions)
+void draw_boards(Board solutions[MEDIUM_LIST], 
+                int num_solutions)
 {
     SDL_Simplewin sw;        
     Neill_SDL_Init(&sw);
@@ -203,7 +214,8 @@ void draw_queen(SDL_Simplewin * sw, int y, int x)
                           QUEEN_SPINE_3_Y_OFFSET + y, sw);
 }
 
-void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin * sw)
+void draw_yellow_rectangle(int w, int h, 
+                        int x, int y, SDL_Simplewin * sw)
 {
     Neill_SDL_SetDrawColour(sw, YELLOW);
 
@@ -215,7 +227,8 @@ void draw_yellow_rectangle(int w, int h, int x, int y, SDL_Simplewin * sw)
     SDL_RenderFillRect(sw->renderer, &rect);
 }
 
-void draw_chess_board(int size, SDL_Rect rectangle, SDL_Simplewin * sw) 
+void draw_chess_board(int size, 
+                    SDL_Rect rectangle, SDL_Simplewin * sw) 
 {
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {

@@ -10,9 +10,10 @@ then displays one board every 2 seconds graphically.
 
 The queen is pixel art using three rectangles.
 
+Users may press any key to exit.
+
 I also use a recursive backtracking algorithm to generate
 my solution. Note: I was heaviliy inspired by 
 https://www.geeksforgeeks.org/n-queen-problem-backtracking-3/
-and other resources that discussed backtracking in this exact problem
 however, my solution is adapted to use my existing solutions array
 rather than returning a boolean.

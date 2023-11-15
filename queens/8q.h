@@ -34,7 +34,8 @@ void validate_arg_count(int argc);
 void test_are_boards_indentical(void);
 bool are_boards_identical(Board* b, Board* c);
 
-void parse_args(int argc, char* argv[], int* size, bool* is_vebose);
+void parse_args(int argc, char* argv[], 
+                int* size, bool* is_vebose);
 void test_parse_args(void);
 
 void test_convert_and_verify_size(void);
