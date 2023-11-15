@@ -25,7 +25,8 @@ int get_solutions(int size, Board solutions[MEDIUM_LIST])
 }
 
 /* To avoid the program runnning too slowly for the user
- we only test from 1 - 7. */
+ we only test from 1 - 7. We spot check returning boards
+ along the way. */
 void test_get_solutions(void) 
 {
     Board solutions[MEDIUM_LIST];
@@ -114,6 +115,8 @@ void test_parse_args(void)
     parse_args(argc, argv, &size, &is_verbose);
     assert(size == 10);
     assert(is_verbose == false);
+
+    // incorrect usage causes errors, so can't test.
 }
 
 void parse_args(int argc, char* argv[], 
@@ -268,7 +271,8 @@ bool board_is_unique(Board* a, Board boards[BOARD_NUM],
 {
     int i=size-1;
     // we loop through backwards, because
-    // similar boards are most likely to be next.
+    // similar boards are most likely to be to the left
+    // of this board.
     while (i>=start){
         // stop the loop when the number of queens is
         // different to the board we're on.
@@ -648,6 +652,7 @@ void test_is_valid_cord(void)
     b.size = 8;
     // off the board
     assert(is_valid_cord(0, 8, &b) == false);
+    assert(is_valid_cord(8, 0, &b) == false);
     assert(is_valid_cord(0, 0, &b));
     assert(is_valid_cord(7, 0, &b));
     assert(is_valid_cord(5, 2, &b));
@@ -898,6 +903,14 @@ void test_can_place_queen(void)
     assert(can_place_queen(7, 4, &c) == false);
     assert(can_place_queen(1, 1, &c) == false);
     assert(can_place_queen(4, 3, &c) == false);
+
+    // reverse of above, all positions are valid.
+    Board d = create_empty_board(10);
+    for (int r=0; r<d.size; r++){
+        for (int c=0; c<d.size; c++){
+            assert(can_place_queen(r, c, &d));
+        }
+    }
 }
 
 void test(void) 
