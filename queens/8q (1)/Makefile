@@ -39,7 +39,7 @@ LIBS =  -lm `pkg-config sdl2 --libs`
 extension: extension.c extension.h neillsdl2.c neillsdl2.h 8q.c 8q.h
 	$(CC) extension.c neillsdl2.c 8q.c -o extension  $(PRODFLAGS) $(LIBS)
 
-extrun:
+ext_run:
 	./extension -visualize 7
 
 all: 8q 8q_san extension
@@ -53,6 +53,6 @@ san_run:
 clean:
 	rm -f 8q 8q_san extension 8q.zip
 
-# Create a .zip file using ALL files in this directory
+# Crete a .zip file using ALL files in this directory
 zip: 8q_dr.c 8q.c 8q.h extension.txt extension.c Makefile extension.h neillsdl2.c neillsdl2.h
 	zip -r 8q.zip 8q_dr.c 8q.c 8q.h extension.txt extension.c Makefile extension.h neillsdl2.c neillsdl2.h
