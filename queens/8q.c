@@ -151,6 +151,7 @@ void parse_args(int argc, char* argv[],
 void test_convert_and_verify_size(void) 
 {
     assert(convert_and_verify_size("7") == 7);
+    assert(convert_and_verify_size("10") == 10);
     assert(convert_and_verify_size("0") == 0);
     assert(convert_and_verify_size("11") == 0);
     assert(convert_and_verify_size("1.1") == 1);
@@ -161,7 +162,10 @@ void test_convert_and_verify_size(void)
  * Returns 0 if invalid number is entered. */
 int convert_and_verify_size(char* size_str) 
 {
-    int size = atoi(size_str);
+    int size;
+    if(sscanf(size_str, "%i", &size)!=1){
+        return 0;
+    }
     if (size <= 0 || size > 10) {
         return 0;
     }

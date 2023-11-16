@@ -56,3 +56,6 @@ clean:
 # Create a .zip file using ALL files in this directory
 zip: 8q_dr.c 8q.c 8q.h extension.txt extension.c Makefile extension.h neillsdl2.c neillsdl2.h
 	zip -r 8q.zip 8q_dr.c 8q.c 8q.h extension.txt extension.c Makefile extension.h neillsdl2.c neillsdl2.h
+
+test:
+	./test.sh
