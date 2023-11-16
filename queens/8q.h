@@ -15,6 +15,11 @@
 #define CORRECT_USAGE "Usage:\n ./8q 6 \n ./8q -verbose 3 \n"
 #define NUM_DIAGONALS 4
 #define ROW_COL 2
+#define UP_AND_LEFT -1, -1
+#define UP_AND_RIGHT -1, 1
+#define DOWN_AND_LEFT 1, -1
+#define DOWN_AND_RIGHT 1, 1
+
 
 typedef struct Board {
   int num_queens;

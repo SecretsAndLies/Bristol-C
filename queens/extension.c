@@ -197,8 +197,8 @@ void sdl_draw_board(Board b, SDL_Simplewin * sw)
 void draw_queen(SDL_Simplewin * sw, int y, int x)
 {
     // convert to pixels.
-    x=x*QUEEN_SIZE;
-    y=y*QUEEN_SIZE;
+    x = x * QUEEN_SIZE;
+    y = y * QUEEN_SIZE;
     // base
     draw_yellow_rectangle(QUEEN_BASE_W, QUEEN_BASE_H, 
                           QUEEN_BASE_X_OFFSET + x,
@@ -220,10 +220,10 @@ void draw_yellow_rectangle(int w, int h,
     Neill_SDL_SetDrawColour(sw, YELLOW);
 
     SDL_Rect rect;
-    rect.w = w*QUEEN_SIZE;
-    rect.h = h*QUEEN_SIZE;
-    rect.x = x*QUEEN_SIZE; 
-    rect.y = y*QUEEN_SIZE;
+    rect.w = w * QUEEN_SIZE;
+    rect.h = h * QUEEN_SIZE;
+    rect.x = x * QUEEN_SIZE; 
+    rect.y = y * QUEEN_SIZE;
     SDL_RenderFillRect(sw->renderer, &rect);
 }
 
@@ -232,9 +232,9 @@ void draw_chess_board(int size,
 {
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
-            rectangle.x = x*RECTSIZE;
-            rectangle.y = y*RECTSIZE;
-            if((x+y)%2==0){
+            rectangle.x = x * RECTSIZE;
+            rectangle.y = y * RECTSIZE;
+            if( ( x + y) % 2 == 0){
                 Neill_SDL_SetDrawColour(sw, WHITE);
                 SDL_RenderFillRect(sw->renderer, &rectangle);
             }

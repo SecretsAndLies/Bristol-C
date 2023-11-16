@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     Board solutions[MEDIUM_LIST];
     int solution_count = get_solutions(size, solutions);
     if(is_verbose){
-        for(int i=0; i<solution_count; i++){
+        for(int i = 0; i<solution_count; i++) {
             print_board_string(&solutions[i]);
         }
     }
