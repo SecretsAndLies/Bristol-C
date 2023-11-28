@@ -16,6 +16,7 @@ typedef struct node Node;
 Node *MakeNode(char c);
 void InsertRandom(Node *t, Node *n);
 char *PrintTree(Node *t);
+int depth(Node *t, int d);
 
 int main(void)
 {
@@ -30,6 +31,7 @@ int main(void)
       InsertRandom(head, n);
    }
    printf("%s\n", PrintTree(head));
+   printf("depth: %i \n", depth(head, 1));
    return 0;
 }
 
@@ -65,8 +67,22 @@ void InsertRandom(Node *t, Node *n)
 
 }
 
-int depth(Node*t){
-    return 1;
+int depth(Node *t, int d){
+    
+    int l;
+    int r;
+    if(t->left==NULL) {
+        l = d;
+    }
+    else {
+        l = depth(t->left, d+1);
+    }
+    if(t->right==NULL) {
+        r = d;
+    } else {
+        r = depth(t->right, d+1);
+    }
+    return l>r?l:r; // gives max of left and right
 }
 
 char *PrintTree(Node *t)
