@@ -1,0 +1,37 @@
+This extension uses a better algorithm (backtracking)
+and visualizes the results. It imports existing
+helper functions from my previous code
+(eg: print_board_string, create_empty_board).
+
+For visalization, I first utilized the code from 
+https://github.com/csnwc/Exercises-In-C/tree/f3803259aa6a0bfc210d6bf07c8d7e578bde9333/Code/Week5/SDL
+as starter code for understanding SDL.
+
+If the -visualize flag is set, 
+it displays one board every 2 seconds graphically. 
+
+The queen is pixel art using three rectangles.
+
+Users may press any key to exit. 
+
+The algorithm used is recursive backtracking.
+I learned about this technique here: 
+https://www.geeksforgeeks.org/n-queen-problem-backtracking-3/
+however, my solution is adapted to use my existing solutions 
+array rather than returning a boolean.
+
+The algorithm works by starting with an empty board, then 
+checking if it's a solution (this is the base case). If so, 
+it adds it to the solutions array.
+If it's not, I place a queen at the given row and col. I run 
+the function recursively with the next row. This will ultimately
+test if adding a queen to this location can ever result in
+a solution. When I finish all recursions (potentially adding
+several solution boards), I remove the queen
+so that I can test the next set of boards.
+
+As specified in the link, I could have also optimized 
+my is_unique function to be faster, however this was 
+already very fast for 10x10 boards, and I liked
+the usage of my existing code as a library. As Knuth would
+say, premature optimization is the root of all evil!

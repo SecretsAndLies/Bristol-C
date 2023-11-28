@@ -12,10 +12,11 @@ int main(int argc, char* argv[])
     int num_solutions = 0;
     ext_solve(0, &start, solutions, &num_solutions);
     for(int i=0; i<num_solutions; i++){
-        print_board_string(&solutions[i]);
+         print_board_string(&solutions[i]);
     }
+    
     printf("%i solutions\n", num_solutions);
-    if(is_visualize){
+    if(is_visualize && num_solutions){
         draw_boards(solutions, num_solutions);
     }
     return 0;

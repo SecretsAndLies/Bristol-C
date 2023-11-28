@@ -386,6 +386,8 @@ void test_copy_board(void)
     // check that these boards are
     // pointing to a different spot in memory
     assert(&d != &c);
+    assert(&d.grid!=&c.grid);
+    assert(&d.num_queens!=&c.num_queens);
     assert(are_boards_identical(&d, &c));
 }
 
