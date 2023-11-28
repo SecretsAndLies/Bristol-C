@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define STRSIZE 5000
 
@@ -17,6 +18,7 @@ Node *MakeNode(char c);
 void InsertRandom(Node *t, Node *n);
 char *PrintTree(Node *t);
 int depth(Node *t, int d);
+bool is_identical(Node * first, Node * second);
 
 int main(void)
 {
@@ -32,7 +34,54 @@ int main(void)
    }
    printf("%s\n", PrintTree(head));
    printf("depth: %i \n", depth(head, 1));
+
+   char d;
+   Node *head2 = MakeNode('A');
+   Node *e;
+
+   srand(time(NULL));
+   for(d = 'B'; d < 'J'; d++){
+      e = MakeNode(d);
+      InsertRandom(head2, e);
+   }
+   printf("%s\n", PrintTree(head2));
+   printf("depth: %i \n", depth(head2, 1));
+
+   printf("identical: %i \n", is_identical(head,head));
+   printf("non identical: %i \n", is_identical(head,head2));
    return 0;
+}
+
+bool is_identical(Node * first, Node * second)
+{
+
+    if(first->c!=second->c){
+        return false;
+    }
+    // at the end of the tree.
+    bool left;
+    if(first->left==NULL && second->left == NULL){
+        left = true;
+    }
+    else if(first->left == NULL  || second->left == NULL){
+        left = false;
+    }
+    else{
+        left = is_identical(first->left, second->left);
+    }
+    bool right;
+
+    if(first->right == NULL  && second->right == NULL){
+        right = true;
+    }
+    else if(first->right == NULL  || second->right == NULL){
+        right = false;
+    }
+    else{
+        right = is_identical(first->right, second->right);
+    }
+     
+    return left & right; // if either are false, should be false.
 }
 
 Node *MakeNode(char c)
