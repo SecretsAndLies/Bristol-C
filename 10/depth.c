@@ -33,7 +33,7 @@ int main(void)
       InsertRandom(head, n);
    }
    printf("%s\n", PrintTree(head));
-   printf("depth: %i \n", depth(head, 1));
+   printf("depth: %i \n", depth(head, 0));
 
    char d;
    Node *head2 = MakeNode('A');
@@ -45,7 +45,7 @@ int main(void)
       InsertRandom(head2, e);
    }
    printf("%s\n", PrintTree(head2));
-   printf("depth: %i \n", depth(head2, 1));
+   printf("depth: %i \n", depth(head2, 0));
 
    printf("identical: %i \n", is_identical(head,head));
    printf("non identical: %i \n", is_identical(head,head2));
@@ -54,32 +54,19 @@ int main(void)
 
 bool is_identical(Node * first, Node * second)
 {
+    if(first==NULL && second==NULL){
+        return true;
+    }
+    if(first == NULL || second==NULL){
+        return false;
+    }
 
     if(first->c!=second->c){
         return false;
     }
-    // at the end of the tree.
-    bool left;
-    if(first->left==NULL && second->left == NULL){
-        left = true;
-    }
-    else if(first->left == NULL  || second->left == NULL){
-        left = false;
-    }
-    else{
-        left = is_identical(first->left, second->left);
-    }
-    bool right;
 
-    if(first->right == NULL  && second->right == NULL){
-        right = true;
-    }
-    else if(first->right == NULL  || second->right == NULL){
-        right = false;
-    }
-    else{
-        right = is_identical(first->right, second->right);
-    }
+    bool left = is_identical(first->left, second->left);
+    bool right = is_identical(first->right, second->right);
      
     return left & right; // if either are false, should be false.
 }
@@ -118,19 +105,13 @@ void InsertRandom(Node *t, Node *n)
 
 int depth(Node *t, int d){
     
-    int l;
-    int r;
-    if(t->left==NULL) {
-        l = d;
+    if(t==NULL){
+        return d;
     }
-    else {
-        l = depth(t->left, d+1);
-    }
-    if(t->right==NULL) {
-        r = d;
-    } else {
-        r = depth(t->right, d+1);
-    }
+
+    int l = depth(t->left, d+1);
+    int r = depth(t->right, d+1);
+
     return l>r?l:r; // gives max of left and right
 }
 
