@@ -57,6 +57,7 @@ int main(void)
    assert(p);
    assert(*p == 15);
 
+   printf("neils input str %s \n",str);
    assert(bsa_tostring(b, str));
    assert(strcmp(str, "{[0]=0}{}{}{}{[15]=15}{}{[100]=100}")==0);
 

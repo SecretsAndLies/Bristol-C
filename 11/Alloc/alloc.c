@@ -75,6 +75,7 @@ void test_bsa_set(void)
     // test adding another number in the same pos, size shouldn't increase
     bsa_set(b,0,4);
     assert(b->total_size==1);
+    assert(b->row_arr[0].r_size==1);
 
     // test adding a number in a different row and check that in between row is still 0
     bsa_set(b,3,9);
@@ -82,6 +83,9 @@ void test_bsa_set(void)
     assert(b->row_arr[2].int_arr[0].num==9);
     assert(b->row_arr[2].int_arr[0].set==true);
     assert(b->row_arr[1].int_arr==0);
+    assert(b->row_arr[2].r_size==1);
+
+    // TODO test adding more values.
 
     bsa_free(b);
 }
@@ -237,7 +241,7 @@ bool bsa_delete(bsa* b, int indx)
         return false; // int_arr has already been freed.
     }
 
-    if(b->row_arr[row_i].int_arr[col_i].set=false){
+    if(b->row_arr[row_i].int_arr[col_i].set==false){
         return false; // no element to delete - do nothing.
     }
     b->row_arr[row_i].r_size--;
@@ -401,18 +405,80 @@ void test_get_orig_index_from_arr_index(void)
 // Returns stringified version of structure
 // Each row has its elements printed between {}, up to the maximum index.
 // Rows after the maximum index are ignored.
+// todo confirm use of sprintf (snprintf better?)
+// todo rewrite (length)
 bool bsa_tostring(bsa* b, char* str)
 {
-    return false;
+    if(b==NULL){
+        return false;
+    }
+    str[0]='\0';
+    if(b->total_size==0){
+        strcpy(str,"");
+        return true;
+    }
+    // todo, you might want to store max_row and r_len in the struct itself.
+    int max_row = get_max_row_which_contains_a_value(b);
+    for (int r=0; r<=max_row; r++){
+            append_string(str,"{",LISTSTRLEN);
+            if(b->row_arr[r].int_arr && b->row_arr->r_size>0){
+                int count = 0;
+                int r_len = get_length_of_row(r);
+                    for(int c=0; c<r_len; c++){
+                        if(b->row_arr[r].int_arr[c].set){
+                            count++;
+                            int index = get_orig_index_from_arr_index(r,c);
+                            int value = b->row_arr[r].int_arr[c].num;
+                            char temp_string[LISTSTRLEN] = "";
+                            sprintf(temp_string, "[%i]=%i", index, value);
+                            append_string(str, temp_string, LISTSTRLEN);
+                            if((b->row_arr[r].r_size)>count){
+                                append_string(str, " ", LISTSTRLEN);
+                            }
+                        }
+                    }
+                }
+        append_string(str, "}", LISTSTRLEN);
+    }
+    return true;
+}
+
+void append_string(char *destination, const char *source, size_t destSize)
+{
+    if (strlen(destination) + strlen(source) + 1 <= destSize) {
+        strcat(destination, source);
+    } else {
+        on_error("Error, string too long.");
+    }
+}
+
+void test_append_string(void)
+{
+    char str[LISTSTRLEN] = "";
+    append_string(str,"test",LISTSTRLEN);
+    assert(strcmp(str, "test")==0);
+    append_string(str,"2test",LISTSTRLEN);
+    assert(strcmp(str, "test2test")==0);
+    append_string(str,"3test",LISTSTRLEN);
+    assert(strcmp(str, "test2test3test")==0);
 }
 
 void test_bsa_tostring(void)
 {
-    bsa b = bsa_init();
-       assert(bsa_set(b, 0, 0));
-   assert(bsa_set(b, 15, 15));
-
-
+    char str[LISTSTRLEN] = "";
+    bsa * b = bsa_init();
+    assert(bsa_set(b, 0, 0));
+    assert(bsa_tostring(b, str));
+    assert(strcmp(str, "{[0]=0}")==0);
+    assert(bsa_set(b, 1, 1));
+    assert(bsa_tostring(b, str));
+    assert(strcmp(str, "{[0]=0}{[1]=1}")==0);
+    assert(bsa_set(b, 2, 2));
+    assert(bsa_tostring(b, str));
+    assert(strcmp(str, "{[0]=0}{[1]=1 [2]=2}")==0);
+    assert(bsa_set(b, 10, 10));
+    assert(bsa_tostring(b, str));
+    assert(strcmp(str, "{[0]=0}{[1]=1 [2]=2}{}{[10]=10}")==0);
 }
 
 // Clears up all space used
@@ -420,11 +486,20 @@ bool bsa_free(bsa* b){
     if(b==NULL){
         return false;
     }
-    // TODO also free all the inner structures.
+    for(int r=0; r<BSA_ROWS; r++){
+        if(b->row_arr[r].int_arr){
+            free(b->row_arr[r].int_arr);
+        }
+    }
+
     free(b);
     return true;
 }
 
+
+void test_bsa_free(void){
+
+}
 // Allow a user-defined function to be applied to each (valid) value 
 // in the array. The user defined 'func' is passed a pointer to an int,
 // and maintains an accumulator of the result where required.
@@ -443,6 +518,9 @@ void test(void){
     test_bsa_delete();
     test_get_max_row_which_contains_a_value();
     test_bsa_maxindex();
+    test_append_string();
+    test_bsa_tostring();
+
 }
 
 
@@ -460,3 +538,4 @@ void on_error(const char* s)
    fprintf(stderr, "%s\n", s);
    exit(EXIT_FAILURE);
 }
+

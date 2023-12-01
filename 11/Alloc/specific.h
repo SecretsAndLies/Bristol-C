@@ -1,6 +1,8 @@
 #pragma once
 #include "../bsa.h"
 
+#define LISTSTRLEN 1000
+
 typedef struct int_s {
     int num; // the number.
     bool set; // if this element is set or not.
@@ -33,3 +35,5 @@ void test_bsa_set(void);
 void test_bsa_get(void);
 void test_bsa_delete(void);
 void test_bsa_maxindex(void);
+void test_bsa_tostring(void);
+void append_string(char *destination, const char *source, size_t destSize);
