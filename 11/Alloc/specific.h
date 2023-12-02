@@ -37,3 +37,6 @@ void test_bsa_delete(void);
 void test_bsa_maxindex(void);
 void test_bsa_tostring(void);
 void append_string(char *destination, const char *source, size_t destSize);
+void test_add(void);
+void add(int *p, int *n);
+

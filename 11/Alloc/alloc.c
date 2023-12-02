@@ -17,6 +17,9 @@ bsa* bsa_init(void)
 {
     bsa * b = ncalloc(1,sizeof(bsa));
     b->total_size=0;
+    for (int i=0; i<BSA_ROWS; i++){
+        b->row_arr[i].int_arr=NULL;
+    }
 
     return b;
 }
@@ -27,7 +30,7 @@ void test_bsa_init(void)
     assert(b);
     assert(b->total_size==0);
     for (int i=0; i<BSA_ROWS; i++){
-        assert(b->row_arr[i].int_arr==0);
+        assert(b->row_arr[i].int_arr==NULL);
         assert(b->row_arr[i].r_size==0);
     }
     bsa_free(b);
@@ -237,12 +240,14 @@ bool bsa_delete(bsa* b, int indx)
     int row_i = get_row_from_index(indx);
     int col_i = get_col_within_row(row_i,indx);
 
-    if(b->row_arr[row_i].int_arr==0){
-        return false; // int_arr has already been freed.
+    if(b->row_arr[row_i].r_size==0){
+        // int_arr has already been freed.
+        return false; 
     }
 
     if(b->row_arr[row_i].int_arr[col_i].set==false){
-        return false; // no element to delete - do nothing.
+        // no element to delete - do nothing.
+        return false; 
     }
     b->row_arr[row_i].r_size--;
     b->total_size--;
@@ -250,7 +255,7 @@ bool bsa_delete(bsa* b, int indx)
     // if this was the last elemnt, free int_arr
     if(b->row_arr[row_i].r_size==0){
         free(b->row_arr[row_i].int_arr);
-        b->row_arr[row_i].int_arr=0;
+        b->row_arr[row_i].int_arr=NULL;
     }
     return true;
 
@@ -268,7 +273,7 @@ void test_bsa_delete(void)
     assert(b->total_size==5);
     bsa_delete(b,0);
     assert(b->total_size==4);
-    assert(b->row_arr[0].int_arr==0);
+    assert(b->row_arr[0].int_arr==NULL);
     // check that deleting the same element twice doesn't decrement size
     bsa_delete(b,0);
     assert(b->total_size==4);
@@ -280,7 +285,7 @@ void test_bsa_delete(void)
 
     // delete second element, row should now be gone.
     bsa_delete(b,2);
-    assert(b->row_arr[1].int_arr==0);
+    assert(b->row_arr[1].int_arr==NULL);
     assert(b->total_size==2);
 
     bsa_free(b);
@@ -421,7 +426,7 @@ bool bsa_tostring(bsa* b, char* str)
     int max_row = get_max_row_which_contains_a_value(b);
     for (int r=0; r<=max_row; r++){
             append_string(str,"{",LISTSTRLEN);
-            if(b->row_arr[r].int_arr && b->row_arr->r_size>0){
+            if(b->row_arr[r].int_arr && b->row_arr[r].r_size>0){
                 int count = 0;
                 int r_len = get_length_of_row(r);
                     for(int c=0; c<r_len; c++){
@@ -479,9 +484,14 @@ void test_bsa_tostring(void)
     assert(bsa_set(b, 10, 10));
     assert(bsa_tostring(b, str));
     assert(strcmp(str, "{[0]=0}{[1]=1 [2]=2}{}{[10]=10}")==0);
+    bsa_free(b);
 }
 
+// TODO test all functions with a blank value in the first row.
+
 // Clears up all space used
+// no tests exist for this function, memory leaks are 
+// detected using valgrind and sanitizer.
 bool bsa_free(bsa* b){
     if(b==NULL){
         return false;
@@ -489,6 +499,7 @@ bool bsa_free(bsa* b){
     for(int r=0; r<BSA_ROWS; r++){
         if(b->row_arr[r].int_arr){
             free(b->row_arr[r].int_arr);
+            b->row_arr[r].int_arr=NULL;
         }
     }
 
@@ -497,15 +508,33 @@ bool bsa_free(bsa* b){
 }
 
 
-void test_bsa_free(void){
-
-}
 // Allow a user-defined function to be applied to each (valid) value 
 // in the array. The user defined 'func' is passed a pointer to an int,
 // and maintains an accumulator of the result where required.
-void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc){
-
+void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
+{
+    // TODO: from Neils examples, he seems to be using this as a flag.
+    // int acc_copy = *acc;
+    // *acc = 0;
+    int max_row = get_max_row_which_contains_a_value(b);
+    for (int r=0; r<=max_row; r++){
+            if(b->row_arr[r].int_arr && b->row_arr[r].r_size>0){
+                int r_len = get_length_of_row(r);
+                    for(int c=0; c<r_len; c++){
+                        if(b->row_arr[r].int_arr[c].set){
+                            func(&(b->row_arr[r].int_arr[c].num), acc);
+                        }
+                    }
+                }
+            }
 }
+
+void test_bsa_foreach(void)
+{
+    // retest neils funcs with way more complicated examples.
+    // eg: fill the entire array and then do the for each on it.
+}
+
 
 void test(void){
     test_bsa_init();
@@ -520,7 +549,7 @@ void test(void){
     test_bsa_maxindex();
     test_append_string();
     test_bsa_tostring();
-
+    test_bsa_foreach();
 }
 
 
