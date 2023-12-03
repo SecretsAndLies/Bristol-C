@@ -2,7 +2,8 @@
 
 
 // Create an empty BSA
-bsa * bsa_init(void){
+bsa * bsa_init(void)
+{
     bsa * b = acalloc(1, sizeof(bsa));
     return b;
 
@@ -24,14 +25,15 @@ void on_error(const char* s)
 }
 
 // Set element at index indx with value d i.e. b[i] = d;
-bool bsa_set(bsa* b, int indx, int d){
+bool bsa_set(bsa* b, int indx, int d)
+{
     if(b==NULL){
         return false;
     }
     int bucket = hash(indx);
 
     // if that node already exists overwrite it.
-    node *curr = b->buckets[bucket];
+        node *curr = b->buckets[bucket];
         while (curr) {
             if (curr->index == indx) {
                 curr->num = d;
@@ -51,7 +53,6 @@ bool bsa_set(bsa* b, int indx, int d){
     return true;
 }
 
-// TODO think of an improved hash function.
 int hash(int index) 
 {
     return index % SIZE;
@@ -78,7 +79,8 @@ int* bsa_get(bsa* b, int indx)
 }
 
 // Delete element at index indx 
-bool bsa_delete(bsa* b, int indx){
+bool bsa_delete(bsa* b, int indx)
+{
     if(b==NULL){
         return false;
     }
@@ -111,7 +113,8 @@ bool bsa_delete(bsa* b, int indx){
 
 // Returns maximum index written to so far or
 // -1 if no cells have been written to yet
-int bsa_maxindex(bsa* b){
+int bsa_maxindex(bsa* b)
+{
     if(b==NULL){
         return -1;
     }
@@ -131,7 +134,8 @@ int bsa_maxindex(bsa* b){
 
 
 // Clears up all space used
-bool bsa_free(bsa* b){
+bool bsa_free(bsa* b)
+{
     if(b==NULL){
         return false;
     }
@@ -151,15 +155,15 @@ bool bsa_free(bsa* b){
 // Allow a user-defined function to be applied to each (valid) value 
 // in the array. The user defined 'func' is passed a pointer to an int,
 // and maintains an accumulator of the result where required.
-void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc){
+void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
+{
     if(b==NULL){
-        return false;
+        return;
     }
     for (int i = 0; i < SIZE; i++) {
         node *curr = b->buckets[i];
         while (curr) {
             func(&(curr->num), acc);
-            node *temp = curr;
             curr = curr->next;
         }
     }
@@ -167,7 +171,8 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc){
 
 // TODO: bash script that compares the output of ext and reg.
 
-void test(void){
+void test(void)
+{
 
     assert(hash(0)==0);
     assert(hash(2)==2);
@@ -251,40 +256,16 @@ void test(void){
 
     bsa_free(b);
 
-    // // foreach - use it to compute product of numbers, and also to double each one
-    // b = bsa_init();
-    // bsa_set(b, 1, 1);
-    // bsa_set(b, 2, 2);
-    // bsa_set(b, 3, 3);
-    // int acc = 1;
-    // bsa_foreach(times, b, &acc);
-    // // printf("acc %i \n", acc);
-    // assert(acc==6);
-    // // Double each numbers in array
-    // assert(bsa_tostring(b, str));
-    // assert(strcmp(str, "{}{[1]=1 [2]=2}{[3]=3}")==0);
-    // bsa_foreach(twice, b, &acc);
-    // assert(bsa_tostring(b, str));
-    // assert(strcmp(str, "{}{[1]=2 [2]=4}{[3]=6}")==0);
-    // bsa_free(b);
+    // todo basic for each check
 
-}
+    
 
-void times(int* p, int* n)
-{
-   *n = *n * *p;
-}
-
-void twice(int* p, int* n)
-{
-   // Need to use n to switch off warnings :-(
-   *n = 0;
-   *p = *p * 2;
 }
    
 
 // ignore this, it's just to switch of warnings.
-bool bsa_tostring(bsa* b, char* str){
+bool bsa_tostring(bsa* b, char* str)
+{
     if(b){
         *str = '\0';
         return true;

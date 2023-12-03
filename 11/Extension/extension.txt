@@ -1,29 +1,34 @@
-For my extension, I imagined that a client gave me the bsa.h
-structure and said that it must support all those operations
-(except tostring) and provided fibmemo.c
-as the programs is called very often.
+todo get number of hash nodes for some progs.
+todo: run scripts built to test the memory usage (eg: writing )
 
-The client wants that program specifically to run fast, 
-and also stressed that the old approach (alloc) was
-giving them storage issues when running those programs.
-
-I looked through them and noticed that bsa_maxindex and bsa_foreach 
-was not called in their code. After confirming with the
-client that they rarely use these functions in their code, 
 I decided on a hashing implementation that is O(N) for storage. 
-In speed, the approach is O(1) for the get, set and delete 
-operations (for sparse data sets) but O(N) for the bsa_maxindex
-and bsa_foreach is O(N+M) where N is the intial size of the hash table.
+In speed, the approach is O(1 + the number of elements that are in that hash)
+which will depend on indexes that the data writes to.
+Crutially, the new data structure does not gaurentee order
+this is demonstrated in the output of isfactorial, where the output
+is unordered.
 
-Since I use a linked list for collisions, the theoretical max
-is 
+My hash function is really simple 
+- just a modulus of the space in the array. 
+The initial size of the table is 15,319 
+which I decided on because it was a prime number and allowed
+sieve and fibmemo to run without any collisions 
+ie: O(1) time for insertion and deletion.
 
+To time the scripts I created a bash script that ran
+each 20 times, and returned the average user time 
+(to 6 decimal places). 
+- fibmemo ran at the same speed in both (less than 1% difference)
+- sieve was 57% faster in the extension
+- isfactorial was 8% faster in the extension, but doesn't
+preserve the order when printed.
 
-- initial size of the table is N
-- Run benchmarks. How much storage used on client programs.
-- 
-
-to do - compare how much slower this new max index func is.
+I then used valgrind with --tool=massif 
+to determine how much memory was used at peak.
+For all three programs, the extension caused 
+a 99.99% decrease in peak 
+memory usage, from 4.3GB to less than 130KB
+I believe that this is 0(N) memory uage.
 
 Sources: I referenced the CS50 implementation of a hash table.
 https://youtu.be/nvzVHwrrub0

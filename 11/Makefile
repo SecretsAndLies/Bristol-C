@@ -21,24 +21,48 @@ isfactorial: bsa.h Alloc/specific.h Alloc/alloc.c isfactorial.c
 sieve_s: bsa.h Alloc/specific.h Alloc/alloc.c sieve.c
 	$(CC) sieve.c Alloc/alloc.c -o sieve_s -I./Alloc $(PRODUCTION)
 
+#valgrind versions. TODO remove -g
+fibmemo_v: bsa.h Alloc/specific.h Alloc/alloc.c fibmemo.c
+	$(CC) -g fibmemo.c Alloc/alloc.c -o fibmemo_v -I./Alloc $(VALGRIND)
+
+isfactorial_v: bsa.h Alloc/specific.h Alloc/alloc.c isfactorial.c
+	$(CC) -g isfactorial.c Alloc/alloc.c -o isfactorial_v -I./Alloc $(VALGRIND)
+
+sieve_v: bsa.h Alloc/specific.h Alloc/alloc.c sieve.c
+	$(CC) -g sieve.c Alloc/alloc.c -o sieve_v -I./Alloc $(VALGRIND)
+
 ## Only if you do an extension. Uncomment in all, extfibmemo_s and run.
+extfibmemo: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
+	$(CC) fibmemo.c Extension/extension.c -o extfibmemo -I./Extension $(PRODUCTION)
+
 extfibmemo_s: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
 	$(CC) fibmemo.c Extension/extension.c -o extfibmemo_s -I./Extension $(SANITIZE)
 
 extisfactorial: bsa.h Extension/specific.h Extension/extension.c isfactorial.c
 	$(CC) isfactorial.c Extension/extension.c -o extisfactorial -I./Extension $(PRODUCTION)
 
-extsieve_s: bsa.h Extension/specific.h Extension/extension.c sieve.c
-	$(CC) sieve.c Extension/extension.c -o extsieve_s -I./Extension $(PRODUCTION)
+extsieve: bsa.h Extension/specific.h Extension/extension.c sieve.c
+	$(CC) sieve.c Extension/extension.c -o extsieve -I./Extension $(PRODUCTION)
 
-run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo_s extisfactorial extsieve_s
+extfibmemo_v: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
+	$(CC) -g fibmemo.c Extension/extension.c -o extfibmemo_v -I./Extension $(VALGRIND)
+
+extisfactorial_v: bsa.h Extension/specific.h Extension/extension.c isfactorial.c
+	$(CC) -g isfactorial.c Extension/extension.c -o extisfactorial_v -I./Extension $(VALGRIND)
+
+extsieve_v: bsa.h Extension/specific.h Extension/extension.c sieve.c
+	$(CC) -g sieve.c Extension/extension.c -o extsieve_v -I./Extension $(VALGRIND)
+
+
+run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s extisfactorial extsieve_s
 	./driverbsa_s
 	./isfactorial
 	./fibmemo
 	./sieve_s
+	./extfibmemo
 	./extfibmemo_s
 	./extisfactorial
-	./extsieve_s
+	./extsieve
 
 clean:
-	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s
+	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s extfibmemo_v extisfactorial_v extsieve_v isfactorial_v sieve_v fibmemo_v massif.* 
