@@ -1,35 +1,36 @@
-todo get number of hash nodes for some progs.
-todo: run scripts built to test the memory usage (eg: writing )
+TODO: Get the number of hash nodes for some programs.
+TODO: Run scripts built to test memory usage
+(e.g., writing 10,000 numbers, then 100,000 and observing how memory usage changes).
 
-I decided on a hashing implementation that is O(N) for storage. 
-In speed, the approach is O(1 + the number of elements that are in that hash)
-which will depend on indexes that the data writes to.
-Crutially, the new data structure does not gaurentee order
-this is demonstrated in the output of isfactorial, where the output
-is unordered.
+I decided on a hashing implementation that is O(N) for storage
+and slightly faster in speed.
 
-My hash function is really simple 
-- just a modulus of the space in the array. 
-The initial size of the table is 15,319 
-which I decided on because it was a prime number and allowed
-sieve and fibmemo to run without any collisions 
-ie: O(1) time for insertion and deletion.
+In terms of speed, the approach is O(1 + the number of elements in that bucket),
+which will depend on the indexes to which the data writes.
+Crucially, the new data structure does not guarantee order.
+This is demonstrated in the output of isfactorial, which is
+unordered.
 
-To time the scripts I created a bash script that ran
-each 20 times, and returned the average user time 
-(to 6 decimal places). 
-- fibmemo ran at the same speed in both (less than 1% difference)
-- sieve was 57% faster in the extension
-- isfactorial was 8% faster in the extension, but doesn't
+My hash function is really simple
+
+just a modulus of the space in the array.
+The initial size of the table is 15,319,
+which I chose because it is a prime number, helping
+to reduce collisions.
+To time the scripts, I created a bash script that ran
+each program 20 times and returned the average user time.
+
+fibmemo ran at the same speed in both (less than 1% difference).
+sieve was 57% faster in the extension.
+isfactorial was 8% faster in the extension, but doesn't
 preserve the order when printed.
+I then used Valgrind with --tool=massif
+to determine the peak memory usage.
+For all three programs, the extension caused
+a 99.99% decrease in peak
+memory usage, from 4.3GB to less than 130KB.
 
-I then used valgrind with --tool=massif 
-to determine how much memory was used at peak.
-For all three programs, the extension caused 
-a 99.99% decrease in peak 
-memory usage, from 4.3GB to less than 130KB
-I believe that this is 0(N) memory uage.
+Sources: I referenced the CS50 implementation of a hash table 
+(https://youtu.be/nvzVHwrrub0)
+as well as the in-class implementation of a linked list.
 
-Sources: I referenced the CS50 implementation of a hash table.
-https://youtu.be/nvzVHwrrub0
-as well as the in class implementation of a linked list.
