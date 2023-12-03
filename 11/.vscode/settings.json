@@ -2,6 +2,8 @@
     "files.associations": {
         "algorithm": "c",
         "random": "c",
-        "functional": "c"
+        "functional": "c",
+        "string.h": "c",
+        "stdbool.h": "c"
     }
 }

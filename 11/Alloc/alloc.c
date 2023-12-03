@@ -7,7 +7,7 @@
     // 3 size 8: 7 8 9 10 11 12 13 14
     // 4 size 16: 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
     // 5 size 32: 31 ...
-    // ...    // test_get_max_row_which_contains_a_value();
+    // ...    // test_get_max_filled_row();
 
     // 29 size 536870912
 
@@ -15,10 +15,9 @@
 // TODO ask neil how he feels about explicitly setting values.
 bsa* bsa_init(void)
 {
-    bsa * b = ncalloc(1,sizeof(bsa));
-    b->total_size=0;
+    bsa * b = acalloc(1,sizeof(bsa));
     for (int i=0; i<BSA_ROWS; i++){
-        b->row_arr[i].int_arr=NULL;
+        b->row_arr[i].r_len=get_length_of_row(i);
     }
 
     return b;
@@ -33,9 +32,19 @@ void test_bsa_init(void)
         assert(b->row_arr[i].int_arr==NULL);
         assert(b->row_arr[i].r_size==0);
     }
+    assert(b->row_arr[0].r_len==1);
+    assert(b->row_arr[1].r_len==2);
+    assert(b->row_arr[2].r_len==4);
+    assert(b->row_arr[3].r_len==8);
+    assert(b->row_arr[4].r_len==16);
+    assert(b->row_arr[5].r_len==32);
+    assert(b->row_arr[6].r_len==64);
+    assert(b->row_arr[7].r_len==128);
+    assert(b->row_arr[8].r_len==256);
+    assert(b->row_arr[29].r_len==536870912);
+
     bsa_free(b);
 }
-
 
 // Set element at index indx with value d i.e. b[i] = d;
 // May require an allocation if it's the first element in that row
@@ -44,23 +53,30 @@ bool bsa_set(bsa* b, int indx, int d)
     if(b==NULL){
         return false;
     }
-    int row_index = get_row_from_index(indx);
 
-    if(b->row_arr[row_index].r_size == 0){
-        int length = get_length_of_row(row_index);
-        b->row_arr[row_index].int_arr = ncalloc(length,sizeof(int_s));
+    if(is_invalid_index(indx)){
+        return false;
+    }
+
+    int row_i = get_row_from_index(indx);
+
+    if(b->row_arr[row_i].r_size == 0){
+        int len =  b->row_arr[row_i].r_len;
+        int size = sizeof(int_s);
+        b->row_arr[row_i].int_arr = acalloc(len,size);
     }
 
     // increment the counter only if the existing value isn't set.
-    int col_index = get_col_within_row(row_index, indx);
-    if(b->row_arr[row_index].int_arr[col_index].set==false){
-        b->row_arr[row_index].r_size++;
+    int col_i = get_col_within_row(row_i, indx);
+    bool num_set = b->row_arr[row_i].int_arr[col_i].set;
+    if(!num_set){
+        b->row_arr[row_i].r_size++;
         b->total_size++;
     }
 
     // finally, we actually set the int s struct.
-    b->row_arr[row_index].int_arr[col_index].num = d;
-    b->row_arr[row_index].int_arr[col_index].set = true;
+    b->row_arr[row_i].int_arr[col_i].num = d;
+    b->row_arr[row_i].int_arr[col_i].set = true;
     
     return true;
 }
@@ -88,14 +104,25 @@ void test_bsa_set(void)
     assert(b->row_arr[1].int_arr==0);
     assert(b->row_arr[2].r_size==1);
 
-    // TODO test adding more values.
+    // test adding values (overwriting existing)
+    for(int i=0; i<10000; i++)
+    {
+        bsa_set(b,i,i);
+    }    
+    assert(b->total_size==10000);
+    
+    assert(bsa_set(b, MAX_INDEX,19));
+    assert(*bsa_get(b, MAX_INDEX)==19);
+
+    assert(!bsa_set(b, MAX_INDEX+1,19));
 
     bsa_free(b);
+
 }
 
 int get_length_of_row(int row)
 {
-    // 2 ^ row
+    // same as 2 ^ row
     return 1<<row;
 }
 
@@ -112,8 +139,10 @@ void test_get_length_of_row(void)
 
 int get_col_within_row(int row, int index)
 {
-    int n = index+1; // avoids edge cases and zero issues.
-    return n-(1<<row); // this is the same as row^2
+    // avoids edge cases and zero issues
+    int n = index+1;
+    // this is the same as row^2
+    return n-(1<<row); 
 }
 
 void test_get_col_within_row(void)
@@ -158,13 +187,16 @@ void test_get_col_within_row(void)
 
 int get_row_from_index(int indx)
 {
+    // TODO delete
     /*
-    Make a copy of index called n and increase by one (to cover the edge cases)
+    Make a copy of index called n and increase by one
+    (to cover the edge cases)
     So for example, 0011 would become 0100
     then we bit shift left until only 1 is left
-    and return that number. So 10 returns 3.
+    and return that number. So 10 returns 3 because we go
+    0100 -> 0010 -> 0001
+    which is 3 steps.
     */
-
     int n = indx+1;
     int row = 0;
     while (n>1){
@@ -189,11 +221,35 @@ void test_get_row_from_index(void)
     assert(get_row_from_index(3)==2);
 }
 
+void test_is_invalid_index(void)
+{
+    assert(is_invalid_index(5)==false);
+    assert(is_invalid_index(0)==false);
+    assert(is_invalid_index(-1));
+    assert(is_invalid_index(MAX_INDEX-1)==false);
+    assert(is_invalid_index(MAX_INDEX)==false);
+    assert(is_invalid_index(MAX_INDEX+1));
+}
+
+bool is_invalid_index(int indx)
+{
+    if(indx>MAX_INDEX){
+        return true;
+    }
+    if(indx<0){
+        return true;
+    }
+    return false;
+}
+
 // Return pointer to data at element b[i]
 // or NULL if element is unset, or part of a row that hasn't been allocated.
 int* bsa_get(bsa* b, int indx)
 {
     if(b==NULL){
+        return NULL;
+    }
+    if(is_invalid_index(indx)){
         return NULL;
     }
     int row_i = get_row_from_index(indx);
@@ -228,6 +284,17 @@ void test_bsa_get(void)
     assert(*p=14);
     bsa_free(b);
 
+    bsa * c = bsa_init();
+
+    for(int i=0; i<10000; i++)
+    {
+        bsa_set(c,i,i-2);
+    }  
+    for(int i=0; i<10000; i++)
+    {
+        assert(*bsa_get(c,i)==i-2);
+    }  
+    bsa_free(c);
 }
 
 // Delete element at index indx - forces a shrink
@@ -236,6 +303,9 @@ bool bsa_delete(bsa* b, int indx)
 {
     if(b==NULL){
         return false;
+    }
+    if(is_invalid_index(indx)){
+        return NULL;
     }
     int row_i = get_row_from_index(indx);
     int col_i = get_col_within_row(row_i,indx);
@@ -293,7 +363,7 @@ void test_bsa_delete(void)
 
 // Returns maximum index written to so far or
 // -1 if no cells have been written to yet
-    // TODO this could be optimized adding space. (Sam's approach)
+// TODO optimize?
 int bsa_maxindex(bsa* b)
 {
     if(b==NULL){
@@ -303,9 +373,9 @@ int bsa_maxindex(bsa* b)
         return -1;
     }
 
-    int max_row = get_max_row_which_contains_a_value(b);
+    int max_row = get_max_filled_row(b);
 
-    int row_len = get_length_of_row(max_row);
+    int row_len = b->row_arr[max_row].r_len;
     int max_index = 0;
     for (int i=0; i<row_len; i++)
     {
@@ -320,8 +390,7 @@ int bsa_maxindex(bsa* b)
     return orig_index;
 }
 
-// todo rename
-int get_max_row_which_contains_a_value(bsa* b)
+int get_max_filled_row(bsa* b)
 {
     int max_row = 0;
     for (int i=0; i<BSA_ROWS; i++)
@@ -333,36 +402,53 @@ int get_max_row_which_contains_a_value(bsa* b)
     return max_row;
 }
 
-// TODO write
-void test_get_max_row_which_contains_a_value(void)
+void test_get_max_filled_row(void)
 {
+    bsa* b = bsa_init();
+
+    bsa_set(b, 0, 0);
+    assert(get_max_filled_row(b) == 0);
+    bsa_set(b, 1, 10);
+    assert(get_max_filled_row(b) == 1);
+    bsa_set(b, 2, 10);
+    assert(get_max_filled_row(b) == 1);
+    bsa_set(b, 3, 10);
+    assert(get_max_filled_row(b) == 2);
+    bsa_set(b, 4, 10);
+    assert(get_max_filled_row(b) == 2);
+    bsa_delete(b, 3);
+    assert(get_max_filled_row(b) == 2);
+    bsa_delete(b, 4);
+    assert(get_max_filled_row(b) == 1);
+
+    bsa_free(b);
 
 }
 
 void test_bsa_maxindex(void)
 {
-   bsa * b = bsa_init();
-   bsa_set(b,0,0);
-   assert(bsa_maxindex(b)==0);
-   bsa_set(b,1,10);
-   assert(bsa_maxindex(b)==1);
-   bsa_set(b,2,10);
-   assert(bsa_maxindex(b)==2);
-   bsa_set(b,3,10);
-   assert(bsa_maxindex(b)==3);
-   bsa_set(b,4,10);
-   assert(bsa_maxindex(b)==4);
+    bsa * b = bsa_init();
+    bsa_set(b,0,0);
+    assert(bsa_maxindex(b)==0);
+    bsa_set(b,1,10);
+    assert(bsa_maxindex(b)==1);
+    bsa_set(b,2,10);
+    assert(bsa_maxindex(b)==2);
+    bsa_set(b,3,10);
+    assert(bsa_maxindex(b)==3);
+    bsa_set(b,4,10);
+    assert(bsa_maxindex(b)==4);
 
-   bsa_delete(b,0);
-   assert(bsa_maxindex(b)==4);
-   bsa_delete(b,3);
-   assert(bsa_maxindex(b)==4);
-   bsa_delete(b,4);
-   assert(bsa_maxindex(b)==2);
+    bsa_delete(b,0);
+    assert(bsa_maxindex(b)==4);
+    bsa_delete(b,3);
+    assert(bsa_maxindex(b)==4);
+    bsa_delete(b,4);
+    assert(bsa_maxindex(b)==2);
 
-   bsa_delete(b,4);
+    bsa_delete(b,4);
 
-   bsa_free(b);
+    bsa_free(b);
 
 }
 
@@ -422,36 +508,41 @@ bool bsa_tostring(bsa* b, char* str)
         strcpy(str,"");
         return true;
     }
-    // todo, you might want to store max_row and r_len in the struct itself.
-    int max_row = get_max_row_which_contains_a_value(b);
+    // todo, you might want to store max_row in the struct itself.
+    int max_row = get_max_filled_row(b);
     for (int r=0; r<=max_row; r++){
-            append_string(str,"{",LISTSTRLEN);
-            if(b->row_arr[r].int_arr && b->row_arr[r].r_size>0){
-                int count = 0;
-                int r_len = get_length_of_row(r);
-                    for(int c=0; c<r_len; c++){
-                        if(b->row_arr[r].int_arr[c].set){
-                            count++;
-                            int index = get_orig_index_from_arr_index(r,c);
-                            int value = b->row_arr[r].int_arr[c].num;
-                            char temp_string[LISTSTRLEN] = "";
-                            sprintf(temp_string, "[%i]=%i", index, value);
-                            append_string(str, temp_string, LISTSTRLEN);
-                            if((b->row_arr[r].r_size)>count){
-                                append_string(str, " ", LISTSTRLEN);
-                            }
-                        }
-                    }
-                }
-        append_string(str, "}", LISTSTRLEN);
+        build_row_string(str, r, b);
     }
     return true;
 }
 
-void append_string(char *destination, const char *source, size_t destSize)
+void build_row_string(char *str, int r, bsa * b)
 {
-    if (strlen(destination) + strlen(source) + 1 <= destSize) {
-        strcat(destination, source);
+    append_string(str,"{",LISTSTRLEN);
+    if(b->row_arr[r].int_arr && b->row_arr[r].r_size>0){
+        int count = 0;
+        int r_len = b->row_arr[r].r_len;
+            for(int c=0; c<r_len; c++){
+                if(b->row_arr[r].int_arr[c].set){
+                    count++;
+                    int index = get_orig_index_from_arr_index(r,c);
+                    int value = b->row_arr[r].int_arr[c].num;
+                    char temp_string[LISTSTRLEN] = "";
+                    sprintf(temp_string, "[%i]=%i", index, value);
+                    append_string(str, temp_string, LISTSTRLEN);
+                    if((b->row_arr[r].r_size)>count){
+                        append_string(str, " ", LISTSTRLEN);
+                    }
+                }
+            }
+        }
+    append_string(str, "}", LISTSTRLEN);
+}
+
+void append_string(char *dest, const char *source, size_t destSize)
+{
+    if (strlen(dest) + strlen(source) + 1 <= destSize) {
+        strcat(dest, source);
     } else {
         on_error("Error, string too long.");
     }
@@ -516,10 +607,10 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
     // TODO: from Neils examples, he seems to be using this as a flag.
     // int acc_copy = *acc;
     // *acc = 0;
-    int max_row = get_max_row_which_contains_a_value(b);
+    int max_row = get_max_filled_row(b);
     for (int r=0; r<=max_row; r++){
             if(b->row_arr[r].int_arr && b->row_arr[r].r_size>0){
-                int r_len = get_length_of_row(r);
+                int r_len = b->row_arr[r].r_len;
                     for(int c=0; c<r_len; c++){
                         if(b->row_arr[r].int_arr[c].set){
                             func(&(b->row_arr[r].int_arr[c].num), acc);
@@ -529,14 +620,39 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
             }
 }
 
+// todo WRITE
 void test_bsa_foreach(void)
 {
-    // retest neils funcs with way more complicated examples.
-    // eg: fill the entire array and then do the for each on it.
+    bsa * b = bsa_init();
+    bsa_set(b, 1, 1);
+    bsa_set(b, 2, 2);
+    bsa_set(b, 3, 3);
+    bsa_set(b, 35, 35);
+    bsa_set(b, 36, 36);
+    bsa_set(b, 37, 37);
+    bsa_set(b, 38, 38);
+    char str[LISTSTRLEN] = "";
+    bsa_tostring(b,str);
+    assert(strcmp(str, "{}{[1]=1 [2]=2}{[3]=3}{}{}{[35]=35 [36]=36 [37]=37 [38]=38}")==0);
+    // not used but required for function header.
+    int acc = 0; 
+    bsa_foreach(add, b, &acc);
+    bsa_tostring(b,str);
+    assert(strcmp(str, "{}{[1]=2 [2]=3}{[3]=4}{}{}{[35]=36 [36]=37 [37]=38 [38]=39}")==0);
+
+    bsa_free(b);
+
 }
 
+void add(int* p, int* n)
+{
+   // Need to use n to switch off warnings :-(
+   *n = 0;
+   *p = *p + 1;
+}
 
 void test(void){
+    test_is_invalid_index();
     test_bsa_init();
     test_get_row_from_index();
     test_get_col_within_row();
@@ -545,7 +661,7 @@ void test(void){
     test_bsa_set();
     test_bsa_get();
     test_bsa_delete();
-    test_get_max_row_which_contains_a_value();
+    test_get_max_filled_row();
     test_bsa_maxindex();
     test_append_string();
     test_bsa_tostring();
@@ -553,7 +669,7 @@ void test(void){
 }
 
 
-void* ncalloc(int n, size_t size)
+void* acalloc(int n, size_t size)
 {
    void* v = calloc(n, size);
    if(v==NULL){
