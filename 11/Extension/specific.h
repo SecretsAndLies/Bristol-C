@@ -1,18 +1,22 @@
 #include "../bsa.h"
 
-#define INITIAL_SIZE 8
-#define RESIZE_FACTOR 2
+// decent sized prime
+#define SIZE 15319
+#define LISTSTRLEN 1000
+#define MAX_IN_LL 1000
 
-typedef struct int_s {
-    int num; 
-    bool set;
-} int_s;
+typedef struct node {
+    int index;
+    int num;
+    struct node *next;
+} node;
 
 struct bsa {
-    int_s *array;
-    size_t size;
-    size_t capacity;
+    node *buckets[SIZE];  
 };
 
 void* acalloc(int n, size_t size);
 void on_error(const char* s);
+int hash(int index);
+
+

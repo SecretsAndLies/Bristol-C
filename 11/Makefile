@@ -25,12 +25,20 @@ sieve_s: bsa.h Alloc/specific.h Alloc/alloc.c sieve.c
 extfibmemo_s: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
 	$(CC) fibmemo.c Extension/extension.c -o extfibmemo_s -I./Extension $(SANITIZE)
 
-run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo_s
+extisfactorial: bsa.h Extension/specific.h Extension/extension.c isfactorial.c
+	$(CC) isfactorial.c Extension/extension.c -o extisfactorial -I./Extension $(PRODUCTION)
+
+extsieve_s: bsa.h Extension/specific.h Extension/extension.c sieve.c
+	$(CC) sieve.c Extension/extension.c -o extsieve_s -I./Extension $(PRODUCTION)
+
+run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo_s extisfactorial extsieve_s
 	./driverbsa_s
 	./isfactorial
 	./fibmemo
 	./sieve_s
 	./extfibmemo_s
+	./extisfactorial
+	./extsieve_s
 
 clean:
 	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s

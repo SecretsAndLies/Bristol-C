@@ -604,9 +604,6 @@ bool bsa_free(bsa* b){
 // and maintains an accumulator of the result where required.
 void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 {
-    // TODO: from Neils examples, he seems to be using this as a flag.
-    // int acc_copy = *acc;
-    // *acc = 0;
     int max_row = get_max_filled_row(b);
     for (int r=0; r<=max_row; r++){
             if(b->row_arr[r].int_arr && b->row_arr[r].r_size>0){
