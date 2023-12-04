@@ -4,50 +4,49 @@
 // Create an empty BSA
 bsa * bsa_init(void)
 {
-    bsa * b = acalloc(1, sizeof(bsa));
+    bsa* b = acalloc(1, sizeof(bsa));
     return b;
-
 }
 
 void* acalloc(int n, size_t size)
 {
-   void* v = calloc(n, size);
-   if(v==NULL){
-      on_error("Cannot calloc() space");
-   }
-   return v;
+    void* v = calloc(n, size);
+    if (v == NULL) {
+        on_error("Cannot calloc() space");
+    }
+    return v;
 }
 
 void on_error(const char* s)
 {
-   fprintf(stderr, "%s\n", s);
-   exit(EXIT_FAILURE);
+    fprintf(stderr, "%s\n", s);
+    exit(EXIT_FAILURE);
 }
 
 // Set element at index indx with value d i.e. b[i] = d;
 bool bsa_set(bsa* b, int indx, int d)
 {
-    if(b==NULL){
+    if (b == NULL) {
         return false;
     }
     int bucket = hash(indx);
 
     // if that node already exists overwrite it.
-        node *curr = b->buckets[bucket];
-        while (curr) {
-            if (curr->index == indx) {
-                curr->num = d;
-                return true;
-            }
-            curr = curr->next;
+    node* curr = b->buckets[bucket];
+    while (curr) {
+        if (curr->index == indx) {
+            curr->num = d;
+            return true;
         }
+        curr = curr->next;
+    }
     // otherwise, create a new node.
-    node *new_node = acalloc(1, sizeof(node));
+    node* new_node = acalloc(1, sizeof(node));
     new_node->index = indx;
     new_node->num = d;
 
     // this can be null.
-    new_node->next = b->buckets[bucket]; 
+    new_node->next = b->buckets[bucket];
     b->buckets[bucket] = new_node;
 
     return true;
@@ -62,11 +61,11 @@ int hash(int index)
 // or NULL if element is unset
 int* bsa_get(bsa* b, int indx)
 {
-    if(b==NULL){
+    if (b == NULL) {
         return false;
     }
     int bucket = hash(indx);
-    node *curr = b->buckets[bucket];
+    node* curr = b->buckets[bucket];
 
     while (curr) {
         if (curr->index == indx) {
@@ -81,13 +80,13 @@ int* bsa_get(bsa* b, int indx)
 // Delete element at index indx 
 bool bsa_delete(bsa* b, int indx)
 {
-    if(b==NULL){
+    if (b == NULL) {
         return false;
     }
 
     int bucket = hash(indx);
-    node *curr = b->buckets[bucket];
-    node *prev = NULL;
+    node* curr = b->buckets[bucket];
+    node* prev = NULL;
 
     while (curr != NULL) {
         if (curr->index == indx) {
@@ -95,8 +94,7 @@ bool bsa_delete(bsa* b, int indx)
             if (prev == NULL) {
                 // this can also set curr->next to null
                 b->buckets[bucket] = curr->next;
-            } 
-            else {
+            } else {
                 prev->next = curr->next;
             }
             free(curr);
@@ -115,12 +113,12 @@ bool bsa_delete(bsa* b, int indx)
 // -1 if no cells have been written to yet
 int bsa_maxindex(bsa* b)
 {
-    if(b==NULL){
+    if (b == NULL) {
         return -1;
     }
     int max = -1;
-    for(int i = 0; i<SIZE; i++) {
-        node *curr = b->buckets[i];
+    for (int i = 0; i < SIZE; i++) {
+        node* curr = b->buckets[i];
 
         while (curr) {
             if (curr->index > max) {
@@ -136,13 +134,13 @@ int bsa_maxindex(bsa* b)
 // Clears up all space used
 bool bsa_free(bsa* b)
 {
-    if(b==NULL){
+    if (b == NULL) {
         return false;
     }
     for (int i = 0; i < SIZE; i++) {
-        node *curr = b->buckets[i];
+        node* curr = b->buckets[i];
         while (curr) {
-            node *temp = curr;
+            node* temp = curr;
             curr = curr->next;
             free(temp);
         }
@@ -157,11 +155,11 @@ bool bsa_free(bsa* b)
 // and maintains an accumulator of the result where required.
 void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 {
-    if(b==NULL){
+    if (b == NULL) {
         return;
     }
     for (int i = 0; i < SIZE; i++) {
-        node *curr = b->buckets[i];
+        node* curr = b->buckets[i];
         while (curr) {
             func(&(curr->num), acc);
             curr = curr->next;
@@ -173,29 +171,28 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 
 void test(void)
 {
-
-    assert(hash(0)==0);
-    assert(hash(2)==2);
-    assert(hash(4)==4);
-    assert(hash(5)==5);
-    assert(hash(15319)==0);
-    assert(hash(15320)==1);
+    assert(hash(0) == 0);
+    assert(hash(2) == 2);
+    assert(hash(4) == 4);
+    assert(hash(5) == 5);
+    assert(hash(15319) == 0);
+    assert(hash(15320) == 1);
 
     char str[LISTSTRLEN] = "";
 
     // A NULL BSA has size zero
-    assert(bsa_maxindex(NULL)==-1);
+    assert(bsa_maxindex(NULL) == -1);
     assert(!bsa_tostring(NULL, str));
 
     // Initialise
     bsa* b = bsa_init();
     assert(b);
-    assert(bsa_maxindex(b)==-1);
-    assert(b->buckets[0]==NULL); 
+    assert(bsa_maxindex(b) == -1);
+    assert(b->buckets[0] == NULL);
 
     // Set some values
     assert(bsa_set(b, 0, 4));
-    assert(bsa_maxindex(b)==0);
+    assert(bsa_maxindex(b) == 0);
     // Reset existing value
     assert(bsa_set(b, 0, 0));
     assert(bsa_set(b, 15, 15));
@@ -208,67 +205,63 @@ void test(void)
     p = bsa_get(b, 15);
     assert(p);
     assert(*p == 15);
-    assert(b->buckets[15]->num==15);
-    assert(b->buckets[15]->next==NULL);
+    assert(b->buckets[15]->num == 15);
+    assert(b->buckets[15]->next == NULL);
 
-    // Get an unset value 
+    // Get an unset value
     p = bsa_get(b, 1);
     assert(!p);
     p = bsa_get(b, 1024);
     assert(!p);
 
     assert(bsa_set(b, 100, 100));
-    assert(bsa_maxindex(b)==100);
-    assert(b->buckets[100]->num==100);
-    assert(b->buckets[15]->next==NULL);
+    assert(bsa_maxindex(b) == 100);
+    assert(b->buckets[100]->num == 100);
+    assert(b->buckets[15]->next == NULL);
     p = bsa_get(b, 100);
     assert(p);
     assert(*p == 100);
     // make sure nothing has changed.
-    assert(b->buckets[15]->num==15);
-    assert(b->buckets[15]->next==NULL);
-
+    assert(b->buckets[15]->num == 15);
+    assert(b->buckets[15]->next == NULL);
 
     // Let's do some deleting
 
     // Cell not not used, can't delete it
     assert(!bsa_delete(b, 99));
     // Cell is used, can delete it
-    assert(b->buckets[0]->next==NULL);
+    assert(b->buckets[0]->next == NULL);
     assert(bsa_delete(b, 100));
-    assert(bsa_maxindex(b)==15);
-    assert(b->buckets[100]==NULL);
+    assert(bsa_maxindex(b) == 15);
+    assert(b->buckets[100] == NULL);
     // Check it's gone
     p = bsa_get(b, 100);
     assert(!p);
     // Cell is used, can delete it
     assert(bsa_delete(b, 15));
-    assert(b->buckets[15]==NULL);
-    assert(bsa_maxindex(b)==0);
+    assert(b->buckets[15] == NULL);
+    assert(bsa_maxindex(b) == 0);
     p = bsa_get(b, 15);
     assert(!p);
     // Delete last element left
     assert(bsa_delete(b, 0));
-    assert(b->buckets[0]==NULL);
-    assert(bsa_maxindex(b)<0);
+    assert(b->buckets[0] == NULL);
+    assert(bsa_maxindex(b) < 0);
     p = bsa_get(b, 0);
     assert(!p);
 
     bsa_free(b);
 
     // todo basic for each check
-
-    
-
 }
    
 
 // ignore this, it's just to switch of warnings.
 bool bsa_tostring(bsa* b, char* str)
 {
-    if(b){
+    if (b) {
         *str = '\0';
         return true;
-    }    
+    }
     return false;
 }

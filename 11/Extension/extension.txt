@@ -1,6 +1,8 @@
 TODO: Get the number of hash nodes for some programs.
 TODO: Run scripts built to test memory usage
 (e.g., writing 10,000 numbers, then 100,000 and observing how memory usage changes).
+TODO: test each function with predetermined inputs and graph results
+(eg: for each with 10,000 items randomly inserted.)
 
 I decided on a hashing implementation that is O(N) for storage
 and slightly faster in speed.
@@ -11,8 +13,7 @@ Crucially, the new data structure does not guarantee order.
 This is demonstrated in the output of isfactorial, which is
 unordered.
 
-My hash function is really simple
-
+My hash function is really simple, 
 just a modulus of the space in the array.
 The initial size of the table is 15,319,
 which I chose because it is a prime number, helping

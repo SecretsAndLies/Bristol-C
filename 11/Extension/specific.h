@@ -8,15 +8,13 @@
 typedef struct node {
     int index;
     int num;
-    struct node *next;
+    struct node* next;
 } node;
 
 struct bsa {
-    node *buckets[SIZE];  
+    node* buckets[SIZE];
 };
 
 void* acalloc(int n, size_t size);
 void on_error(const char* s);
 int hash(int index);
-
-
