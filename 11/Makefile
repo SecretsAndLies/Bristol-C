@@ -54,7 +54,7 @@ extsieve_v: bsa.h Extension/specific.h Extension/extension.c sieve.c
 	$(CC) -g sieve.c Extension/extension.c -o extsieve_v -I./Extension $(VALGRIND)
 
 
-run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s extisfactorial extsieve_s
+run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s extisfactorial extsieve
 	./driverbsa_s
 	./isfactorial
 	./fibmemo

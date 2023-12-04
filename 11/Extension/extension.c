@@ -1,5 +1,5 @@
 #include "specific.h"
-
+// TODO: bash script that compares the output of ext and reg.
 
 // Create an empty BSA
 bsa * bsa_init(void)
@@ -167,8 +167,6 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
     }
 }
 
-// TODO: bash script that compares the output of ext and reg.
-
 void test(void)
 {
     assert(hash(0) == 0);
@@ -252,16 +250,59 @@ void test(void)
 
     bsa_free(b);
 
-    // todo basic for each check
-}
-   
+    bsa * c = bsa_init();
+    for (int i=0; i<100; i++){
+        bsa_set(c,i,i);
+    }
+    int acc = 0;
+    bsa_foreach(add, c, &acc);
+    for (int i=0; i<100; i++){
+        assert(*bsa_get(c,i)==i+1);
+    }
+    bsa_free(c);
 
-// ignore this, it's just to switch of warnings.
+
+    bsa* d = bsa_init();
+    for (int i = 1; i < 1000000; i *= 2) {
+        int random_num = rand() - rand();
+        bsa_set(d, i, random_num);
+        assert(*bsa_get(d, i) == random_num);
+        assert(bsa_delete(d, i));
+        assert((bsa_get(d, i)) == NULL);
+
+        // try to delete again
+        assert(bsa_delete(d, i) == false);
+
+        // set three times (overwrite)
+        bsa_set(d, i, random_num + 1);
+        bsa_set(d, i, random_num + 2);
+        bsa_set(d, i, random_num + 3);
+        assert(*bsa_get(d, i) == random_num + 3);
+    }
+    for (int i = 0; i < 1000000; i++) {
+        if (bsa_get(d, i)) {
+            assert(bsa_delete(d, i));
+        }
+        assert(bsa_delete(d, i) == false);
+    }
+
+    bsa_free(d);
+}
+
+void add(int* p, int* n)
+{
+    // Need to use n to switch off warnings :-(
+    *n = 0;
+    *p = *p + 1;
+}
+
 bool bsa_tostring(bsa* b, char* str)
 {
+// ignore this, it's just to switch of warnings.
+// this function is unwritten.
     if (b) {
         *str = '\0';
-        return true;
+        return false;
     }
     return false;
 }

@@ -21,15 +21,14 @@ struct bsa {
 
 void* acalloc(int n, size_t size);
 void on_error(const char* s);
-int get_row_from_index(int indx);
-void test_get_row_from_index(void);
-int get_length_of_row(int row);
-void test_get_length_of_row(void);
-int get_col_within_row(int row, int index);
-void test_get_col_within_row(void);
-int get_orig_index_from_arr_index(int row_index,
-                                  int col_index);
-void test_get_orig_index_from_arr_index(void);
+int get_row(int indx);
+void test_get_row(void);
+int get_row_len(int row);
+void test_get_row_len(void);
+int get_col(int row, int index);
+void test_get_col(void);
+int get_index(int row, int col);
+void test_get_index(void);
 int get_max_filled_row(bsa* b);
 void test_get_max_filled_row(void);
 void test_bsa_init(void);
