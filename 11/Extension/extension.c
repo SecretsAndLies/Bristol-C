@@ -1,6 +1,4 @@
 #include "specific.h"
-// TODO: bash script that compares the output of ext and reg.
-
 // Create an empty BSA
 bsa * bsa_init(void)
 {
@@ -40,17 +38,20 @@ bool bsa_set(bsa* b, int indx, int d)
         }
         curr = curr->next;
     }
-    // otherwise, create a new node.
-    node* new_node = acalloc(1, sizeof(node));
-    new_node->index = indx;
-    new_node->num = d;
-
-    // this can be null.
+    node* new_node = create_node(indx, d);
     new_node->next = b->buckets[bucket];
     b->buckets[bucket] = new_node;
-
     return true;
 }
+
+node* create_node(int index, int num)
+{
+    node* new_node = acalloc(1, sizeof(node));
+    new_node->index = index;
+    new_node->num = num;
+    return new_node;
+}
+
 
 int hash(int index) 
 {
@@ -169,6 +170,12 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 
 void test(void)
 {
+    node * n = create_node(0, 10);
+    assert(n->index==0);
+    assert(n->num==10);
+    assert(n->next==NULL);
+    free(n);
+
     assert(hash(0) == 0);
     assert(hash(2) == 2);
     assert(hash(4) == 4);

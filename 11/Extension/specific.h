@@ -19,3 +19,4 @@ void* acalloc(int n, size_t size);
 void on_error(const char* s);
 int hash(int index);
 void add(int* p, int* n);
+node* create_node(int index, int num);

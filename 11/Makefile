@@ -1,10 +1,10 @@
-CC=gcc
-COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 #-Werror
+CC=gcc #test clang before submission.
+COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 -Werror
 SANITIZE= $(COMMON) -fsanitize=undefined -fsanitize=address $(DEBUG)
 VALGRIND= $(COMMON) $(DEBUG)
 PRODUCTION= $(COMMON) -O3
 
-all: driverbsa_s driverbsa fibmemo sieve_s isfactorial extfibmemo_s
+all: driverbsa_s driverbsa fibmemo sieve_s isfactorial extfibmemo_s driverbsa_v fibmemo_v isfactorial_v sieve_v extfibmemo_v extisfactorial_v extsieve_v
 
 driverbsa_s: bsa.h Alloc/specific.h Alloc/alloc.c driver.c
 	$(CC) driver.c Alloc/alloc.c -o driverbsa_s -I./Alloc $(SANITIZE)
@@ -21,7 +21,10 @@ isfactorial: bsa.h Alloc/specific.h Alloc/alloc.c isfactorial.c
 sieve_s: bsa.h Alloc/specific.h Alloc/alloc.c sieve.c
 	$(CC) sieve.c Alloc/alloc.c -o sieve_s -I./Alloc $(PRODUCTION)
 
-#valgrind versions. TODO remove -g
+#valgrind versions for speed checks
+driverbsa_v: bsa.h Alloc/specific.h Alloc/alloc.c driver.c
+	$(CC) -g driver.c Alloc/alloc.c -o driverbsa_v -I./Alloc $(VALGRIND)
+
 fibmemo_v: bsa.h Alloc/specific.h Alloc/alloc.c fibmemo.c
 	$(CC) -g fibmemo.c Alloc/alloc.c -o fibmemo_v -I./Alloc $(VALGRIND)
 
@@ -54,7 +57,7 @@ extsieve_v: bsa.h Extension/specific.h Extension/extension.c sieve.c
 	$(CC) -g sieve.c Extension/extension.c -o extsieve_v -I./Extension $(VALGRIND)
 
 
-run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s extisfactorial extsieve
+run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s extisfactorial extsieve driverbsa_v fibmemo_v isfactorial_v sieve_v extfibmemo_v extisfactorial_v extsieve_v
 	./driverbsa_s
 	./isfactorial
 	./fibmemo
@@ -63,6 +66,13 @@ run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s e
 	./extfibmemo_s
 	./extisfactorial
 	./extsieve
+	# valgrind --leak-check=full  ./driverbsa_v
+	# valgrind --leak-check=full  ./isfactorial_v
+	# valgrind --leak-check=full  ./fibmemo_v
+	# valgrind --leak-check=full  ./sieve_v
+	# valgrind --leak-check=full  ./extfibmemo_v
+	# valgrind --leak-check=full  ./extisfactorial_v
+	# valgrind --leak-check=full  ./extsieve_v
 
 clean:
 	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s extfibmemo_v extisfactorial_v extsieve_v isfactorial_v sieve_v fibmemo_v massif.* 

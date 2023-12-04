@@ -25,13 +25,14 @@ fibmemo ran at the same speed in both (less than 1% difference).
 sieve was 57% faster in the extension.
 isfactorial was 8% faster in the extension, but doesn't
 preserve the order when printed.
-I then used Valgrind with --tool=massif
-to determine the peak memory usage.
+I then used Valgrind to determine the memory usage.
 For all three programs, the extension caused
-a 99.99% decrease in peak
-memory usage, from 4.3GB to less than 130KB.
+a 99.99% decrease in
+memory usage, from 4.3GB (6.7GB on isfactorial) 
+to less than half a Megabyte.
 
 Sources: I referenced the CS50 implementation of a hash table 
 (https://youtu.be/nvzVHwrrub0)
 as well as the in-class implementation of a linked list.
+
 
