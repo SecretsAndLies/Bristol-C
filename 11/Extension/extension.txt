@@ -1,38 +1,82 @@
-TODO: Get the number of hash nodes for some programs.
-TODO: Run scripts built to test memory usage
-(e.g., writing 10,000 numbers, then 100,000 and observing how memory usage changes).
-TODO: test each function with predetermined inputs and graph results
-(eg: for each with 10,000 items randomly inserted.)
+==Intro==
+I decided on a hashing implementation using 
+a linked list for collisions.
 
-I decided on a hashing implementation that is O(N) for storage
-and slightly faster in speed.
+==Hash Function==
+My hash function a modulus of the space in the array (15,319)
+which I chose because it is a reasonably large prime number, helping
+to reduce collisions. Increasing this number would reduce collisions
+at the expense of memory.
 
-In terms of speed, the approach is O(1 + the number of elements in that bucket),
-which will depend on the indexes to which the data writes.
-Crucially, the new data structure does not guarantee order.
-This is demonstrated in the output of isfactorial, which is
-unordered.
+==Space complexity==
+The main advantage of this approach is that it's O(N) for
+memory usage (with an overhead of 123KB for the intial size of the array).
+Because of the overhead, this approach is worse if only a 
+few small indexes are written, but much better for large indexes.
 
-My hash function is really simple, 
-just a modulus of the space in the array.
-The initial size of the table is 15,319,
-which I chose because it is a prime number, helping
-to reduce collisions.
-To time the scripts, I created a bash script that ran
+Using valgrind and removing tests, the programs used:
+*fibmemo* 1,768 bytes vs 123,608 bytes (6891% more)
+*sieve* 5,832 vs 127,896 bytes (2093% more)
+*isfactorial* 2,435,094,920 bytes vs 123,768 bytes (99.99% less!)
+
+The worst case scenerio for the BSA would be if a number was written
+to an index in every row (ie: at index 0, 1, 3, 7 etc). 
+This would cause it to initialize a huge amount of space for only 30 numbers. 
+I wrote code to test this and the extension results in a 
+99.99% decrease in memory usage, from 8.5GB to 123KB.
+
+==Overall Time complexity==
+Unfortunately, this appraoch is generally slower, but not
+signicantly so for the example programs.
+
+To time the programs, I created a bash script that ran
 each program 20 times and returned the average user time.
+The results are below.
 
-fibmemo ran at the same speed in both (less than 1% difference).
-sieve was 57% faster in the extension.
-isfactorial was 8% faster in the extension, but doesn't
-preserve the order when printed.
-I then used Valgrind to determine the memory usage.
-For all three programs, the extension caused
-a 99.99% decrease in
-memory usage, from 4.3GB (6.7GB on isfactorial) 
-to less than half a Megabyte.
+*fibmemo* 0.1268 seconds vs 0.1319 (4% slower)
+*sieve* 0.0005 vs 0.00065 (30% slower)
+*isfactorial* 2.1279 vs 2.29195 (7% slower)
 
-Sources: I referenced the CS50 implementation of a hash table 
+However, time would depend on the data. I created a program to
+test this hypothesis. If a user added numbers to 0-N indexes, 
+when N is multiplied by 100, the original is slowed down 
+by approximately that amount, whereas for the extension,
+going from 100,000 to 10,000,000 indexes resulted in a 642x
+increase (vs only 116x for the basic version.)
+
+This path would only get worse as the number of collisions increased.
+
+In order to get the foreach function to print the numbers
+in order, I used a linear search, which gets up to
+the max index stored. This is signicantly less efficent than 
+the approach in the basic version. I added numbers at random indexes
+and then ran for each. TODO.
+
+==Sources==
+I referenced the CS50 implementation of a hash table 
 (https://youtu.be/nvzVHwrrub0)
 as well as the in-class implementation of a linked list.
 
 
+=== DELETE ===
+make add
+./timer.sh add 1000
+./timer.sh add 100000
+./timer.sh add 10000000 
+
+./timer.sh add_ext 1000
+./timer.sh add_ext 100000
+./timer.sh add_ext 10000000 
+
+For adding to indexes less than 15,319, the extension is faster than
+the basic version, this is 
+
+ORIGINAL (total time)
+1,000 -> 0.016
+100,000 -> 0.099 (5x more than 1,000)
+10,000,000 -> 11.641 (116x more than 100,000)
+
+EXTENSION (total time)
+1,000 -> 0.014
+100,000 -> 0.115 (7x more than 1,000)
+10,000,000 -> 74 seconds (642x more than 100,000)

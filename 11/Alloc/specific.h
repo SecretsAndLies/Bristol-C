@@ -17,6 +17,7 @@ typedef struct row {
 struct bsa {
     row row_arr[BSA_ROWS];
     int total_size;
+    int max_index;
 };
 
 void* acalloc(int n, size_t size);
@@ -37,8 +38,6 @@ void test_bsa_get(void);
 void test_bsa_delete(void);
 void test_bsa_maxindex(void);
 void test_bsa_tostring(void);
-void append_string(char* dest, const char* source,
-                   size_t destSize);
 void test_add(void);
 void add(int* p, int* n);
 bool is_invalid_index(int indx);

@@ -9,7 +9,7 @@ bsa * bsa_init(void)
 void* acalloc(int n, size_t size)
 {
     void* v = calloc(n, size);
-    if (v == NULL) {
+    if(v == NULL){
         on_error("Cannot calloc() space");
     }
     return v;
@@ -24,19 +24,19 @@ void on_error(const char* s)
 // Set element at index indx with value d i.e. b[i] = d;
 bool bsa_set(bsa* b, int indx, int d)
 {
-    if (b == NULL) {
+    if(b == NULL){
         return false;
     }
     int bucket = hash(indx);
 
     // if that node already exists overwrite it.
     node* curr = b->buckets[bucket];
-    while (curr) {
-        if (curr->index == indx) {
+    while(curr){
+        if(curr->index == indx){
             curr->num = d;
             return true;
         }
-        curr = curr->next;
+         curr = curr->next;
     }
     node* new_node = create_node(indx, d);
     new_node->next = b->buckets[bucket];
@@ -62,14 +62,14 @@ int hash(int index)
 // or NULL if element is unset
 int* bsa_get(bsa* b, int indx)
 {
-    if (b == NULL) {
+    if(b == NULL){
         return false;
     }
     int bucket = hash(indx);
     node* curr = b->buckets[bucket];
 
-    while (curr) {
-        if (curr->index == indx) {
+    while(curr){
+        if(curr->index == indx){
             return &(curr->num);
         }
         curr = curr->next;
@@ -81,25 +81,22 @@ int* bsa_get(bsa* b, int indx)
 // Delete element at index indx 
 bool bsa_delete(bsa* b, int indx)
 {
-    if (b == NULL) {
+    if(b == NULL){
         return false;
     }
-
     int bucket = hash(indx);
     node* curr = b->buckets[bucket];
     node* prev = NULL;
-
-    while (curr != NULL) {
-        if (curr->index == indx) {
+    while(curr != NULL){
+        if(curr->index == indx){
             // If it is the first node in the list
-            if (prev == NULL) {
+            if(prev == NULL){
                 // this can also set curr->next to null
                 b->buckets[bucket] = curr->next;
-            } else {
+            } else{
                 prev->next = curr->next;
             }
             free(curr);
-
             return true;
         }
         prev = curr;
@@ -114,15 +111,15 @@ bool bsa_delete(bsa* b, int indx)
 // -1 if no cells have been written to yet
 int bsa_maxindex(bsa* b)
 {
-    if (b == NULL) {
+    if(b == NULL){
         return -1;
     }
     int max = -1;
-    for (int i = 0; i < SIZE; i++) {
+    for(int i = 0; i < SIZE; i++){
         node* curr = b->buckets[i];
 
-        while (curr) {
-            if (curr->index > max) {
+        while(curr){
+            if(curr->index > max){
                 max = curr->index;
             }
             curr = curr->next;
@@ -135,12 +132,12 @@ int bsa_maxindex(bsa* b)
 // Clears up all space used
 bool bsa_free(bsa* b)
 {
-    if (b == NULL) {
+    if(b == NULL){
         return false;
     }
-    for (int i = 0; i < SIZE; i++) {
+    for(int i = 0; i < SIZE; i++){
         node* curr = b->buckets[i];
-        while (curr) {
+        while(curr){
             node* temp = curr;
             curr = curr->next;
             free(temp);
@@ -156,14 +153,14 @@ bool bsa_free(bsa* b)
 // and maintains an accumulator of the result where required.
 void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 {
-    if (b == NULL) {
+    if(b == NULL){
         return;
     }
-    for (int i = 0; i < SIZE; i++) {
-        node* curr = b->buckets[i];
-        while (curr) {
-            func(&(curr->num), acc);
-            curr = curr->next;
+    int max = bsa_maxindex(b);
+    for(int i = 0; i <= max; i++){
+        int * a = bsa_get(b,i);
+        if(a){
+            func(bsa_get(b,i), acc);
         }
     }
 }
@@ -201,7 +198,6 @@ void test(void)
     // Reset existing value
     assert(bsa_set(b, 0, 0));
     assert(bsa_set(b, 15, 15));
-    // todo add elements that test where things end up.
 
     // Get some values tbsa've already been set
     int* p = bsa_get(b, 0);
@@ -258,19 +254,19 @@ void test(void)
     bsa_free(b);
 
     bsa * c = bsa_init();
-    for (int i=0; i<100; i++){
+    for(int i=0; i<100; i++){
         bsa_set(c,i,i);
     }
     int acc = 0;
     bsa_foreach(add, c, &acc);
-    for (int i=0; i<100; i++){
+    for(int i=0; i<100; i++){
         assert(*bsa_get(c,i)==i+1);
     }
     bsa_free(c);
 
 
     bsa* d = bsa_init();
-    for (int i = 1; i < 1000000; i *= 2) {
+    for(int i = 1; i < 1000000; i *= 2){
         int random_num = rand() - rand();
         bsa_set(d, i, random_num);
         assert(*bsa_get(d, i) == random_num);
@@ -286,8 +282,8 @@ void test(void)
         bsa_set(d, i, random_num + 3);
         assert(*bsa_get(d, i) == random_num + 3);
     }
-    for (int i = 0; i < 1000000; i++) {
-        if (bsa_get(d, i)) {
+    for(int i = 0; i < 1000000; i++){
+        if(bsa_get(d, i)){
             assert(bsa_delete(d, i));
         }
         assert(bsa_delete(d, i) == false);
@@ -307,7 +303,7 @@ bool bsa_tostring(bsa* b, char* str)
 {
 // ignore this, it's just to switch of warnings.
 // this function is unwritten.
-    if (b) {
+    if(b){
         *str = '\0';
         return false;
     }

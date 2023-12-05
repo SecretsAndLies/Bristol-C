@@ -24,7 +24,7 @@ TIMEFORMAT=%6U
 # Run the program 20 times and sum the user times
 for i in {1..20}; do
     # Capture the user time using 'time' command
-    sys_time=$( { time ./"$1" > /dev/null 2>&1; } 2>&1 )
+    sys_time=$( { time ./"$1" "$2" > /dev/null 2>&1; } 2>&1 )
 
     # Check if sys_time is a number
     if ! [[ $sys_time =~ ^[0-9]+([.][0-9]+)?$ ]]; then
