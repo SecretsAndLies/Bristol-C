@@ -179,6 +179,8 @@ void test(void)
     assert(hash(5) == 5);
     assert(hash(15319) == 0);
     assert(hash(15320) == 1);
+    assert(hash(15319*2) == 0);
+    assert(hash(15319*3) == 0);
 
     char str[LISTSTRLEN] = "";
 

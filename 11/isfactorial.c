@@ -7,7 +7,7 @@ void printfacts(int* p, int* n);
 // https://oeis.org/A000142/list
 int main(void)
 {
-   // test();
+   test();
    int i;
    bsa* b = bsa_init();
    for(i=0; i<500000000; i++){

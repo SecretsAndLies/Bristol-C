@@ -1,19 +1,38 @@
 #include "bsa.h"
 int rl(int row);
+void printfacts(int* p, int* n);
 int main(int argc, char *argv[])
 {
     bsa * b = bsa_init();
     argc = 0; // fake
     argv[0]='\0'; // fake
+    bsa_set(b,0,10);
+    bsa_set(b,10,10);
+    bsa_set(b,100,10);
+    bsa_set(b,10000,10);
+    bsa_set(b,100000,10);
+    bsa_set(b,10000000,10);
+    bsa_set(b,100000000,10);
+       int i;
+   bsa_foreach(printfacts, b, &i);
 
-    int len = 0;
-    for (int i = 0; i < BSA_ROWS; i++){
-        bsa_set(b,len,1);
-        len +=rl(i);
-    }
-    bsa_free(b);
+
+        bsa_free(b);
     return 0;
 }
+void printfacts(int* p, int* n)
+{
+   *n = 0;
+   printf("%d\n", *p);
+}
+
+
+    // int len = 0;
+    // for (int i = 0; i < BSA_ROWS; i++){
+    //     bsa_set(b,len,1);
+    //     len +=rl(i);
+    // }
+
 
 // row 0 starts at 0
 // row 1 starts at 1

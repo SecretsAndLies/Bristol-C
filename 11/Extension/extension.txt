@@ -3,10 +3,10 @@ I decided on a hashing implementation using
 a linked list for collisions.
 
 ==Hash Function==
-My hash function a modulus of the space in the array (15,319)
-which I chose because it is a reasonably large prime number, helping
-to reduce collisions. Increasing this number would reduce collisions
-at the expense of memory.
+My hash function a modulus of the intial 
+space in the array (15,319) which I chose because it is a 
+reasonably large prime number, helping to reduce collisions. 
+Increasing this number would increase speed at the expense of memory.
 
 ==Space complexity==
 The main advantage of this approach is that it's O(N) for
@@ -15,68 +15,48 @@ Because of the overhead, this approach is worse if only a
 few small indexes are written, but much better for large indexes.
 
 Using valgrind and removing tests, the programs used:
-*fibmemo* 1,768 bytes vs 123,608 bytes (6891% more)
-*sieve* 5,832 vs 127,896 bytes (2093% more)
-*isfactorial* 2,435,094,920 bytes vs 123,768 bytes (99.99% less!)
+*fibmemo* 2KB bytes vs 123KB bytes (6,050% more)
+*sieve* 5.8KB vs 128KB bytes (2093% more)
+*isfactorial* 2.4GB vs 123KB bytes (99.99% less!)
 
-The worst case scenerio for the BSA would be if a number was written
+The worst case scenerio for the alloc version would be if a number was written
 to an index in every row (ie: at index 0, 1, 3, 7 etc). 
 This would cause it to initialize a huge amount of space for only 30 numbers. 
-I wrote code to test this and the extension results in a 
+I tested this and the extension results in a 
 99.99% decrease in memory usage, from 8.5GB to 123KB.
 
-==Overall Time complexity==
-Unfortunately, this appraoch is generally slower, but not
-signicantly so for the example programs.
+==Overall Time Complexity==
+Unfortunately, depending on the data, this aproach can be slower.
 
-To time the programs, I created a bash script that ran
-each program 20 times and returned the average user time.
-The results are below.
+To time the example programs, I created a bash script that ran
+each program 20 times and returned the average user time 
+to 6 significant figures. The results are below.
 
-*fibmemo* 0.1268 seconds vs 0.1319 (4% slower)
-*sieve* 0.0005 vs 0.00065 (30% slower)
-*isfactorial* 2.1279 vs 2.29195 (7% slower)
+*fibmemo* 0.00045 seconds vs 0.0003 (33% faster)
+*sieve* 0.0005 vs 0.0007 (30% slower)
+*isfactorial* 2.13 vs 2.29 (7% slower)
 
-However, time would depend on the data. I created a program to
-test this hypothesis. If a user added numbers to 0-N indexes, 
-when N is multiplied by 100, the original is slowed down 
+However, these numbers could be signicantly different with
+other data.
+I tested this by adding to index 0-I, linearly. 
+When I is multiplied by 100, the original is slowed down 
 by approximately that amount, whereas for the extension,
-going from 100,000 to 10,000,000 indexes resulted in a 642x
-increase (vs only 116x for the basic version.)
+going from I=100,000 to I=10,000,000 resulted in it being 642x
+slower (vs only 116x for the alloc version.)
 
-This path would only get worse as the number of collisions increased.
+This would only get worse as the number of collisions increased.
+A worst case scenerio for the extension would be if the 
+indexes 0, 15319, 15319*2, 15319*3... were written. This 
+would be O(N) for set, get and delete.
 
 In order to get the foreach function to print the numbers
-in order, I used a linear search, which gets up to
-the max index stored. This is signicantly less efficent than 
-the approach in the basic version. I added numbers at random indexes
-and then ran for each. TODO.
+in order, I used a linear search. This is signicantly less efficent than 
+the approach in the alloc version. To test this, I added numbers
+at indexes 0, 10, 10K, 10M etc. 
+I found that the alloc foreach function was
+5x faster than the extension (0.1 seconds vs 0.5 seconds).
 
 ==Sources==
 I referenced the CS50 implementation of a hash table 
 (https://youtu.be/nvzVHwrrub0)
 as well as the in-class implementation of a linked list.
-
-
-=== DELETE ===
-make add
-./timer.sh add 1000
-./timer.sh add 100000
-./timer.sh add 10000000 
-
-./timer.sh add_ext 1000
-./timer.sh add_ext 100000
-./timer.sh add_ext 10000000 
-
-For adding to indexes less than 15,319, the extension is faster than
-the basic version, this is 
-
-ORIGINAL (total time)
-1,000 -> 0.016
-100,000 -> 0.099 (5x more than 1,000)
-10,000,000 -> 11.641 (116x more than 100,000)
-
-EXTENSION (total time)
-1,000 -> 0.014
-100,000 -> 0.115 (7x more than 1,000)
-10,000,000 -> 74 seconds (642x more than 100,000)
