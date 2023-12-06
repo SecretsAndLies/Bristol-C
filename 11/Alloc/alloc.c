@@ -6,7 +6,8 @@ bsa* bsa_init(void)
 {
     bsa* b = acalloc(1, sizeof(bsa));
     for (int i = 0; i < BSA_ROWS; i++){
-        b->row_arr[i].r_len = get_row_len(i);
+        row * r = &(b->row_arr[i]);
+        r->r_len = get_row_len(i);
     }
     return b;
 }
@@ -70,20 +71,22 @@ bool bsa_set(bsa* b, int indx, int d)
     if (is_invalid_input(b, indx)){
         return false;
     }
-    int r = get_row(indx);
-    if (b->row_arr[r].r_size == 0){
-        int len = b->row_arr[r].r_len;
+    int row_i = get_row(indx);
+    row * r = &(b->row_arr[row_i]);
+
+    if (r->r_size == 0){
+        int len = r->r_len;
         int size = sizeof(int_s);
-        b->row_arr[r].int_arr = acalloc(len, size);
+        r->int_arr = acalloc(len, size);
     }
-    int c = get_col(r, indx);
-    bool num_set = b->row_arr[r].int_arr[c].set;
+    int col_i = get_col(row_i, indx);
+    bool num_set = r->int_arr[col_i].set;
     if (!num_set){
-        b->row_arr[r].r_size++;
+        r->r_size++;
         b->total_size++;
     }
-    b->row_arr[r].int_arr[c].num = d;
-    b->row_arr[r].int_arr[c].set = true;
+    r->int_arr[col_i].num = d;
+    r->int_arr[col_i].set = true;
     return true;
 }
 
@@ -247,13 +250,14 @@ int* bsa_get(bsa* b, int indx)
     }
     int row_i = get_row(indx);
     int col_i = get_col(row_i, indx);
-    if (b->row_arr[row_i].r_size == 0){
+    row * r = &(b->row_arr[row_i]);
+    if (r->r_size == 0){
         return NULL;
     }
-    if (b->row_arr[row_i].int_arr[col_i].set == false){
+    if (r->int_arr[col_i].set == false){
         return NULL;
     }
-    return &(b->row_arr[row_i].int_arr[col_i].num);
+    return &(r->int_arr[col_i].num);
 }
 
 void test_bsa_get(void) 
@@ -297,18 +301,20 @@ bool bsa_delete(bsa* b, int indx)
     }
     int row_i = get_row(indx);
     int col_i = get_col(row_i, indx);
-    if (b->row_arr[row_i].r_size == 0){
+    row * r = &(b->row_arr[row_i]);
+
+    if (r->r_size == 0){
         return false;
     }
-    if (b->row_arr[row_i].int_arr[col_i].set == false){
+    if (r->int_arr[col_i].set == false){
         return false;
     }
-    b->row_arr[row_i].r_size--;
+    r->r_size--;
     b->total_size--;
-    b->row_arr[row_i].int_arr[col_i].set = false;
-    if (b->row_arr[row_i].r_size == 0){
-        free(b->row_arr[row_i].int_arr);
-        b->row_arr[row_i].int_arr = NULL;
+    r->int_arr[col_i].set = false;
+    if (r->r_size == 0){
+        free(r->int_arr);
+        r->int_arr = NULL;
     }
     return true;
 }
@@ -352,10 +358,11 @@ int bsa_maxindex(bsa* b)
         return -1;
     }
     int max_row = get_max_filled_row(b);
-    int row_len = b->row_arr[max_row].r_len;
+    row r = b->row_arr[max_row];
+    int row_len = r.r_len;
     int max_index = 0;
     for (int i = 0; i < row_len; i++){
-        if (b->row_arr[max_row].int_arr[i].set == true){
+        if (r.int_arr[i].set == true){
             max_index = i;
         }
     }
@@ -367,7 +374,8 @@ int get_max_filled_row(bsa* b)
 {
     int max_row = 0;
     for (int i = 0; i < BSA_ROWS; i++){
-        if (b->row_arr[i].r_size != 0){
+        row r = b->row_arr[i];
+        if (r.r_size != 0){
             max_row = i;
         }
     }
@@ -484,21 +492,23 @@ bool bsa_tostring(bsa* b, char* str)
     return true;
 }
 
+// todo row.
 void build_row_string(char* str, int r, bsa* b) 
 {
     strcat(str, "{");
-    if (b->row_arr[r].int_arr && b->row_arr[r].r_size > 0){
+    row row = b->row_arr[r];
+    if (row.int_arr && row.r_size > 0){
         int count = 0;
-        int r_len = b->row_arr[r].r_len;
+        int r_len = row.r_len;
         for (int c = 0; c < r_len; c++){
-            if (b->row_arr[r].int_arr[c].set){
+            if (row.int_arr[c].set){
                 count++;
                 int indx = get_index(r, c);
-                int value = b->row_arr[r].int_arr[c].num;
+                int value = row.int_arr[c].num;
                 char col_str[LISTSTRLEN] = "";
                 sprintf(col_str, "[%i]=%i", indx, value);
                 strcat(str, col_str);
-                if ((b->row_arr[r].r_size) > count){
+                if ((row.r_size) > count){
                     strcat(str, " ");
                 }
             }
@@ -536,10 +546,11 @@ bool bsa_free(bsa* b)
     if (b == NULL){
         return false;
     }
-    for (int r = 0; r < BSA_ROWS; r++){
-        if (b->row_arr[r].int_arr){
-            free(b->row_arr[r].int_arr);
-            b->row_arr[r].int_arr = NULL;
+    for (int i = 0; i < BSA_ROWS; i++){
+        row r = b->row_arr[i];
+        if (r.int_arr){
+            free(r.int_arr);
+            r.int_arr = NULL;
         }
     }
     free(b);
@@ -556,14 +567,14 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
         return;
     }
     int max_row = get_max_filled_row(b);
-    for (int r = 0; r <= max_row; r++){
-        if (b->row_arr[r].int_arr &&
-            b->row_arr[r].r_size > 0){
-            int r_len = b->row_arr[r].r_len;
-            for (int c = 0; c < r_len; c++){
-                bool num_set = b->row_arr[r].int_arr[c].set;
+    for (int i = 0; i <= max_row; i++){
+        row r = b->row_arr[i];
+        if (r.int_arr && r.r_size > 0){
+            int r_len = r.r_len;
+            for (int j = 0; j < r_len; j++){
+                bool num_set = r.int_arr[j].set;
                 if (num_set){
-                    func(&(b->row_arr[r].int_arr[c].num), acc);
+                    func(&(r.int_arr[j].num), acc);
                 }
             }
         }
