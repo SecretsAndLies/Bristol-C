@@ -297,20 +297,15 @@ bool bsa_delete(bsa* b, int indx)
     }
     int row_i = get_row(indx);
     int col_i = get_col(row_i, indx);
-
     if (b->row_arr[row_i].r_size == 0){
-        // int_arr has already been freed.
         return false;
     }
-
     if (b->row_arr[row_i].int_arr[col_i].set == false){
-        // no element to delete - do nothing.
         return false;
     }
     b->row_arr[row_i].r_size--;
     b->total_size--;
     b->row_arr[row_i].int_arr[col_i].set = false;
-    // if this was the last elemnt, free int_arr
     if (b->row_arr[row_i].r_size == 0){
         free(b->row_arr[row_i].int_arr);
         b->row_arr[row_i].int_arr = NULL;
@@ -356,9 +351,7 @@ int bsa_maxindex(bsa* b)
     if (b == NULL || b->total_size == 0){
         return -1;
     }
-
     int max_row = get_max_filled_row(b);
-
     int row_len = b->row_arr[max_row].r_len;
     int max_index = 0;
     for (int i = 0; i < row_len; i++){
@@ -366,10 +359,7 @@ int bsa_maxindex(bsa* b)
             max_index = i;
         }
     }
-
-    // convert arr index back into the orig index
     int orig_index = get_index(max_row, max_index);
-
     return orig_index;
 }
 
@@ -552,7 +542,6 @@ bool bsa_free(bsa* b)
             b->row_arr[r].int_arr = NULL;
         }
     }
-
     free(b);
     return true;
 }
@@ -609,13 +598,6 @@ void test_bsa_foreach(void)
     bsa_foreach(add, b, NULL);
 
     bsa_free(b);
-}
-
-void add(int* p, int* n) 
-{
-    // Need to use n to switch off warnings :-(
-    *n = 0;
-    *p = *p + 1;
 }
 
 void test(void) 
@@ -737,4 +719,11 @@ void on_error(const char* s)
 {
     fprintf(stderr, "%s\n", s);
     exit(EXIT_FAILURE);
+}
+
+void add(int* p, int* n) 
+{
+    // Need to use n to switch off warnings :-(
+    *n = 0;
+    *p = *p + 1;
 }

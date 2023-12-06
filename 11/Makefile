@@ -82,13 +82,13 @@ run: driverbsa driverbsa_s fibmemo sieve_s isfactorial extfibmemo extfibmemo_s e
 	./extfibmemo_s
 	./extisfactorial
 	./extsieve
-	# valgrind --leak-check=full  ./driverbsa_v
-	# valgrind --leak-check=full  ./isfactorial_v
-	# valgrind --leak-check=full  ./fibmemo_v
-	# valgrind --leak-check=full  ./sieve_v
-	# valgrind --leak-check=full  ./extfibmemo_v
-	# valgrind --leak-check=full  ./extisfactorial_v
-	# valgrind --leak-check=full  ./extsieve_v
+	valgrind --leak-check=full  ./driverbsa_v
+	valgrind --leak-check=full  ./isfactorial_v
+	valgrind --leak-check=full  ./fibmemo_v
+	valgrind --leak-check=full  ./sieve_v
+	valgrind --leak-check=full  ./extfibmemo_v
+	valgrind --leak-check=full  ./extisfactorial_v
+	valgrind --leak-check=full  ./extsieve_v
 
 clean:
 	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s extfibmemo_v extisfactorial_v extsieve_v isfactorial_v sieve_v fibmemo_v massif.* isfactorial_p driverbsa_p gmon.out add add_ext bsa.zip add_ext add_ext_v add_v
