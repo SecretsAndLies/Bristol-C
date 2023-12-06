@@ -561,7 +561,8 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
             b->row_arr[r].r_size > 0){
             int r_len = b->row_arr[r].r_len;
             for (int c = 0; c < r_len; c++){
-                if (b->row_arr[r].int_arr[c].set){
+                bool num_set = b->row_arr[r].int_arr[c].set;
+                if (num_set){
                     func(&(b->row_arr[r].int_arr[c].num), acc);
                 }
             }

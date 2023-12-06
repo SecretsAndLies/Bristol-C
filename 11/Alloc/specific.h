@@ -17,7 +17,6 @@ typedef struct row {
 struct bsa {
     row row_arr[BSA_ROWS];
     int total_size;
-    int max_index;
 };
 
 void* acalloc(int n, size_t size);

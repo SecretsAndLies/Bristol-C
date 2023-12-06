@@ -57,6 +57,6 @@ I found that the alloc foreach function was
 5x faster than the extension (0.1 seconds vs 0.5 seconds).
 
 ==Sources==
-I referenced the CS50 implementation of a hash table 
-(https://youtu.be/nvzVHwrrub0)
-as well as the in-class implementation of a linked list.
+I referenced:
+• The CS50 implementation of a hash table (https://youtu.be/nvzVHwrrub0)
+• The in-class implementation of a linked list.
