@@ -543,8 +543,7 @@ void test_bsa_tostring(void)
     assert(strcmp(str, "{[0]=0}{[1]=1 [2]=2}") == 0);
     assert(bsa_set(b, 10, 10));
     assert(bsa_tostring(b, str));
-    assert(strcmp(str, "{[0]=0}{[1]=1 [2]=2}{}{[10]=10}") ==
-           0);
+    assert(strcmp(str, "{[0]=0}{[1]=1 [2]=2}{}{[10]=10}") == 0);
     bsa_free(b);
 
 }
