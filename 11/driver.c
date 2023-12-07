@@ -8,7 +8,7 @@ void twice(int* p, int* n);
 int main(void)
 {
 
-   // test();
+   test();
    char str[LISTSTRLEN] = "";
 
    // A NULL BSA has size zero
