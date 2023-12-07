@@ -1,4 +1,4 @@
-CC=gcc #test clang before submission.
+CC=clang #test clang before submission.
 COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 -Werror
 DEBUG= -g3
 SANITIZE= $(COMMON) -fsanitize=undefined -fsanitize=address $(DEBUG)

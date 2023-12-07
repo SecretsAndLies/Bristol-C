@@ -282,15 +282,15 @@ void test_bsa_get(void)
     bsa_set(b, 4, 14);
 
     int* p = bsa_get(b, 0);
-    assert(*p = 10);
+    assert(*p == 10);
     p = bsa_get(b, 1);
-    assert(*p = 11);
+    assert(*p == 11);
     p = bsa_get(b, 2);
-    assert(*p = 12);
+    assert(*p == 12);
     p = bsa_get(b, 3);
-    assert(*p = 13);
+    assert(*p == 13);
     p = bsa_get(b, 4);
-    assert(*p = 14);
+    assert(*p == 14);
     bsa_free(b);
 
     bsa* c = bsa_init();
