@@ -42,11 +42,9 @@ bool is_invalid_input(bsa* b, int indx)
     if(b == NULL){
         return true;
     }
-
     if(is_invalid_index(indx)){
         return true;
     }
-
     return false;
 }
 
@@ -60,7 +58,6 @@ bool bsa_set(bsa* b, int indx, int d)
     }
     int row_i = get_row(indx);
     row * r = &(b->row_arr[row_i]);
-
     if(r->r_size == 0){
         int len = r->r_len;
         int size = sizeof(int_s);
@@ -140,7 +137,6 @@ void test_is_invalid_input(void)
 
 int get_row_len(int row) 
 {
-    // same as 2 ^ row
     return 1 << row;
 }
 
@@ -157,9 +153,7 @@ void test_get_row_len(void)
 
 int get_col(int row, int index) 
 {
-    // avoids edge cases and zero issues
     int n = index + 1;
-    // this is the same as row^2
     return n - (1 << row);
 }
 
@@ -498,6 +492,7 @@ bool bsa_tostring(bsa* b, char* str)
         return true;
     }
     int max_row = get_max_filled_row(b);
+    // TODO change to i
     for(int r = 0; r <= max_row; r++){
         build_row_string(str, r, b);
     }
@@ -577,6 +572,7 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
         return;
     }
     int max_row = get_max_filled_row(b);
+    // todo change to j i.
     for(int i = 0; i <= max_row; i++){
         row r = b->row_arr[i];
         if(r.int_arr && r.r_size > 0){
