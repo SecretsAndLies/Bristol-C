@@ -1,7 +1,7 @@
 #include "../bsa.h"
 
 #define LISTSTRLEN 1000
-#define MAX_INDEX 1073741822
+#define OFFSET 2
 
 typedef struct int_s {
     int num;
@@ -43,3 +43,5 @@ void build_row_string(char* str, int r, bsa* b);
 void test_bsa_foreach(void);
 void test_is_invalid_input(void);
 void add(int* p, int* n);
+int get_max_index(int row_count);
+void test_get_max_index(void);

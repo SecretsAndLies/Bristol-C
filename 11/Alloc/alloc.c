@@ -50,18 +50,6 @@ bool is_invalid_input(bsa* b, int indx)
     return false;
 }
 
-void test_is_invalid_input(void) 
-{
-    bsa* b = bsa_init();
-    assert(is_invalid_input(NULL, 0));
-    assert(is_invalid_input(b, -1));
-    assert(is_invalid_input(b, MAX_INDEX + 1));
-    assert(is_invalid_input(b, 0) == false);
-    assert(is_invalid_input(b, 1) == false);
-    assert(is_invalid_input(b, MAX_INDEX) == false);
-    bsa_free(b);
-}
-
 // Set element at index indx with value d i.e. b[i] = d;
 // May require an allocation if it's the first element in
 // that row
@@ -120,11 +108,33 @@ void test_bsa_set(void)
     }
     assert(b->total_size == 10000);
 
-    assert(bsa_set(b, MAX_INDEX, 19));
-    assert(*bsa_get(b, MAX_INDEX) == 19);
+    assert(bsa_set(b, get_max_index(BSA_ROWS), 19));
+    assert(*bsa_get(b, get_max_index(BSA_ROWS)) == 19);
 
-    assert(!bsa_set(b, MAX_INDEX + 1, 19));
+    assert(!bsa_set(b, get_max_index(BSA_ROWS) + 1, 19));
 
+    bsa_free(b);
+}
+
+int get_max_index(int row_count)
+{
+    return (1<<row_count)-OFFSET;
+}
+
+void test_get_max_index(void)
+{
+    assert(get_max_index(30)==1073741822);
+}
+
+void test_is_invalid_input(void) 
+{
+    bsa* b = bsa_init();
+    assert(is_invalid_input(NULL, 0));
+    assert(is_invalid_input(b, -1));
+    assert(is_invalid_input(b, get_max_index(BSA_ROWS) + 1));
+    assert(is_invalid_input(b, 0) == false);
+    assert(is_invalid_input(b, 1) == false);
+    assert(is_invalid_input(b, get_max_index(BSA_ROWS)) == false);
     bsa_free(b);
 }
 
@@ -223,14 +233,17 @@ void test_is_invalid_index(void)
     assert(is_invalid_index(5) == false);
     assert(is_invalid_index(0) == false);
     assert(is_invalid_index(-1));
-    assert(is_invalid_index(MAX_INDEX - 1) == false);
-    assert(is_invalid_index(MAX_INDEX) == false);
-    assert(is_invalid_index(MAX_INDEX + 1));
+    assert(is_invalid_index(get_max_index(BSA_ROWS) - 1) == false);
+    assert(is_invalid_index(get_max_index(BSA_ROWS)) == false);
+    assert(is_invalid_index(get_max_index(BSA_ROWS) + 1));
 }
 
 bool is_invalid_index(int indx) 
 {
-    if(indx > MAX_INDEX){
+    if(BSA_ROWS<1){
+        on_error("BSA_ROWS must be greater than 0.");
+    }
+    if(indx > get_max_index(BSA_ROWS)){
         return true;
     }
     if(indx < 0){
@@ -491,7 +504,6 @@ bool bsa_tostring(bsa* b, char* str)
     return true;
 }
 
-// todo row.
 void build_row_string(char* str, int r, bsa* b) 
 {
     strcat(str, "{");

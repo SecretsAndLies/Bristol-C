@@ -24,7 +24,7 @@ void on_error(const char* s)
 // Set element at index indx with value d i.e. b[i] = d;
 bool bsa_set(bsa* b, int indx, int d)
 {
-    if(b == NULL){
+    if(is_invalid_input(b, indx)){
         return false;
     }
     int bucket = hash(indx);
@@ -62,7 +62,7 @@ int hash(int index)
 // or NULL if element is unset
 int* bsa_get(bsa* b, int indx)
 {
-    if(b == NULL){
+    if(is_invalid_input(b, indx)){
         return false;
     }
     int bucket = hash(indx);
@@ -81,7 +81,7 @@ int* bsa_get(bsa* b, int indx)
 // Delete element at index indx 
 bool bsa_delete(bsa* b, int indx)
 {
-    if(b == NULL){
+    if(is_invalid_input(b, indx)){
         return false;
     }
     int bucket = hash(indx);
@@ -109,10 +109,10 @@ bool bsa_delete(bsa* b, int indx)
 // -1 if no cells have been written to yet
 int bsa_maxindex(bsa* b)
 {
-    if(b == NULL){
-        return -1;
-    }
     int max = -1;
+    if(b == NULL){
+        return max;
+    }
     for(int i = 0; i < SIZE; i++){
         node* curr = b->buckets[i];
 
@@ -151,7 +151,7 @@ bool bsa_free(bsa* b)
 // and maintains an accumulator of the result where required.
 void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 {
-    if(b == NULL){
+    if(!b || !func || !acc){
         return;
     }
     int max = bsa_maxindex(b);
@@ -165,6 +165,8 @@ void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc)
 
 void test(void)
 {
+    test_is_invalid_index();
+    test_is_invalid_input();
     node * n = create_node(0, 10);
     assert(n->index==0);
     assert(n->num==10);
@@ -199,7 +201,7 @@ void test(void)
     assert(bsa_set(b, 0, 0));
     assert(bsa_set(b, 15, 15));
 
-    // Get some values tbsa've already been set
+    // Get some values that've already been set
     int* p = bsa_get(b, 0);
     assert(p);
     assert(*p == 0);
@@ -308,4 +310,43 @@ bool bsa_tostring(bsa* b, char* str)
         return false;
     }
     return false;
+}
+
+
+bool is_invalid_input(bsa* b, int indx) 
+{
+    if(b == NULL){
+        return true;
+    }
+
+    if(is_invalid_index(indx)){
+        return true;
+    }
+
+    return false;
+}
+
+bool is_invalid_index(int indx) 
+{
+    if(indx < 0){
+        return true;
+    }
+    return false;
+}
+
+void test_is_invalid_index(void) 
+{
+    assert(is_invalid_index(5) == false);
+    assert(is_invalid_index(0) == false);
+    assert(is_invalid_index(-1));
+}
+
+void test_is_invalid_input(void) 
+{
+    bsa* b = bsa_init();
+    assert(is_invalid_input(NULL, 0));
+    assert(is_invalid_input(b, -1));
+    assert(is_invalid_input(b, 0) == false);
+    assert(is_invalid_input(b, 1) == false);
+    bsa_free(b);
 }
