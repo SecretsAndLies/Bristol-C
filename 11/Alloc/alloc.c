@@ -1,11 +1,10 @@
 #include "specific.h"
 
 // Create an empty BSA
-
 bsa* bsa_init(void) 
 {
     bsa* b = acalloc(1, sizeof(bsa));
-    for (int i = 0; i < BSA_ROWS; i++){
+    for(int i = 0; i < BSA_ROWS; i++){
         row * r = &(b->row_arr[i]);
         r->r_len = get_row_len(i);
     }
@@ -19,7 +18,7 @@ void test_bsa_init(void)
     assert(b);
     // check calloc worked sucessfully
     assert(b->total_size == 0);
-    for (int i = 0; i < BSA_ROWS; i++){
+    for(int i = 0; i < BSA_ROWS; i++){
         assert(b->row_arr[i].int_arr == NULL);
         assert(b->row_arr[i].r_size == 0);
     }
@@ -40,11 +39,11 @@ void test_bsa_init(void)
 
 bool is_invalid_input(bsa* b, int indx) 
 {
-    if (b == NULL){
+    if(b == NULL){
         return true;
     }
 
-    if (is_invalid_index(indx)){
+    if(is_invalid_index(indx)){
         return true;
     }
 
@@ -68,20 +67,20 @@ void test_is_invalid_input(void)
 // that row
 bool bsa_set(bsa* b, int indx, int d) 
 {
-    if (is_invalid_input(b, indx)){
+    if(is_invalid_input(b, indx)){
         return false;
     }
     int row_i = get_row(indx);
     row * r = &(b->row_arr[row_i]);
 
-    if (r->r_size == 0){
+    if(r->r_size == 0){
         int len = r->r_len;
         int size = sizeof(int_s);
         r->int_arr = acalloc(len, size);
     }
     int col_i = get_col(row_i, indx);
     bool num_set = r->int_arr[col_i].set;
-    if (!num_set){
+    if(!num_set){
         r->r_size++;
         b->total_size++;
     }
@@ -116,7 +115,7 @@ void test_bsa_set(void)
     assert(b->row_arr[2].r_size == 1);
 
     // test adding values (overwriting existing)
-    for (int i = 0; i < 10000; i++){
+    for(int i = 0; i < 10000; i++){
         bsa_set(b, i, i);
     }
     assert(b->total_size == 10000);
@@ -197,7 +196,7 @@ int get_row(int indx)
 {
     int n = indx + 1;
     int row = 0;
-    while (n > 1){
+    while(n > 1){
         n = n >> 1;
         row++;
     }
@@ -231,10 +230,10 @@ void test_is_invalid_index(void)
 
 bool is_invalid_index(int indx) 
 {
-    if (indx > MAX_INDEX){
+    if(indx > MAX_INDEX){
         return true;
     }
-    if (indx < 0){
+    if(indx < 0){
         return true;
     }
     return false;
@@ -245,16 +244,16 @@ bool is_invalid_index(int indx)
 // been allocated.
 int* bsa_get(bsa* b, int indx) 
 {
-    if (is_invalid_input(b, indx)){
+    if(is_invalid_input(b, indx)){
         return false;
     }
     int row_i = get_row(indx);
     int col_i = get_col(row_i, indx);
     row * r = &(b->row_arr[row_i]);
-    if (r->r_size == 0){
+    if(r->r_size == 0){
         return NULL;
     }
-    if (r->int_arr[col_i].set == false){
+    if(r->int_arr[col_i].set == false){
         return NULL;
     }
     return &(r->int_arr[col_i].num);
@@ -283,10 +282,10 @@ void test_bsa_get(void)
 
     bsa* c = bsa_init();
 
-    for (int i = 0; i < 10000; i++){
+    for(int i = 0; i < 10000; i++){
         bsa_set(c, i, i - 2);
     }
-    for (int i = 0; i < 10000; i++){
+    for(int i = 0; i < 10000; i++){
         assert(*bsa_get(c, i) == i - 2);
     }
     bsa_free(c);
@@ -296,23 +295,23 @@ void test_bsa_get(void)
 // if that was the only cell in the row occupied.
 bool bsa_delete(bsa* b, int indx) 
 {
-    if (is_invalid_input(b, indx)){
+    if(is_invalid_input(b, indx)){
         return false;
     }
     int row_i = get_row(indx);
     int col_i = get_col(row_i, indx);
     row * r = &(b->row_arr[row_i]);
 
-    if (r->r_size == 0){
+    if(r->r_size == 0){
         return false;
     }
-    if (r->int_arr[col_i].set == false){
+    if(r->int_arr[col_i].set == false){
         return false;
     }
     r->r_size--;
     b->total_size--;
     r->int_arr[col_i].set = false;
-    if (r->r_size == 0){
+    if(r->r_size == 0){
         free(r->int_arr);
         r->int_arr = NULL;
     }
@@ -354,15 +353,15 @@ void test_bsa_delete(void)
 // -1 if no cells have been written to yet
 int bsa_maxindex(bsa* b) 
 {
-    if (b == NULL || b->total_size == 0){
+    if(b == NULL || b->total_size == 0){
         return -1;
     }
     int max_row = get_max_filled_row(b);
     row r = b->row_arr[max_row];
     int row_len = r.r_len;
     int max_index = 0;
-    for (int i = 0; i < row_len; i++){
-        if (r.int_arr[i].set == true){
+    for(int i = 0; i < row_len; i++){
+        if(r.int_arr[i].set == true){
             max_index = i;
         }
     }
@@ -373,9 +372,9 @@ int bsa_maxindex(bsa* b)
 int get_max_filled_row(bsa* b) 
 {
     int max_row = 0;
-    for (int i = 0; i < BSA_ROWS; i++){
+    for(int i = 0; i < BSA_ROWS; i++){
         row r = b->row_arr[i];
-        if (r.r_size != 0){
+        if(r.r_size != 0){
             max_row = i;
         }
     }
@@ -435,7 +434,7 @@ int get_index(int row, int col)
 {
     int sum = 0;
     int i = 0;
-    while (i < row){
+    while(i < row){
         sum += get_row_len(i);
         i++;
     }
@@ -477,16 +476,16 @@ void test_get_index(void)
 // maximum index. Rows after the maximum index are ignored.
 bool bsa_tostring(bsa* b, char* str) 
 {
-    if (b == NULL || str == NULL){
+    if(b == NULL || str == NULL){
         return false;
     }
     str[0] = '\0';
-    if (b->total_size == 0){
+    if(b->total_size == 0){
         strcpy(str, "");
         return true;
     }
     int max_row = get_max_filled_row(b);
-    for (int r = 0; r <= max_row; r++){
+    for(int r = 0; r <= max_row; r++){
         build_row_string(str, r, b);
     }
     return true;
@@ -497,18 +496,18 @@ void build_row_string(char* str, int r, bsa* b)
 {
     strcat(str, "{");
     row row = b->row_arr[r];
-    if (row.int_arr && row.r_size > 0){
+    if(row.int_arr && row.r_size > 0){
         int count = 0;
         int r_len = row.r_len;
-        for (int c = 0; c < r_len; c++){
-            if (row.int_arr[c].set){
+        for(int c = 0; c < r_len; c++){
+            if(row.int_arr[c].set){
                 count++;
                 int indx = get_index(r, c);
                 int value = row.int_arr[c].num;
                 char col_str[LISTSTRLEN] = "";
                 sprintf(col_str, "[%i]=%i", indx, value);
                 strcat(str, col_str);
-                if ((row.r_size) > count){
+                if((row.r_size) > count){
                     strcat(str, " ");
                 }
             }
@@ -543,12 +542,12 @@ void test_bsa_tostring(void)
 // detected using valgrind and sanitizer.
 bool bsa_free(bsa* b) 
 {
-    if (b == NULL){
+    if(b == NULL){
         return false;
     }
-    for (int i = 0; i < BSA_ROWS; i++){
+    for(int i = 0; i < BSA_ROWS; i++){
         row r = b->row_arr[i];
-        if (r.int_arr){
+        if(r.int_arr){
             free(r.int_arr);
             r.int_arr = NULL;
         }
@@ -563,17 +562,17 @@ bool bsa_free(bsa* b)
 // of the result where required.
 void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc) 
 {
-    if (!b || !func || !acc){
+    if(!b || !func || !acc){
         return;
     }
     int max_row = get_max_filled_row(b);
-    for (int i = 0; i <= max_row; i++){
+    for(int i = 0; i <= max_row; i++){
         row r = b->row_arr[i];
-        if (r.int_arr && r.r_size > 0){
+        if(r.int_arr && r.r_size > 0){
             int r_len = r.r_len;
-            for (int j = 0; j < r_len; j++){
+            for(int j = 0; j < r_len; j++){
                 bool num_set = r.int_arr[j].set;
-                if (num_set){
+                if(num_set){
                     func(&(r.int_arr[j].num), acc);
                 }
             }
@@ -632,7 +631,7 @@ void test(void)
     // integration tests for set get and delete
     // add random values sparsely
     bsa* b = bsa_init();
-    for (int i = 3; i <= 393216; i *= 2){
+    for(int i = 3; i <= 393216; i *= 2){
         bsa_set(b, i, i);
         assert(*bsa_get(b, i) == i);
         assert(bsa_delete(b, i));
@@ -680,8 +679,8 @@ void test(void)
     assert(get_max_filled_row(b)==18);
 
     // delete all rows except last
-    for (int i = 3; i < 393216; i*=2){
-        if (bsa_get(b, i)){
+    for(int i = 3; i < 393216; i*=2){
+        if(bsa_get(b, i)){
             assert(bsa_delete(b, i));
         }
         assert(bsa_delete(b, i) == false);
@@ -712,7 +711,7 @@ void test(void)
     assert(get_max_filled_row(b)==18);
     assert(bsa_delete(b, 393216));
     // check that no rows exist
-    for (int i = 0; i < BSA_ROWS; i++){
+    for(int i = 0; i < BSA_ROWS; i++){
         assert(b->row_arr[i].int_arr == NULL);
     }
     bsa_free(b);
@@ -721,7 +720,7 @@ void test(void)
 void* acalloc(int n, size_t size) 
 {
     void* v = calloc(n, size);
-    if (v == NULL){
+    if(v == NULL){
         on_error("Cannot calloc() space");
     }
     return v;

@@ -30,9 +30,9 @@ Unfortunately, depending on the data, this aproach can be slower.
 
 To time the example programs, I created a bash script that ran
 each program 20 times and returned the average user time 
-to 6 significant figures. The results are below.
+to 6 significant figures. The timings (in seconds) are below.
 
-*fibmemo* 0.00045 seconds vs 0.0003 (33% faster)
+*fibmemo* 0.00045 vs 0.0003 (33% faster)
 *sieve* 0.0005 vs 0.0007 (30% slower)
 *isfactorial* 2.13 vs 2.29 (7% slower)
 

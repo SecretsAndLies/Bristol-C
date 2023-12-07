@@ -91,9 +91,9 @@ bool bsa_delete(bsa* b, int indx)
         if(curr->index == indx){
             // If it is the first node in the list
             if(prev == NULL){
-                // this can also set curr->next to null
                 b->buckets[bucket] = curr->next;
-            } else{
+            } 
+            else{
                 prev->next = curr->next;
             }
             free(curr);
@@ -102,8 +102,6 @@ bool bsa_delete(bsa* b, int indx)
         prev = curr;
         curr = curr->next;
     }
-
-    // index not found
     return false;
 }
 
