@@ -1,32 +1,6 @@
-#include "parse.h"
-// <PROG> ::= "START" <INSLST>
-// <INSLST> ::= "END" | <INS> <INSLST>
-// <INS> ::= <FWD> | <RGT> | <COL> | <LOOP> | <SET>
-// <FWD> ::= "FORWARD" <VARNUM>
-// <RGT> ::= "RIGHT" <VARNUM>
-// <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
-// <LOOP> ::= "LOOP" <LTR> "OVER" <LST> <INSLST>
-// <SET> ::= "SET" <LTR> "(" <PFIX>
-// <VARNUM> ::= <VAR> | <NUM>
-// % Variables e.g. $A, $B, $Z etc.
-// <VAR> ::= $<LTR>
-// % One Uppercase letter
-// <LTR> ::= A, B ... Z
-// % Any valid double (as defined by scanf("%lf"...)
-// <NUM> ::= 10 or -17.99 etc.
-// % A single word (as defined by scanf("%s"...) with double-quotes around it
-// % Valid colours include "BLACK", "RED", "GREEN", "BLUE",
-// % "YELLOW", "CYAN", "MAGENTA", "WHITE"
-// <WORD> ::= "RED", "BLUE", "HELLO!" or "178"
-// <LST> ::= "{" <ITEMS>
-// <ITEMS> ::= "}" | <ITEM> <ITEMS>
-// <ITEM> ::= <VARNUM> | <WORD>
-// <PFIX> ::= ")" | <OP> <PFIX> | <VARNUM> <PFIX>
-// % A single mathematical operation character
-// <OP> ::= + - / *
+#include "interp.h"
 
-/// TODO DELETE
-
+// TODO delete
 // https://docs.google.com/spreadsheets/d/1jdvzG2hEDDXJ83oQDXqG4Nl4RXmUWUHoT9VOMphs4Qk/edit#gid=0
 int main( int argc, char *argv[] )  
 {
@@ -35,10 +9,7 @@ int main( int argc, char *argv[] )
       on_error("Wrong number of arguments.");
    }
    Program * prog = get_program(argv[1]);
-   if(program(prog)){
-      puts("PARSED!"); // TODO REMOVE.
-   }
-   else{
+   if(!program(prog)){
       free(prog);
       on_error("Cannot parse.");
    }
@@ -546,6 +517,11 @@ void test_num(void)
 bool fwd(Program *p)
 {
    DEBUG
+   neillclrscrn();
+   neillcursorhome();
+   printf("\033[;10H");
+   printf("ASDDS\n");
+
    // advance past FORWARD
    p->curr_word++;
    return varnum(p);
@@ -695,17 +671,10 @@ Program * get_program(char * prog_name)
    FILE * f = nfopen(prog_name,"r");
    Program* prog = calloc(1, sizeof(Program));
    int i=0;
-   while(fscanf(f, "%s", prog->words[i])==1 && i<MAXNUMTOKENS){
-      if(strlen(prog->words[i])>=MAXTOKENSIZE-1){
-         on_error("File contains words that are too long.");
-      }
-      i++;
-   };
+   while(fscanf(f, "%s", prog->words[i++])==1 && i<MAXNUMTOKENS);
    if(i>=MAXNUMTOKENS){
-      on_error("File is too long (too many words).");
+      on_error("File contains too many tokens to parse.");
    }
-   // TODO test that this fails with strings of 99, 100, 101
-   // and files longer 99, 100, 101 words.
    fclose(f);
    return prog;
 }

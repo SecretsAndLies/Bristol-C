@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "../neillsimplescreen.h"
 
 #define CURRENT_WORD p->words[p->curr_word]
 #define FIRST_LETTER CURRENT_WORD[0]
