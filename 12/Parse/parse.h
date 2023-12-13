@@ -3,15 +3,16 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <ctype.h>
 
+#define CURRENT_WORD p->words[p->curr_word]
+#define FIRST_LETTER CURRENT_WORD[0]
 #define strsame(A,B) (strcmp(A, B)==0)
-#define ERROR(PHRASE) { fprintf(stderr, \
-          "Fatal Error %s occurred in file: %s, function: %s, line: %d\n", PHRASE, \
-          __FILE__, __func__, __LINE__); \
-          exit(EXIT_FAILURE); }
 
-#define MAXNUMTOKENS 100
+#define MAXNUMTOKENS 1000
 #define MAXTOKENSIZE 20
+
+#define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
 struct prog{
    char words[MAXNUMTOKENS][MAXTOKENSIZE];
@@ -21,6 +22,8 @@ struct prog{
 typedef struct prog Program;
 
 void* nfopen(char* fname, char* mode);
+void on_error(const char* s);
+
 Program * get_program(char * prog_name);
 
 bool parse_program(Program *p);
@@ -41,3 +44,37 @@ bool parse_num(Program *p);
 void test_parse_num(void);
 
 void test(void);
+
+bool parse_col(Program *p);
+void test_parse_col(void);
+
+bool parse_loop(Program *p);
+void test_parse_loop(void);
+
+bool parse_set(Program *p);
+
+bool check_ltr(char * s);
+void test_check_ltr(void);
+
+bool parse_var(Program *p);
+void test_parse_var(void);
+
+bool parse_word(Program *p);
+void test_parse_word(void);
+
+bool parse_lst(Program *p);
+
+bool parse_items(Program *p);
+
+bool parse_item(Program *p);
+
+bool parse_varnum(Program * p);
+
+bool is_operator(char c);
+void test_is_operator(void);
+
+bool parse_op(Program *p);
+void test_parse_op(void);
+
+bool is_number(char * str);
+void test_is_number(void);
