@@ -26,6 +26,7 @@
 // <OP> ::= + - / *
 
 /// TODO DELETE
+// TODO delete debug
 
 // https://docs.google.com/spreadsheets/d/1jdvzG2hEDDXJ83oQDXqG4Nl4RXmUWUHoT9VOMphs4Qk/edit#gid=0
 int main( int argc, char *argv[] )  
@@ -566,6 +567,7 @@ bool ins(Program *p)
 {
    DEBUG
    // todo switch?
+   // todo think about changing this so that the words are passed in the function.
    if(strsame(CURRENT_WORD, "FORWARD")){
       return fwd(p);
    }

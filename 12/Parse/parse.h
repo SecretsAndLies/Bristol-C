@@ -14,12 +14,10 @@
 
 #define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
-struct prog{
+typedef struct Program{
    char words[MAXNUMTOKENS][MAXTOKENSIZE];
    int curr_word;
-};
-
-typedef struct prog Program;
+} Program;
 
 void* nfopen(char* fname, char* mode);
 void on_error(const char* s);

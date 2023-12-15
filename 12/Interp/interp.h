@@ -13,14 +13,53 @@
 #define MAXNUMTOKENS 1000
 #define MAXTOKENSIZE 100
 
+#define TURTLE "#"
+#define TIME_TO_WAIT 1
+
+#define SCREEN_HEIGHT 51
+#define SCREEN_WIDTH 33
+#define SCREEN_MID_ROW SCREEN_HEIGHT/2
+#define SCREEN_MID_COL SCREEN_WIDTH/2
+
+#define START_ANGLE 180
+
 #define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
-struct prog{
+#define NUM_VARIABLES 27 // this is 26 + a constant 1
+#define CONST_VAR_INDEX 26 // 0-25 is A-Z
+
+typedef enum {
+  NONE,
+  PS,
+  TXT
+} File_Type; 
+
+typedef enum {
+  INT,
+  STRING
+} Var_Type; 
+
+typedef struct Variable{
+   Var_Type var_type;
+   char str_var[MAXTOKENSIZE];
+   int int_var;
+} Variable;
+
+typedef struct Turtle
+{
+   double x;
+   double y;
+   char output[SCREEN_WIDTH][SCREEN_HEIGHT]; 
+   double angle;
+   neillcol col;
+   Variable variables[NUM_VARIABLES];
+} Turtle;
+
+typedef struct Program{
    char words[MAXNUMTOKENS][MAXTOKENSIZE];
    int curr_word;
-};
-
-typedef struct prog Program;
+   Turtle ttl;
+} Program;
 
 void* nfopen(char* fname, char* mode);
 void on_error(const char* s);
@@ -77,5 +116,12 @@ void test_is_operator(void);
 bool op(Program *p);
 void test_op(void);
 
-bool is_number(char * str);
-void test_is_number(void);
+void test_get_number(void);
+bool get_number(char * str, double * num);
+
+
+
+void cursor_goto(int row, int col);
+// no testing needed.
+
+

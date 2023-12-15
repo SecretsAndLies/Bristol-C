@@ -3,6 +3,8 @@
    Will only work on ANSI compliant terminals :
    https://en.wikipedia.org/wiki/ANSI_escape_code
    such as xterm, WSL etc.
+   Also see:
+   https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 */
 
 #include "neillsimplescreen.h"
@@ -13,7 +15,8 @@ void neillclrscrn(void)
    printf("\033[2J");
 }
 
-/* Issue ANSI Codes to move cursor home */
+/* Issue ANSI Codes to move cursor to 
+the middle of a default terminal */
 void neillcursorhome(void)
 {
    printf("\033[H");

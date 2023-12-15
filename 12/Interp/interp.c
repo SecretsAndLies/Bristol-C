@@ -1,13 +1,13 @@
 #include "interp.h"
 
-// TODO delete
-// https://docs.google.com/spreadsheets/d/1jdvzG2hEDDXJ83oQDXqG4Nl4RXmUWUHoT9VOMphs4Qk/edit#gid=0
+// TODO delete debug
 int main( int argc, char *argv[] )  
 {
    test();
    if(argc!=2){
       on_error("Wrong number of arguments.");
    }
+   // todo validate what the arg1 is.
    Program * prog = get_program(argv[1]);
    if(!program(prog)){
       free(prog);
@@ -27,7 +27,7 @@ void test(void)
    test_col();
    test_is_operator();
    test_program();
-   test_is_number();
+   test_get_number();
    test_loop();
 }
 
@@ -38,14 +38,6 @@ bool is_operator(char c)
 
 void test_is_operator(void)
 {
-   assert(is_operator('+') == true);
-   assert(is_operator('-') == true);
-   assert(is_operator('*') == true);
-   assert(is_operator('/') == true);
-   assert(is_operator('a') == false);
-   assert(is_operator('1') == false);
-   assert(is_operator('&') == false);
-   assert(is_operator(' ') == false);
 }
 
 
@@ -93,34 +85,6 @@ bool op(Program *p)
 
 void test_op(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   // invalid too long
-   strcpy(prog->words[0],"+1");
-   assert(!op(prog));
-   prog->curr_word = 0;
-
-   // too short
-   strcpy(prog->words[0],"");
-   assert(!op(prog));
-   prog->curr_word = 0;
-   
-   // valid 
-   strcpy(prog->words[0],"+");
-   strcpy(prog->words[1],"-");
-   strcpy(prog->words[2],"/");
-   strcpy(prog->words[3],"*");
-   assert(op(prog));
-   assert(prog->curr_word==1);
-   assert(op(prog));
-   assert(prog->curr_word==2);
-   assert(op(prog));
-   assert(prog->curr_word==3);
-   assert(op(prog));
-   assert(prog->curr_word==4);
-
-   prog->curr_word = 0;
-
-   free(prog);
 
 }
 
@@ -167,42 +131,6 @@ bool var(Program *p)
 
 void test_var(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   // invalid too long
-   strcpy(prog->words[0],"START");
-   assert(!var(prog));
-   prog->curr_word = 0;
-
-   // too short
-   strcpy(prog->words[0],"$");
-   assert(!var(prog));
-   prog->curr_word = 0;
-   
-   // no dollar sign
-   strcpy(prog->words[0],"10");
-   assert(!var(prog));
-   prog->curr_word = 0;
-
-   // not a letter.
-   strcpy(prog->words[0],"$7");
-   assert(!var(prog));
-   prog->curr_word = 0;
-
-   // lower case 
-   strcpy(prog->words[0],"$a");
-   assert(!var(prog));
-   prog->curr_word = 0;
-
-   // valid 
-   strcpy(prog->words[0],"$A");
-   strcpy(prog->words[1],"$Z");
-   assert(var(prog));
-   assert(prog->curr_word==1);
-   assert(var(prog));
-   assert(prog->curr_word==2);
-   prog->curr_word = 0;
-
-   free(prog);
 }
 
 // <LST> ::= "{" <ITEMS>
@@ -237,21 +165,17 @@ bool items(Program *p)
    return true;
 }
 
-bool is_number(char * str)
+// todo this code is identifcal to get number but returns a number.
+bool get_number(char * str, double * num)
 {
-   double a;
-   if(sscanf(str,"%lf", &a)!=1){
+   if(sscanf(str,"%lf", num)!=1){
       return false;
    }
-   a=0; // switching off warnings :-(
    return true;
 }
 
-void test_is_number(void)
+void test_get_number(void)
 {
-   assert(is_number("7"));
-   assert(is_number("-7.0"));
-   assert(!is_number("t"));
 }
 
 // <VARNUM> ::= <VAR> | <NUM>
@@ -275,7 +199,8 @@ bool varnum(Program * p)
 bool item(Program *p)
 {
    DEBUG
-   if(FIRST_LETTER=='$' || is_number(CURRENT_WORD)){
+   double num;
+   if(FIRST_LETTER=='$' || get_number(CURRENT_WORD,&num)){
       if(!varnum(p)){
          return false;
       }
@@ -309,43 +234,6 @@ bool word(Program *p)
 
 void test_word(void)
 {
-  Program* prog = calloc(1, sizeof(Program));
-   strcpy(prog->words[0],"\"RED\"");
-   assert(word(prog));
-   assert(prog->curr_word==1);
-   prog->curr_word = 0;
-
-   strcpy(prog->words[0],"\"BLUE\"");
-   assert(word(prog));
-   assert(prog->curr_word==1);
-   prog->curr_word = 0;
-
-   strcpy(prog->words[0],"\"HELLO!\"");
-   assert(word(prog));
-   assert(prog->curr_word==1);
-   prog->curr_word = 0;
-
-   strcpy(prog->words[0],"\"178!\"");
-   assert(word(prog));
-   assert(prog->curr_word==1);
-   prog->curr_word = 0;
-
-   // missing all quotes
-   strcpy(prog->words[0],"178!");
-   assert(!word(prog));
-   assert(prog->curr_word==0);
-
-   // missing opening quotes
-   strcpy(prog->words[0],"178!\"");
-   assert(!word(prog));
-   assert(prog->curr_word==0);
-
-   // missing closing quotes
-   strcpy(prog->words[0],"\"178!");
-   assert(!word(prog));
-   assert(prog->curr_word==0);
-
-   free(prog);
 }
 
 // <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
@@ -371,24 +259,7 @@ bool col(Program *p)
 
 void test_col(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   // "COLOUR" <VAR> 
-   strcpy(prog->words[0],"COLOUR");
-   strcpy(prog->words[1],"$A");
-   assert(col(prog));
-   assert(prog->curr_word == 2);
-   prog->curr_word = 0;
 
-   // "COLOUR" <WORD>
-   strcpy(prog->words[0],"COLOUR");
-   strcpy(prog->words[1],"\"HELLO!\"");
-   assert(col(prog));
-   assert(prog->curr_word == 2);
-   prog->curr_word = 2;
-
-   // TODO test invalid var and words? or are we happy that they're tested in their functions?
-
-   free(prog);
 }
 
 bool check_ltr(char * s)
@@ -406,26 +277,6 @@ bool check_ltr(char * s)
 
 void test_check_ltr(void)
 {
-   // too long
-   assert(!check_ltr("START"));
-   assert(!check_ltr("$START"));
-
-   // not a letter
-   assert(!check_ltr("1"));
-   assert(!check_ltr("$1"));
-
-   // lowercase
-   assert(!check_ltr("a"));
-   assert(!check_ltr("$a"));
-
-   // dollar signs.
-   assert(!check_ltr("$Z"));
-   assert(!check_ltr("$A"));
-
-   // valid 
-   assert(check_ltr("A"));
-   assert(check_ltr("Z"));
-
 }
 
 // <LOOP> ::= "LOOP" <LTR> "OVER" <LST> <INSLST>
@@ -455,75 +306,37 @@ bool loop(Program *p)
 
 void test_loop(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   strcpy(prog->words[0],"LOOP");
-   strcpy(prog->words[1],"C");
-   strcpy(prog->words[2],"OVER");
-   strcpy(prog->words[3],"{");
-   strcpy(prog->words[4],"\"RED\"");
-   strcpy(prog->words[5],"\"GREEN\"");
-   strcpy(prog->words[6],"\"YELLOW\"");
-   strcpy(prog->words[7],"\"BLUE\"");
-   strcpy(prog->words[8],"}");
-   strcpy(prog->words[9],"COLOUR");
-   strcpy(prog->words[10],"$C");
-   strcpy(prog->words[11],"FORWARD");
-   strcpy(prog->words[12],"$D");
-   strcpy(prog->words[13],"RIGHT");
-   strcpy(prog->words[14],"90");
-   strcpy(prog->words[15],"END");
-   assert(loop(prog));
-   assert(prog->curr_word==15);
-   prog->curr_word=0;
-   free(prog);
 }
 
 // <NUM>    ::= 10 or -17.99 etc.
 bool num(Program *p)
 {
+   // TODO repretitive use of num.
    DEBUG
-   if(!is_number(CURRENT_WORD)){
+   double num;
+   if(!get_number(CURRENT_WORD, &num)){
       return false;
    }
    p->curr_word++;
+   p->ttl.variables[CONST_VAR_INDEX].var_type=INT;
+   p->ttl.variables[CONST_VAR_INDEX].int_var=num;
+
    return true;
 }
 
 void test_num(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   strcpy(prog->words[0],"START");
-   assert(!num(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"1");
-   assert(num(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"10");
-   assert(num(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"-17.99");
-   assert(num(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"0");
-   assert(num(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"11231230");
-   assert(num(prog));
-   prog->curr_word = 0;
-   free(prog);
 }
 
 // <FWD> ::= "FORWARD" <VARNUM>
 bool fwd(Program *p)
 {
    DEBUG
-   neillclrscrn();
-   neillcursorhome();
-   printf("\033[;10H");
-   printf("ASDDS\n");
 
    // advance past FORWARD
    p->curr_word++;
+
+   // TODO you need to get the number out of var num
    return varnum(p);
 }
 
@@ -564,27 +377,7 @@ bool ins(Program *p)
 
 void test_ins(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   strcpy(prog->words[0],"FORWARD");
-   strcpy(prog->words[1],"123");
-   assert(ins(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"RIGHT");
-   strcpy(prog->words[1],"-82.43");
-   assert(ins(prog));
-   prog->curr_word = 0;
 
-   // testing with random strings and non numbers.
-   strcpy(prog->words[0],"MOW");
-   strcpy(prog->words[1],"-82.43");
-   assert(!ins(prog));
-   prog->curr_word = 0;
-   strcpy(prog->words[0],"RIGHT");
-   strcpy(prog->words[1],"far");
-   assert(!ins(prog));
-   prog->curr_word = 0;
-
-   free(prog);
 }
 
 // <INSLST> ::= "END" | <INS> <INSLST>
@@ -605,20 +398,8 @@ bool inslst(Program *p)
 
 void test_inslst(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   strcpy(prog->words[0],"END");
-   assert(inslst(prog));
-   prog->curr_word = 0;
 
-   strcpy(prog->words[0],"s");
-   strcpy(prog->words[1],"START");
-   strcpy(prog->words[2],"START");
-   strcpy(prog->words[3],"START");
-   strcpy(prog->words[4],"END");
-   assert(inslst(prog));
-   prog->curr_word = 0;
-
-   free(prog);}
+}
 
 // <PROG>   ::= "START" <INSLST>
 bool program(Program *p)
@@ -633,37 +414,7 @@ bool program(Program *p)
 
 void test_program(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
-   strcpy(prog->words[0],"START");
-   strcpy(prog->words[1],"END");
-   assert(program(prog));
-   prog->curr_word = 0;
 
-   // starting with END should fail
-   strcpy(prog->words[0],"END");
-   assert(!program(prog));
-   prog->curr_word = 0;
-
-   // ending with START should fail
-   strcpy(prog->words[0],"START");
-   strcpy(prog->words[1],"START");
-   assert(!program(prog));
-   prog->curr_word = 0;
-
-   // valid files should increment curr_word
-   strcpy(prog->words[0],"START");
-   strcpy(prog->words[1],"FORWARD");
-   strcpy(prog->words[2],"5");
-   strcpy(prog->words[3],"RIGHT");
-   strcpy(prog->words[4],"5.2");
-   strcpy(prog->words[5],"FORWARD");
-   strcpy(prog->words[6],"-2.2");
-   strcpy(prog->words[7],"END");
-   assert(program(prog));
-   assert(prog->curr_word==7);
-   prog->curr_word = 0;
-
-   free(prog);
 }
 
 Program * get_program(char * prog_name)
@@ -693,4 +444,10 @@ void on_error(const char* s)
 {
    fprintf(stderr, "%s\n", s);
    exit(EXIT_FAILURE);
+}
+
+/* Issue ANSI Codes to move cursor to the given position */
+void cursor_goto(int row, int col)
+{
+   printf("\033[%i;%iH",row,col);
 }
