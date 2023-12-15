@@ -32,14 +32,10 @@
 int main( int argc, char *argv[] )  
 {
    test();
-   if(argc!=2){
-      on_error("Wrong number of arguments.");
-   }
+   check_args_valid(argc, argv);
+
    Program * prog = get_program(argv[1]);
-   if(program(prog)){
-      puts("PARSED!"); // TODO REMOVE.
-   }
-   else{
+   if(!program(prog)){
       free(prog);
       on_error("Cannot parse.");
    }
@@ -59,6 +55,20 @@ void test(void)
    test_program();
    test_is_number();
    test_loop();
+}
+
+void check_args_valid(int argc, char *argv[])
+{
+   if(argc!=MAX_ARGS){
+      on_error("Wrong number of arguments.");
+   }
+   int len = strlen(argv[1]);
+   if(len<=MIN_FILENAME_LEN){
+      on_error("Invalid filename: too short.");
+   }
+   if(strsame(&argv[1][len-MIN_FILENAME_LEN-1],".ttl")){
+      on_error("Invalid filename: must end with .ttl");
+   }
 }
 
 bool is_operator(char c)

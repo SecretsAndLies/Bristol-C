@@ -11,6 +11,8 @@
 
 #define MAXNUMTOKENS 1000
 #define MAXTOKENSIZE 100
+#define MAX_ARGS 2
+#define MIN_FILENAME_LEN 4    // must be at least 4 characters (ie: a.ttl)
 
 #define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
@@ -76,3 +78,7 @@ void test_op(void);
 
 bool is_number(char * str);
 void test_is_number(void);
+
+void check_args_valid(int argc, char *argv[]);
+
+

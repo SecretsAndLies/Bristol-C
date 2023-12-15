@@ -5,20 +5,5 @@
 to help with debugging the parser. adding debug at the top of every function
 helped identify where things were going wrong (and then I could write tests to catch errors)
 
-
-
-                                                   
-                             WWWWWW                
-                            W      W               
-                           W        W              
-                          W          W             
-                         W            W            
-                         W            W            
-                         W            W            
-                         W            W            
-                         W            W            
-                         W            W            
-                          W          W             
-                           W        W              
-                            W      W               
-                             WWWWWW                
+- wrote a bash script (test.sh) that determines that each of the provided example 
+scripts exit with the correct error code.
