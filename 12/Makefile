@@ -1,3 +1,4 @@
+#todo before submission, test with clang, remove warn error, and check your valgrinds.
 CC=gcc
 COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 #-Werror
 DEBUG= -g3
@@ -5,17 +6,26 @@ SANITIZE= $(COMMON) -fsanitize=undefined -fsanitize=address $(DEBUG)
 VALGRIND= $(COMMON) $(DEBUG)
 PRODUCTION= $(COMMON) -O3
 
-all: parse_s interp_s
+all: parse_s interp_s parse_v
 
 parse_s: Parse/parse.h Parse/parse.c
 	$(CC) Parse/parse.c -o parse_s -I./Parse $(SANITIZE) -lm
 
+parse_v: Parse/parse.h Parse/parse.c
+	$(CC) Parse/parse.c -o parse_v -I./Parse $(VALGRIND) -lm
+
 interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
 	$(CC) neillsimplescreen.c Interp/interp.c -o interp_s -I./Interp $(SANITIZE) -lm
+
+interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
+	$(CC) neillsimplescreen.c Interp/interp.c -o interp_v -I./Interp $(VALGRIND) -lm
 
 ## An example : you may wish to adapt this slightly
 extension_s: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h
 	$(CC) neillsimplescreen.c Extension/extension.c -o extension_s -I./Extension $(SANITIZE) -lm
+
+extension_v: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h
+	$(CC) neillsimplescreen.c Extension/extension.c -o extension_v -I./Extension $(SANITIZE) -lm
 
 run: all
 	./parse_s TTLs/empty.ttl

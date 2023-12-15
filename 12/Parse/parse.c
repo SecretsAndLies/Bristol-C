@@ -1,34 +1,6 @@
 #include "parse.h"
-// <PROG> ::= "START" <INSLST>
-// <INSLST> ::= "END" | <INS> <INSLST>
-// <INS> ::= <FWD> | <RGT> | <COL> | <LOOP> | <SET>
-// <FWD> ::= "FORWARD" <VARNUM>
-// <RGT> ::= "RIGHT" <VARNUM>
-// <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
-// <LOOP> ::= "LOOP" <LTR> "OVER" <LST> <INSLST>
-// <SET> ::= "SET" <LTR> "(" <PFIX>
-// <VARNUM> ::= <VAR> | <NUM>
-// % Variables e.g. $A, $B, $Z etc.
-// <VAR> ::= $<LTR>
-// % One Uppercase letter
-// <LTR> ::= A, B ... Z
-// % Any valid double (as defined by scanf("%lf"...)
-// <NUM> ::= 10 or -17.99 etc.
-// % A single word (as defined by scanf("%s"...) with double-quotes around it
-// % Valid colours include "BLACK", "RED", "GREEN", "BLUE",
-// % "YELLOW", "CYAN", "MAGENTA", "WHITE"
-// <WORD> ::= "RED", "BLUE", "HELLO!" or "178"
-// <LST> ::= "{" <ITEMS>
-// <ITEMS> ::= "}" | <ITEM> <ITEMS>
-// <ITEM> ::= <VARNUM> | <WORD>
-// <PFIX> ::= ")" | <OP> <PFIX> | <VARNUM> <PFIX>
-// % A single mathematical operation character
-// <OP> ::= + - / *
-
-/// TODO DELETE
 // TODO delete debug
 
-// https://docs.google.com/spreadsheets/d/1jdvzG2hEDDXJ83oQDXqG4Nl4RXmUWUHoT9VOMphs4Qk/edit#gid=0
 int main( int argc, char *argv[] )  
 {
    test();
@@ -45,6 +17,8 @@ int main( int argc, char *argv[] )
 
 void test(void)
 {
+// helpful testing creator: TODO delete?
+// https://docs.google.com/spreadsheets/d/1jdvzG2hEDDXJ83oQDXqG4Nl4RXmUWUHoT9VOMphs4Qk/edit#gid=0
    test_num();
    test_ins();
    test_check_ltr();
@@ -56,6 +30,8 @@ void test(void)
    test_is_number();
    test_loop();
 }
+
+// todo write a test_check_args_valid
 
 void check_args_valid(int argc, char *argv[])
 {
