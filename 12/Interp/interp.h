@@ -12,11 +12,10 @@
 
 #define MAXNUMTOKENS 1000
 #define MAXTOKENSIZE 100
-#define MAX_ARGS 2
+#define MAX_ARGS 3
 #define MIN_FILENAME_LEN 4    // must be at least 4 characters (ie: a.ttl)
 
 
-#define TURTLE "#"
 #define TIME_TO_WAIT 1
 
 #define SCREEN_HEIGHT 51

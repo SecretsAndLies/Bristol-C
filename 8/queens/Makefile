@@ -1,4 +1,4 @@
-# General flags we'll always use (-Werror to prevent code generation if *any* errors)
+#General flags we'll always use (-Werror to prevent code generation if *any* errors)
 GENFLAGS := -Wall -Wextra -pedantic -std=c99 -Wvla -Wfloat-equal -Werror
 
 # -O3 means optimise compiled code for execution speed
