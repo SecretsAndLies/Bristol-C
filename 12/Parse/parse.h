@@ -26,55 +26,55 @@ void on_error(const char* s);
 
 Program * get_program(char * prog_name);
 
-bool program(Program *p);
-void test_program(void);
+bool parse_program(Program *p);
+void test_parse_program(void);
 
-bool inslst(Program *p);
+bool parse_inslst(Program *p);
 
-bool ins(Program *p);
-void test_ins(void);
+bool parse_ins(Program *p);
+void test_parse_ins(void);
 
-bool rgt(Program *p);
+bool parse_rgt(Program *p);
 // tested in test_ins
 
-bool fwd(Program *p);
+bool parse_fwd(Program *p);
 // tested in test_ins 
 
-bool num(Program *p);
-void test_num(void);
+bool parse_num(Program *p);
+void test_parse_num(void);
 
 void test(void);
 
-bool col(Program *p);
-void test_col(void);
+bool parse_col(Program *p);
+void test_parse_col(void);
 
-bool loop(Program *p);
-void test_loop(void);
+bool parse_loop(Program *p);
+void test_parse_loop(void);
 
-bool set(Program *p);
+bool parse_set(Program *p);
 
 bool check_ltr(char * s);
 void test_check_ltr(void);
 
-bool var(Program *p);
-void test_var(void);
+bool parse_var(Program *p);
+void test_parse_var(void);
 
-bool word(Program *p);
-void test_word(void);
+bool parse_word(Program *p);
+void test_parse_word(void);
 
-bool lst(Program *p);
+bool parse_lst(Program *p);
 
-bool items(Program *p);
+bool parse_items(Program *p);
 
-bool item(Program *p);
+bool parse_item(Program *p);
 
-bool varnum(Program * p);
+bool parse_varnum(Program * p);
 
 bool is_operator(char c);
 void test_is_operator(void);
 
-bool op(Program *p);
-void test_op(void);
+bool parse_op(Program *p);
+void test_parse_op(void);
 
 bool is_number(char * str);
 void test_is_number(void);

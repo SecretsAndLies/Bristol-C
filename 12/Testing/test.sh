@@ -37,4 +37,6 @@ check_exit_sucess parse_s 5x5.ttl
 check_exit_sucess parse_s downarrow.ttl
 check_exit_sucess parse_s ok_parse_fail_interp.ttl
 
+# test extension with invalid filename args
+
 exit 0

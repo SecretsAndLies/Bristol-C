@@ -13,8 +13,8 @@
 #define MAXNUMTOKENS 1000
 #define MAXTOKENSIZE 100
 #define MAX_ARGS 3
-#define MIN_FILENAME_LEN 4    // must be at least 4 characters (ie: a.ttl)
-
+#define INPUT_FILE_INDEX 1
+#define OUTPUT_FILE_INDEX 2
 
 #define TIME_TO_WAIT 1
 
@@ -37,14 +37,15 @@ typedef enum {
 } File_Type; 
 
 typedef enum {
-  INT,
+  NUM,
   STRING
 } Var_Type; 
 
 typedef struct Variable{
    Var_Type var_type;
    char str_var[MAXTOKENSIZE];
-   int int_var;
+   double num_var; 
+   bool is_set;
 } Variable;
 
 typedef struct Turtle
@@ -54,13 +55,14 @@ typedef struct Turtle
    char output[SCREEN_WIDTH][SCREEN_HEIGHT]; 
    double angle;
    neillcol col;
-   Variable variables[NUM_VARIABLES];
 } Turtle;
 
 typedef struct Program{
    char words[MAXNUMTOKENS][MAXTOKENSIZE];
    int curr_word;
    Turtle ttl;
+   Variable variables[NUM_VARIABLES];
+   Variable curr_var;
 } Program;
 
 void* nfopen(char* fname, char* mode);
@@ -68,55 +70,56 @@ void on_error(const char* s);
 
 Program * get_program(char * prog_name);
 
-bool program(Program *p);
-void test_program(void);
+bool run_program(Program *p);
+void test_run_program(void);
 
-bool inslst(Program *p);
+bool run_inslst(Program *p);
+void test_run_inslst(void);
 
-bool ins(Program *p);
-void test_ins(void);
+bool run_ins(Program *p);
+void test_run_ins(void);
 
-bool rgt(Program *p);
+bool run_rgt(Program *p);
 // tested in test_ins
 
-bool fwd(Program *p);
+bool run_fwd(Program *p);
 // tested in test_ins 
 
-bool num(Program *p);
-void test_num(void);
+bool run_num(Program *p);
+void test_run_num(void);
 
 void test(void);
 
-bool col(Program *p);
-void test_col(void);
+bool run_col(Program *p);
+void test_run_col(void);
 
-bool loop(Program *p);
-void test_loop(void);
+bool run_loop(Program *p);
+void test_run_loop(void);
 
-bool set(Program *p);
+bool run_set(Program *p);
 
 bool check_ltr(char * s);
 void test_check_ltr(void);
 
-bool var(Program *p);
-void test_var(void);
+bool run_var(Program *p);
+void test_run_var(void);
 
-bool word(Program *p);
-void test_word(void);
+bool run_word(Program *p);
+void test_run_word(void);
 
-bool lst(Program *p);
+bool run_lst(Program *p);
 
-bool items(Program *p);
+bool run_items(Program *p);
 
-bool item(Program *p);
+bool run_item(Program *p);
 
-bool varnum(Program * p);
+bool run_varnum(Program * p);
 
 bool is_operator(char c);
 void test_is_operator(void);
 
-bool op(Program *p);
-void test_op(void);
+bool run_op(Program *p);
+void test_run_op(void);
 
 void test_get_number(void);
 bool get_number(char * str, double * num);
@@ -124,8 +127,23 @@ bool get_number(char * str, double * num);
 
 
 void cursor_goto(int row, int col);
-// no testing needed.
+// no testing needed. pretty sure i can delte.
 
 void check_args_valid(int argc, char *argv[]);
+
+bool is_valid_filename(char * filename, char * ext);
+void test_is_valid_filename(void);
+
+bool get_number_from_variable(char var, double * num, Program * prog);
+void test_get_number_from_variable(void);
+
+
+
+
+
+
+
+
+
 
 

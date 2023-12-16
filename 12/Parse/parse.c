@@ -7,7 +7,7 @@ int main( int argc, char *argv[] )
    check_args_valid(argc, argv);
 
    Program * prog = get_program(argv[1]);
-   if(!program(prog)){
+   if(!parse_program(prog)){
       free(prog);
       on_error("Cannot parse.");
    }
@@ -19,16 +19,16 @@ void test(void)
 {
 // helpful testing creator: TODO delete?
 // https://docs.google.com/spreadsheets/d/1jdvzG2hEDDXJ83oQDXqG4Nl4RXmUWUHoT9VOMphs4Qk/edit#gid=0
-   test_num();
-   test_ins();
+   test_parse_num();
+   test_parse_ins();
    test_check_ltr();
-   test_word();
-   test_var();
-   test_col();
+   test_parse_word();
+   test_parse_var();
+   test_parse_col();
    test_is_operator();
-   test_program();
+   test_parse_program();
    test_is_number();
-   test_loop();
+   test_parse_loop();
 }
 
 // todo write a test_check_args_valid
@@ -66,7 +66,7 @@ void test_is_operator(void)
 
 
 // <PFIX> ::= ")" | <OP> <PFIX> | <VARNUM> <PFIX>
-bool pfix(Program *p)
+bool parse_pfix(Program *p)
 {
    DEBUG
    if(strsame(CURRENT_WORD, ")")){
@@ -75,18 +75,18 @@ bool pfix(Program *p)
    }
    if(is_operator(FIRST_LETTER))
    {
-      if(!op(p)){
+      if(!parse_op(p)){
          return false;
       }
    }
    else {
-      if(!varnum(p)){
+      if(!parse_varnum(p)){
          return false;
       }
    }
 
    // in both cases you need to prefix.
-   if(!pfix(p)){
+   if(!parse_pfix(p)){
       return false;
    }
 
@@ -94,7 +94,7 @@ bool pfix(Program *p)
 }
 
 // <OP> ::= + - / *
-bool op(Program *p)
+bool parse_op(Program *p)
 {
    DEBUG
    if(strlen(CURRENT_WORD)!=1){
@@ -107,17 +107,17 @@ bool op(Program *p)
    return true;
 }
 
-void test_op(void)
+void test_parse_op(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    // invalid too long
    strcpy(prog->words[0],"+1");
-   assert(!op(prog));
+   assert(!parse_op(prog));
    prog->curr_word = 0;
 
    // too short
    strcpy(prog->words[0],"");
-   assert(!op(prog));
+   assert(!parse_op(prog));
    prog->curr_word = 0;
    
    // valid 
@@ -125,13 +125,13 @@ void test_op(void)
    strcpy(prog->words[1],"-");
    strcpy(prog->words[2],"/");
    strcpy(prog->words[3],"*");
-   assert(op(prog));
+   assert(parse_op(prog));
    assert(prog->curr_word==1);
-   assert(op(prog));
+   assert(parse_op(prog));
    assert(prog->curr_word==2);
-   assert(op(prog));
+   assert(parse_op(prog));
    assert(prog->curr_word==3);
-   assert(op(prog));
+   assert(parse_op(prog));
    assert(prog->curr_word==4);
 
    prog->curr_word = 0;
@@ -141,7 +141,7 @@ void test_op(void)
 }
 
 // <SET> ::= "SET" <LTR> "(" <PFIX>
-bool set(Program *p)
+bool parse_set(Program *p)
 {
    DEBUG
    // go past set.
@@ -157,7 +157,7 @@ bool set(Program *p)
    }
    // go past the open bracket.
    p->curr_word++;
-   if(!pfix(p)){
+   if(!parse_pfix(p)){
       return false;
    }
 
@@ -165,7 +165,7 @@ bool set(Program *p)
 }
 
 // <VAR> ::= $<LTR>
-bool var(Program *p)
+bool parse_var(Program *p)
 {
    DEBUG
    if(strlen(CURRENT_WORD)<2){
@@ -181,40 +181,40 @@ bool var(Program *p)
    return true;
 }
 
-void test_var(void)
+void test_parse_var(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    // invalid too long
    strcpy(prog->words[0],"START");
-   assert(!var(prog));
+   assert(!parse_var(prog));
    prog->curr_word = 0;
 
    // too short
    strcpy(prog->words[0],"$");
-   assert(!var(prog));
+   assert(!parse_var(prog));
    prog->curr_word = 0;
    
    // no dollar sign
    strcpy(prog->words[0],"10");
-   assert(!var(prog));
+   assert(!parse_var(prog));
    prog->curr_word = 0;
 
    // not a letter.
    strcpy(prog->words[0],"$7");
-   assert(!var(prog));
+   assert(!parse_var(prog));
    prog->curr_word = 0;
 
    // lower case 
    strcpy(prog->words[0],"$a");
-   assert(!var(prog));
+   assert(!parse_var(prog));
    prog->curr_word = 0;
 
    // valid 
    strcpy(prog->words[0],"$A");
    strcpy(prog->words[1],"$Z");
-   assert(var(prog));
+   assert(parse_var(prog));
    assert(prog->curr_word==1);
-   assert(var(prog));
+   assert(parse_var(prog));
    assert(prog->curr_word==2);
    prog->curr_word = 0;
 
@@ -222,7 +222,7 @@ void test_var(void)
 }
 
 // <LST> ::= "{" <ITEMS>
-bool lst(Program *p)
+bool parse_lst(Program *p)
 {
    DEBUG
    if(!strsame(CURRENT_WORD, "{")){
@@ -230,24 +230,24 @@ bool lst(Program *p)
    }
    // pass {
    p->curr_word++;
-   if(!items(p)){
+   if(!parse_items(p)){
       return false;
    }
    return true;
 }
 
 // <ITEMS> ::= "}" | <ITEM> <ITEMS>
-bool items(Program *p)
+bool parse_items(Program *p)
 {
    DEBUG
    if(strsame(CURRENT_WORD, "}")){
       p->curr_word++;
       return true;
    }
-   if(!item(p)){
+   if(!parse_item(p)){
       return false;
    }
-   if(!items(p)){
+   if(!parse_items(p)){
       return false;
    }
    return true;
@@ -271,16 +271,16 @@ void test_is_number(void)
 }
 
 // <VARNUM> ::= <VAR> | <NUM>
-bool varnum(Program * p)
+bool parse_varnum(Program * p)
 {
    DEBUG
    if(FIRST_LETTER=='$'){
-      if(!var(p)){
+      if(!parse_var(p)){
          return false;
       }
    }
    else {
-      if(!num(p)){
+      if(!parse_num(p)){
          return false;
       }
    }
@@ -288,17 +288,17 @@ bool varnum(Program * p)
 }
 
 // <ITEM> ::= <VARNUM> | <WORD>
-bool item(Program *p)
+bool parse_item(Program *p)
 {
    DEBUG
    if(FIRST_LETTER=='$' || is_number(CURRENT_WORD)){
-      if(!varnum(p)){
+      if(!parse_varnum(p)){
          return false;
       }
    }
    // otherwise it's a word.
    else {
-      if(!word(p)){
+      if(!parse_word(p)){
          return false;
       }
    }
@@ -306,7 +306,7 @@ bool item(Program *p)
 }
 
 // <WORD> ::= "RED", "BLUE", "HELLO!" or "178"
-bool word(Program *p)
+bool parse_word(Program *p)
 {
    DEBUG
    int len = strlen(CURRENT_WORD);
@@ -323,61 +323,61 @@ bool word(Program *p)
    return true;
 }
 
-void test_word(void)
+void test_parse_word(void)
 {
   Program* prog = calloc(1, sizeof(Program));
    strcpy(prog->words[0],"\"RED\"");
-   assert(word(prog));
+   assert(parse_word(prog));
    assert(prog->curr_word==1);
    prog->curr_word = 0;
 
    strcpy(prog->words[0],"\"BLUE\"");
-   assert(word(prog));
+   assert(parse_word(prog));
    assert(prog->curr_word==1);
    prog->curr_word = 0;
 
    strcpy(prog->words[0],"\"HELLO!\"");
-   assert(word(prog));
+   assert(parse_word(prog));
    assert(prog->curr_word==1);
    prog->curr_word = 0;
 
    strcpy(prog->words[0],"\"178!\"");
-   assert(word(prog));
+   assert(parse_word(prog));
    assert(prog->curr_word==1);
    prog->curr_word = 0;
 
    // missing all quotes
    strcpy(prog->words[0],"178!");
-   assert(!word(prog));
+   assert(!parse_word(prog));
    assert(prog->curr_word==0);
 
    // missing opening quotes
    strcpy(prog->words[0],"178!\"");
-   assert(!word(prog));
+   assert(!parse_word(prog));
    assert(prog->curr_word==0);
 
    // missing closing quotes
    strcpy(prog->words[0],"\"178!");
-   assert(!word(prog));
+   assert(!parse_word(prog));
    assert(prog->curr_word==0);
 
    free(prog);
 }
 
 // <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
-bool col(Program *p)
+bool parse_col(Program *p)
 {
    DEBUG
    // skip past COLOUR
    p->curr_word++;
    if(FIRST_LETTER=='$'){
-      if(!var(p)){
+      if(!parse_var(p)){
          return false;
       }
    }
    // otherwise, it's a word.
    else{
-      if(!word(p)){
+      if(!parse_word(p)){
          return false;
       }
    }
@@ -385,20 +385,20 @@ bool col(Program *p)
    return true;
 }
 
-void test_col(void)
+void test_parse_col(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    // "COLOUR" <VAR> 
    strcpy(prog->words[0],"COLOUR");
    strcpy(prog->words[1],"$A");
-   assert(col(prog));
+   assert(parse_col(prog));
    assert(prog->curr_word == 2);
    prog->curr_word = 0;
 
    // "COLOUR" <WORD>
    strcpy(prog->words[0],"COLOUR");
    strcpy(prog->words[1],"\"HELLO!\"");
-   assert(col(prog));
+   assert(parse_col(prog));
    assert(prog->curr_word == 2);
    prog->curr_word = 2;
 
@@ -445,7 +445,7 @@ void test_check_ltr(void)
 }
 
 // <LOOP> ::= "LOOP" <LTR> "OVER" <LST> <INSLST>
-bool loop(Program *p)
+bool parse_loop(Program *p)
 {
    DEBUG
    // skip "LOOP"
@@ -460,16 +460,16 @@ bool loop(Program *p)
    }
    // go past OVER
    p->curr_word++;
-   if(!lst(p)){
+   if(!parse_lst(p)){
       return false;
    }
-   if(!inslst(p)){
+   if(!parse_inslst(p)){
       return false;
    }
    return true;
 }
 
-void test_loop(void)
+void test_parse_loop(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    strcpy(prog->words[0],"LOOP");
@@ -488,14 +488,14 @@ void test_loop(void)
    strcpy(prog->words[13],"RIGHT");
    strcpy(prog->words[14],"90");
    strcpy(prog->words[15],"END");
-   assert(loop(prog));
+   assert(parse_loop(prog));
    assert(prog->curr_word==15);
    prog->curr_word=0;
    free(prog);
 }
 
 // <NUM>    ::= 10 or -17.99 etc.
-bool num(Program *p)
+bool parse_num(Program *p)
 {
    DEBUG
    if(!is_number(CURRENT_WORD)){
@@ -505,121 +505,121 @@ bool num(Program *p)
    return true;
 }
 
-void test_num(void)
+void test_parse_num(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    strcpy(prog->words[0],"START");
-   assert(!num(prog));
+   assert(!parse_num(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"1");
-   assert(num(prog));
+   assert(parse_num(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"10");
-   assert(num(prog));
+   assert(parse_num(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"-17.99");
-   assert(num(prog));
+   assert(parse_num(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"0");
-   assert(num(prog));
+   assert(parse_num(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"11231230");
-   assert(num(prog));
+   assert(parse_num(prog));
    prog->curr_word = 0;
    free(prog);
 }
 
 // <FWD> ::= "FORWARD" <VARNUM>
-bool fwd(Program *p)
+bool parse_fwd(Program *p)
 {
    DEBUG
    // advance past FORWARD
    p->curr_word++;
-   return varnum(p);
+   return parse_varnum(p);
 }
 
 
 // <RGT> ::= "RIGHT" <VARNUM>
-bool rgt(Program *p)
+bool parse_rgt(Program *p)
 {
    DEBUG
    // advance past RIGHT
    p->curr_word++;
-   return varnum(p);
+   return parse_varnum(p);
 }
 
 // <INS> ::= <FWD> | <RGT> | <COL> | <LOOP> | <SET>
-bool ins(Program *p)
+bool parse_ins(Program *p)
 {
    DEBUG
    // todo switch?
    // todo think about changing this so that the words are passed in the function.
    if(strsame(CURRENT_WORD, "FORWARD")){
-      return fwd(p);
+      return parse_fwd(p);
    }
    else if(strsame(CURRENT_WORD, "RIGHT")){
-      return rgt(p);
+      return parse_rgt(p);
    }
    else if(strsame(CURRENT_WORD, "COLOUR")){
-      return col(p);
+      return parse_col(p);
    }
    else if(strsame(CURRENT_WORD, "LOOP")){
-      return loop(p);
+      return parse_loop(p);
    }
    else if(strsame(CURRENT_WORD, "SET")){
-      return set(p);
+      return parse_set(p);
    }
    // if ins contains none of those words, 
    // it's an invalid instruction.
    return false;
 }
 
-void test_ins(void)
+void test_parse_ins(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    strcpy(prog->words[0],"FORWARD");
    strcpy(prog->words[1],"123");
-   assert(ins(prog));
+   assert(parse_ins(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"RIGHT");
    strcpy(prog->words[1],"-82.43");
-   assert(ins(prog));
+   assert(parse_ins(prog));
    prog->curr_word = 0;
 
    // testing with random strings and non numbers.
    strcpy(prog->words[0],"MOW");
    strcpy(prog->words[1],"-82.43");
-   assert(!ins(prog));
+   assert(!parse_ins(prog));
    prog->curr_word = 0;
    strcpy(prog->words[0],"RIGHT");
    strcpy(prog->words[1],"far");
-   assert(!ins(prog));
+   assert(!parse_ins(prog));
    prog->curr_word = 0;
 
    free(prog);
 }
 
 // <INSLST> ::= "END" | <INS> <INSLST>
-bool inslst(Program *p)
+bool parse_inslst(Program *p)
 {
    DEBUG
    if(strsame(CURRENT_WORD, "END")){
       return true;
    }
-   if(!ins(p)){
+   if(!parse_ins(p)){
       return false;
    }
-   if(!inslst(p)){
+   if(!parse_inslst(p)){
       return false;
    }
    return true;
 }
 
-void test_inslst(void)
+void test_parse_inslst(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    strcpy(prog->words[0],"END");
-   assert(inslst(prog));
+   assert(parse_inslst(prog));
    prog->curr_word = 0;
 
    strcpy(prog->words[0],"s");
@@ -627,39 +627,39 @@ void test_inslst(void)
    strcpy(prog->words[2],"START");
    strcpy(prog->words[3],"START");
    strcpy(prog->words[4],"END");
-   assert(inslst(prog));
+   assert(parse_inslst(prog));
    prog->curr_word = 0;
 
    free(prog);}
 
 // <PROG>   ::= "START" <INSLST>
-bool program(Program *p)
+bool parse_program(Program *p)
 {
    DEBUG
    if(!strsame(CURRENT_WORD, "START")){
       return false;
    }
    p->curr_word++;
-   return inslst(p);
+   return parse_inslst(p);
 }
 
-void test_program(void)
+void test_parse_program(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    strcpy(prog->words[0],"START");
    strcpy(prog->words[1],"END");
-   assert(program(prog));
+   assert(parse_program(prog));
    prog->curr_word = 0;
 
    // starting with END should fail
    strcpy(prog->words[0],"END");
-   assert(!program(prog));
+   assert(!parse_program(prog));
    prog->curr_word = 0;
 
    // ending with START should fail
    strcpy(prog->words[0],"START");
    strcpy(prog->words[1],"START");
-   assert(!program(prog));
+   assert(!parse_program(prog));
    prog->curr_word = 0;
 
    // valid files should increment curr_word
@@ -671,7 +671,7 @@ void test_program(void)
    strcpy(prog->words[5],"FORWARD");
    strcpy(prog->words[6],"-2.2");
    strcpy(prog->words[7],"END");
-   assert(program(prog));
+   assert(parse_program(prog));
    assert(prog->curr_word==7);
    prog->curr_word = 0;
 
