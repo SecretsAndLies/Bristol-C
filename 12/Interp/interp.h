@@ -23,6 +23,8 @@
 #define SCREEN_MID_ROW SCREEN_HEIGHT/2
 #define SCREEN_MID_COL SCREEN_WIDTH/2
 
+#define FLOAT_PRE
+
 #define START_ANGLE 180
 
 #define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
@@ -37,8 +39,9 @@ typedef enum {
 } File_Type; 
 
 typedef enum {
-  NUM,
-  STRING
+   NONE,
+   NUM,
+   STRING
 } Var_Type; 
 
 typedef struct Variable{
@@ -134,8 +137,10 @@ void check_args_valid(int argc, char *argv[]);
 bool is_valid_filename(char * filename, char * ext);
 void test_is_valid_filename(void);
 
-bool get_number_from_variable(char var, double * num, Program * prog);
-void test_get_number_from_variable(void);
+
+void set_variable_to_num(char var, Program p, double num);
+bool get_var_from_variables(char var, Program * prog);
+void test_get_and_set_variables(void);
 
 
 

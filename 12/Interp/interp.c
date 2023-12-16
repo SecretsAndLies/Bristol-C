@@ -17,6 +17,7 @@ int main( int argc, char *argv[] )
 void test(void)
 {
    test_is_valid_filename();
+   test_get_and_set_variables();
    test_get_number_from_variable();
    test_run_num();
    test_run_ins();
@@ -30,23 +31,55 @@ void test(void)
    test_run_loop();
 }
 
-void test_get_number_from_variable(void)
+void test_get_and_set_variables(void)
 {
    Program* prog = calloc(1, sizeof(Program));
    double d;
    // intially no variables are set.
-   assert(!get_number_from_variable('A', &d, prog));
+   assert(!get_var_from_variables('A', prog));
+   assert(prog->curr_var.is_set==false);
+   set_variable_to_num("A", prog, 2.0);
+   assert(get_var_from_variables('A', prog));
+   assert(prog->curr_var.var_type==NUM);
+   assert(prog->curr_var.num_var==NUM);
 
+   set_variable_to_string("A",prog,"TEST");
+   assert(get_var_from_variables('A', prog));
+   assert(prog->curr_var.var_type==STRING);
    free(prog);
 }
 
-bool get_number_from_variable(char var, double * num, Program * prog)
+bool fequal(double a, double b)
+{
+    return fabs(a-b) < __DBL_EPSILON__;
+}
+
+
+// todo, I think the current variable approach won't work for nested loops.
+// potentially we could have a "variable stack"
+// but I'm sure we can use the regular stack with some thought?
+void set_variable_to_num(char var, Program * p, double num)
+{
+   Variable * v = &p->variables[var-'A'];
+   v->var_type=NUM;
+   v->num_var=num;
+}
+
+void set_variable_to_string(char var, Program * p, char * str)
+{
+   Variable * v = &p->variables[var-'A'];   
+   v->var_type=STRING;
+   strcpy(p->curr_var.str_var,str);
+}
+
+// Looks up var and sets the current variable to it
+bool get_var_from_variables(char var, Program * prog);
 {
    Variable v = prog->variables[var-'A'];
-   if(!v.is_set){
+   if(v.var_type==NONE){
       return false;
    }
-   *num = v.num_var;
+   prog.curr_var = v;
    return true;
 }
 
