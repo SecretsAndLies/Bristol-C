@@ -1,6 +1,7 @@
 #include "../stack.h"
 #include "specific.h"
 
+
 #define DOTFILE 5000
 
 stack* stack_init(void)
@@ -116,28 +117,4 @@ void stack_todot(stack* s, char* fname)
    fp = nfopen(str, "wt");
    fprintf(fp, "%s\n", tmp);
    fclose(fp);
-}
-
-void on_error(const char* s)
-{
-   fprintf(stderr, "%s\n", s);
-   exit(EXIT_FAILURE);
-}
-
-void* ncalloc(int n, size_t size)
-{
-   void* v = calloc(n, size);
-   if(v==NULL){
-      on_error("Cannot calloc() space");
-   }
-   return v;
-}
-
-void* nremalloc(void* p, int bytes)
-{
-   void* n = realloc(p, bytes);
-   if(n==NULL){
-      on_error("Cannot malloc() space");
-   }
-   return n;
 }

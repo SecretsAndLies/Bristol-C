@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,6 +7,8 @@
 #include <ctype.h>
 #include <math.h>
 #include "../neillsimplescreen.h"
+#include "stack.h"
+#include "../General/general.h"
 
 #define CURRENT_WORD p->words[p->curr_word]
 #define FIRST_LETTER CURRENT_WORD[0]
@@ -74,10 +77,8 @@ typedef struct Program{
    Variable curr_var;
    File_Type output_location;
    char * output_file_name;
+   stack * stck;
 } Program;
-
-void* nfopen(char* fname, char* mode);
-void on_error(const char* s);
 
 Program * get_program(char * prog_name);
 
@@ -169,3 +170,5 @@ void test_add_to_angle(void);
 double add_to_angle(double current_angle, double add_value);
 
 void test_run_set(void);
+
+void free_prog(Program * p);

@@ -15,10 +15,10 @@ parse_v: Parse/parse.h Parse/parse.c
 	$(CC) Parse/parse.c -o parse_v -I./Parse $(VALGRIND) -lm
 
 interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
-	$(CC) neillsimplescreen.c Interp/interp.c -o interp_s -I./Interp $(SANITIZE) -lm
+	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_s -I./Interp $(SANITIZE) -lm
 
-interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
-	$(CC) neillsimplescreen.c Interp/interp.c -o interp_v -I./Interp $(VALGRIND) -lm
+interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h Interp/Stack/realloc.c
+	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_v -I./Interp $(VALGRIND) -lm
 
 ## An example : you may wish to adapt this slightly
 extension_s: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h

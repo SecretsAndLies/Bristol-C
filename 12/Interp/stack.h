@@ -1,6 +1,8 @@
 #pragma once
 
-typedef int stacktype;
+#include "../General/general.h"
+
+typedef double stacktype;
 
 typedef struct stack stack;
 
@@ -8,6 +10,7 @@ typedef struct stack stack;
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* Create an empty stack */
 stack* stack_init(void);

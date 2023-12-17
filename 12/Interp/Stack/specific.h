@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define FORMATSTR "%i"
+#define FORMATSTR "%lf"
 #define ELEMSIZE 20
 
 #define STACKTYPE "Realloc"
@@ -19,7 +19,3 @@ struct stack {
    int size;
    int capacity;
 };
-
-void on_error(const char* s);
-void* ncalloc(int n, size_t size);
-void* nremalloc(void* p, int bytes);

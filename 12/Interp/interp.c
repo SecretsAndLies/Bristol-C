@@ -7,11 +7,13 @@ int main( int argc, char *argv[] )
    check_args_valid(argc, argv);
    Program * prog = get_program(argv[1]);
    if(!run_program(prog)){
-      free(prog);
+      free_prog(prog);
       on_error("Cannot parse.");
    }
-   free(prog);
-   neillreset(); // todo intergrate with a free function.
+   // todo functionise the free stuff.
+   // todo free the stack.
+   free_prog(prog);
+
    exit(EXIT_SUCCESS);
 }
 
@@ -31,6 +33,13 @@ void test(void)
    test_run_program();
    test_get_number();
    test_run_loop();
+}
+
+void free_prog(Program * p)
+{
+   stack_free(p->stck);
+   free(p);
+   neillreset(); 
 }
 
 void test_get_and_set_variables(void)
@@ -57,7 +66,6 @@ void test_get_and_set_variables(void)
    assert(get_var_from_variables('A', prog));
    assert(prog->curr_var.var_type==STRING);
    assert(strsame(prog->curr_var.str_var,"TEST"));
-
 
    free(prog);
 }
@@ -746,24 +754,11 @@ Program * get_program(char * prog_name)
    prog->ttl.y = START_Y;
    prog->ttl.col=white;
 
+   // stack
+   prog->stck = stack_init();
+   
 
    return prog;
-}
-
-void* nfopen(char* fname, char* mode)
-{
-   FILE* fp;
-   fp = fopen(fname, mode);
-   if(!fp){
-      on_error("Cannot open file");
-   }
-   return fp;
-}
-
-void on_error(const char* s)
-{
-   fprintf(stderr, "%s\n", s);
-   exit(EXIT_FAILURE);
 }
 
 /* Issue ANSI Codes to move cursor to the given position */
