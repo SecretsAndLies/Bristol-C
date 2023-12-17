@@ -7,3 +7,7 @@ helped identify where things were going wrong (and then I could write tests to c
 
 - wrote a bash script (test.sh) that determines that each of the provided example 
 scripts exit with the correct error code.
+
+- fequal to handle floating point imprecision
+
+- added a add_to_angle and subtract from angle to avoid overflow issues.

@@ -3,6 +3,9 @@
         "cstdlib": "c",
         "stdio.h": "c",
         "string.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "iterator": "c",
+        "cmath": "c",
+        "random": "c"
     }
 }

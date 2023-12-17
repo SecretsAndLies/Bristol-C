@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <math.h>
 #include "../neillsimplescreen.h"
 
 #define CURRENT_WORD p->words[p->curr_word]
@@ -18,28 +19,33 @@
 
 #define TIME_TO_WAIT 1
 
-#define SCREEN_HEIGHT 51
-#define SCREEN_WIDTH 33
-#define SCREEN_MID_ROW SCREEN_HEIGHT/2
-#define SCREEN_MID_COL SCREEN_WIDTH/2
+#define SCREEN_HEIGHT 33
+#define SCREEN_WIDTH 51
+#define START_Y SCREEN_HEIGHT/2
+#define START_X SCREEN_WIDTH/2
 
-#define FLOAT_PRE
+#define FLOAT_PRECISION 0.0000001
 
-#define START_ANGLE 180
+#define START_ANGLE 90
 
 #define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
-#define NUM_VARIABLES 27 // this is 26 + a constant 1
-#define CONST_VAR_INDEX 26 // 0-25 is A-Z
+#define NUM_VARIABLES 26 //num letters in alpabet
+
+#define PI 3.14159265358979
+#define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / PI));
+#define DEGREES_TO_RADIANS(degrees) ((degrees) * (PI / 180.0))
+
+#define MAX_DEGREES 360.0
 
 typedef enum {
-  NONE,
+  SCREEN,
   PS,
   TXT
 } File_Type; 
 
 typedef enum {
-   NONE,
+   NOT_SET,
    NUM,
    STRING
 } Var_Type; 
@@ -48,24 +54,26 @@ typedef struct Variable{
    Var_Type var_type;
    char str_var[MAXTOKENSIZE];
    double num_var; 
-   bool is_set;
 } Variable;
 
 typedef struct Turtle
 {
    double x;
    double y;
-   char output[SCREEN_WIDTH][SCREEN_HEIGHT]; 
    double angle;
+   double distance;
    neillcol col;
 } Turtle;
 
 typedef struct Program{
+   char output[SCREEN_HEIGHT][SCREEN_WIDTH]; 
    char words[MAXNUMTOKENS][MAXTOKENSIZE];
    int curr_word;
    Turtle ttl;
    Variable variables[NUM_VARIABLES];
    Variable curr_var;
+   File_Type output_location;
+   char * output_file_name;
 } Program;
 
 void* nfopen(char* fname, char* mode);
@@ -138,17 +146,26 @@ bool is_valid_filename(char * filename, char * ext);
 void test_is_valid_filename(void);
 
 
-void set_variable_to_num(char var, Program p, double num);
+void set_variable_to_string(char var, Program * p, char * str);
+void set_variable_to_num(char var, Program * p, double num);
 bool get_var_from_variables(char var, Program * prog);
 void test_get_and_set_variables(void);
 
+bool fequal(double a, double b);
+void test_fequal(void);
 
+bool go_fwd(Program * p);
 
+void print_arr_to_screen(Program * p);
+// no tests needed.
 
+bool write_turtle_to_arr(Program * p, int r, int c);
 
+bool is_out_of_bounds(int r, int c);
 
+void print_letter_w_colour_code(char letter);
 
+void test_add_to_angle(void);
+double add_to_angle(double current_angle, double add_value);
 
-
-
-
+void test_run_set(void);

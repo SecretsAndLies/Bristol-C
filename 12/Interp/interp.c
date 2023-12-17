@@ -11,14 +11,16 @@ int main( int argc, char *argv[] )
       on_error("Cannot parse.");
    }
    free(prog);
+   neillreset(); // todo intergrate with a free function.
    exit(EXIT_SUCCESS);
 }
 
 void test(void)
 {
+   test_add_to_angle();
+   test_fequal();
    test_is_valid_filename();
    test_get_and_set_variables();
-   test_get_number_from_variable();
    test_run_num();
    test_run_ins();
    test_check_ltr();
@@ -34,30 +36,32 @@ void test(void)
 void test_get_and_set_variables(void)
 {
    Program* prog = calloc(1, sizeof(Program));
-   double d;
    // intially no variables are set.
    assert(!get_var_from_variables('A', prog));
-   assert(prog->curr_var.is_set==false);
-   set_variable_to_num("A", prog, 2.0);
-   assert(get_var_from_variables('A', prog));
-   assert(prog->curr_var.var_type==NUM);
-   assert(prog->curr_var.num_var==NUM);
+   assert(prog->curr_var.var_type==NOT_SET);
 
-   set_variable_to_string("A",prog,"TEST");
+   // now we set a to 2.0
+   set_variable_to_num('A', prog, 2.0);
+   assert(get_var_from_variables('A', prog));
+   assert(fequal(prog->curr_var.num_var,2.0));
+   assert(prog->curr_var.var_type==NUM);
+
+   // test Z with a string
+   set_variable_to_string('Z',prog,"TEST2");
+   assert(get_var_from_variables('Z', prog));
+   assert(prog->curr_var.var_type==STRING);
+   assert(strsame(prog->curr_var.str_var,"TEST2"));
+   
+   // reset A to a different type (overwting)
+   set_variable_to_string('A',prog,"TEST");
    assert(get_var_from_variables('A', prog));
    assert(prog->curr_var.var_type==STRING);
+   assert(strsame(prog->curr_var.str_var,"TEST"));
+
+
    free(prog);
 }
 
-bool fequal(double a, double b)
-{
-    return fabs(a-b) < __DBL_EPSILON__;
-}
-
-
-// todo, I think the current variable approach won't work for nested loops.
-// potentially we could have a "variable stack"
-// but I'm sure we can use the regular stack with some thought?
 void set_variable_to_num(char var, Program * p, double num)
 {
    Variable * v = &p->variables[var-'A'];
@@ -69,17 +73,19 @@ void set_variable_to_string(char var, Program * p, char * str)
 {
    Variable * v = &p->variables[var-'A'];   
    v->var_type=STRING;
-   strcpy(p->curr_var.str_var,str);
+   strcpy(v->str_var, str);
 }
 
 // Looks up var and sets the current variable to it
-bool get_var_from_variables(char var, Program * prog);
+// returns false if that variable is unset.
+// you'll need to check elsewhere that it's a type you're expecting.
+bool get_var_from_variables(char var, Program * prog)
 {
    Variable v = prog->variables[var-'A'];
-   if(v.var_type==NONE){
+   if(v.var_type==NOT_SET){
       return false;
    }
-   prog.curr_var = v;
+   prog->curr_var = v;
    return true;
 }
 
@@ -168,6 +174,11 @@ bool run_pfix(Program *p)
    return true;
 }
 
+void test_run_pfix(void)
+{
+   // test that various expressions add the correct result to the stack.
+}
+
 // <OP> ::= + - / *
 bool run_op(Program *p)
 {
@@ -208,7 +219,18 @@ bool run_set(Program *p)
       return false;
    }
 
+   // TODO
+   // after pfix is run, there should be a result at the top
+   // of the stack. pop it off and set the var in variables to that number.
+
    return true;
+}
+
+void test_run_set(void)
+{
+   //  SET A ( 45 )
+
+   // test this with arithmetic expressions.
 }
 
 // <VAR> ::= $<LTR>
@@ -224,6 +246,8 @@ bool run_var(Program *p)
    if(!check_ltr(&CURRENT_WORD[1])){
       return false;
    }
+   get_var_from_variables(CURRENT_WORD[1], p);
+
    p->curr_word++;
    return true;
 }
@@ -290,12 +314,6 @@ bool run_varnum(Program * p)
          return false;
       }
    }
-
-   // once you're here,   
-   // p->curr_var.var_type=NUM;
-   // p->curr_var.num_var=num;
-   // should be set to a number.
-   // this can be used by whoever calls this.
 
    return true;
 }
@@ -442,10 +460,147 @@ bool run_fwd(Program *p)
    // advance past FORWARD
    p->curr_word++;
 
-   // TODO you need to get the number out of var num
-   return run_varnum(p);
+   if(!run_varnum(p)){
+      return false;
+   }
+
+   // check we've got a number we can use.
+   if(p->curr_var.var_type!=NUM){
+      return false;
+   }
+
+   p->ttl.distance=p->curr_var.num_var;
+
+   if(!go_fwd(p)){
+      return false;
+   }
+   
+   return true;
+
 }
 
+// this is the MAGIC. Takes the x, y, angle and distance
+// and writes to the array.
+bool go_fwd(Program * p)
+{
+
+   // calculate ending cord.
+   double angle_in_radians = DEGREES_TO_RADIANS(p->ttl.angle);
+
+   // convert X,Y into actual r c
+   for (int i=1; i<=p->ttl.distance; i++){
+      // note that we have to - here because of array index weirdness
+      p->ttl.x -= cos(angle_in_radians);
+      p->ttl.y -= sin(angle_in_radians);
+
+      int c = round(p->ttl.x);
+      int r = round(p->ttl.y); 
+
+      if(!write_turtle_to_arr(p,r,c)){
+         return false;
+      }
+   }
+   
+   if(p->output_location==SCREEN){
+      // neillclrscrn(); // TODO add back in.
+      print_arr_to_screen(p);
+      // neillbusywait(1);
+   }
+
+   if(p->output_location==TXT){
+      // TODO print to the txt file.
+   }
+
+   return true;
+}
+
+bool is_out_of_bounds(int r, int c)
+{
+   if (r < 0 || r >= SCREEN_HEIGHT || c < 0 || c >= SCREEN_WIDTH) {
+      return true;
+   }
+   return false;
+
+}
+
+bool write_turtle_to_arr(Program * p, int r, int c)
+{
+   if(is_out_of_bounds(r,c)){
+      return false;
+   }
+   else if(p->ttl.col==white){
+      p->output[r][c]='W';
+   }
+   else if(p->ttl.col==black){
+      p->output[r][c]='K';
+   }
+   else if(p->ttl.col==red){
+      p->output[r][c]='R';
+   }
+   else if(p->ttl.col==green){
+      p->output[r][c]='G';
+   }
+   else if(p->ttl.col==yellow){
+      p->output[r][c]='Y';
+   }
+   else if(p->ttl.col==blue){
+      p->output[r][c]='B';
+   }
+   else if(p->ttl.col==magenta){
+      p->output[r][c]='M';
+   }
+   else if(p->ttl.col==cyan){
+      p->output[r][c]='C';
+   }
+   else{
+      return false;
+   }
+
+   return true;
+}
+
+void print_letter_w_colour_code(char letter)
+{
+   if(letter == 'W'){
+      neillfgcol(white);
+   }
+   if(letter == 'B'){
+      neillfgcol(black);
+   }
+   if(letter == 'R'){
+      neillfgcol(red);
+   }
+   if(letter == 'G'){
+      neillfgcol(green);
+   }
+   if(letter == 'Y'){
+      neillfgcol(yellow);
+   }
+   if(letter == 'B'){
+      neillfgcol(blue);
+   }
+   if(letter == 'M'){
+      neillfgcol(magenta);
+   }
+   if(letter == 'C'){
+      neillfgcol(cyan);
+   }
+
+
+   printf("%c",letter);
+}
+
+void print_arr_to_screen(Program * p)
+{
+   for(int r=0; r<SCREEN_HEIGHT; r++){
+      for(int c=0; c<SCREEN_WIDTH; c++){
+         char letter = p->output[r][c];
+         print_letter_w_colour_code(letter);
+      }  
+      printf("\n");
+   }  
+   printf("\n");
+}
 
 // <RGT> ::= "RIGHT" <VARNUM>
 bool run_rgt(Program *p)
@@ -453,7 +608,50 @@ bool run_rgt(Program *p)
    DEBUG
    // advance past RIGHT
    p->curr_word++;
-   return run_varnum(p);
+   if(!run_varnum(p)){
+      return false;
+   }
+   p->ttl.angle = add_to_angle(p->ttl.angle, p->curr_var.num_var);
+   return true;
+}
+
+void test_add_to_angle(void) 
+{
+   assert(fequal(add_to_angle(30.0, 40.0), 70.0));
+   assert(fequal(add_to_angle(350.0, 20.0), 10.0));
+   assert(fequal(add_to_angle(10.0, -20.0), 350.0));
+   assert(fequal(add_to_angle(0.0, 720.0), 0.0));
+   assert(fequal(add_to_angle(-30.0, 60.0), 30.0));
+}
+
+double add_to_angle(double current_angle, double add_value)
+{
+   double new_angle = fmod(current_angle + add_value, 360.0);
+
+    // Handling negative angles
+    if (new_angle < 0) {
+      new_angle += 360.0;
+      }
+   return new_angle;
+}
+
+void test_run_rgt(void)
+{
+   Program* prog = calloc(1, sizeof(Program));
+
+   strcpy(prog->words[0],"RIGHT");
+   strcpy(prog->words[1],"45");
+   run_rgt(prog);
+   assert(fequal(prog->ttl.angle, 45));
+   prog->curr_word=0;
+   set_variable_to_num('A', prog, 45);
+   strcpy(prog->words[0],"RIGHT");
+   strcpy(prog->words[1],"$A");
+   run_rgt(prog);
+   assert(fequal(prog->ttl.angle, 45));
+
+   free(prog);
+
 }
 
 // <INS> ::= <FWD> | <RGT> | <COL> | <LOOP> | <SET>
@@ -533,6 +731,22 @@ Program * get_program(char * prog_name)
       on_error("File contains too many tokens to parse.");
    }
    fclose(f);
+   prog->output_location=SCREEN; // TODO take in the other args.
+   
+   // set the output to spaces,
+   for(int r=0; r<SCREEN_HEIGHT; r++){
+      for(int c=0; c<SCREEN_WIDTH; c++){
+          prog->output[r][c]='_'; // TODO make this a space.
+      }  
+   }  
+
+   // start angle
+   prog->ttl.angle=START_ANGLE;
+   prog->ttl.x = START_X;
+   prog->ttl.y = START_Y;
+   prog->ttl.col=white;
+
+
    return prog;
 }
 
@@ -556,4 +770,16 @@ void on_error(const char* s)
 void cursor_goto(int row, int col)
 {
    printf("\033[%i;%iH",row,col);
+}
+
+
+bool fequal(double a, double b)
+{
+    return fabs(a-b) < FLOAT_PRECISION;
+}
+
+void test_fequal(void)
+{
+   assert(fequal(0.01,0.01));
+   assert(!fequal(0.02,0.01));
 }
