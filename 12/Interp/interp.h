@@ -172,3 +172,6 @@ double add_to_angle(double current_angle, double add_value);
 void test_run_set(void);
 
 void free_prog(Program * p);
+
+bool run_pfix(Program *p);
+void test_run_pfix(void);

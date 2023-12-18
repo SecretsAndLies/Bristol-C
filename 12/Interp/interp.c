@@ -8,10 +8,10 @@ int main( int argc, char *argv[] )
    Program * prog = get_program(argv[1]);
    if(!run_program(prog)){
       free_prog(prog);
-      on_error("Cannot parse.");
+   // todo - potentially we could have an error message stored in our struct,
+   // and print that here so we get more detailed info about what failed.
+      on_error("Error - cannot interpret program.");
    }
-   // todo functionise the free stuff.
-   // todo free the stack.
    free_prog(prog);
 
    exit(EXIT_SUCCESS);
@@ -20,6 +20,7 @@ int main( int argc, char *argv[] )
 void test(void)
 {
    test_add_to_angle();
+   test_run_pfix();
    test_fequal();
    test_is_valid_filename();
    test_get_and_set_variables();
@@ -40,6 +41,7 @@ void free_prog(Program * p)
    stack_free(p->stck);
    free(p);
    neillreset(); 
+   printf("\n"); // you need this or reset doesn't work.
 }
 
 void test_get_and_set_variables(void)
@@ -163,15 +165,14 @@ bool run_pfix(Program *p)
    {
       if(!run_op(p)){
          return false;
-      }
-      // if you're here, you know it's an operator,
-      // and you can do that to the stack.
+      }      
    }
    else {
       if(!run_varnum(p)){
          return false;
       }
-      // add the number to the stack.
+      // after varnum runs, current var is filled. (potentially it could do the stack directly?)
+      stack_push(p->stck, p->curr_var.num_var);
    }
 
    // in both cases you need to prefix.
@@ -182,28 +183,119 @@ bool run_pfix(Program *p)
    return true;
 }
 
+
 void test_run_pfix(void)
 {
+   Program* prog = calloc(1, sizeof(Program));
+   prog->stck = stack_init();
+
+   double res;
+   strcpy(prog->words[0],"45");
+   strcpy(prog->words[1],")");
+   assert(run_pfix(prog));
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,45));
+   prog->curr_word=0;
+
+   strcpy(prog->words[0],"45");
+   strcpy(prog->words[1],"1");
+   strcpy(prog->words[2],"+");
+   strcpy(prog->words[3],")");
+   run_pfix(prog);
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,46));
+   prog->curr_word=0;
+
+   strcpy(prog->words[0],"22");
+   strcpy(prog->words[1],"2");
+   strcpy(prog->words[2],"/");
+   strcpy(prog->words[3],")");
+   run_pfix(prog);
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,11));
+   prog->curr_word=0;
+
+   strcpy(prog->words[0],"22");
+   strcpy(prog->words[1],"2");
+   strcpy(prog->words[2],"*");
+   strcpy(prog->words[3],")");
+   run_pfix(prog);
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,44));
+   prog->curr_word=0;
+
+   strcpy(prog->words[0],"22");
+   strcpy(prog->words[1],"2");
+   strcpy(prog->words[2],"-");
+   strcpy(prog->words[3],")");
+   run_pfix(prog);
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,20));
+   prog->curr_word=0;
+
+   strcpy(prog->words[0],"2");
+   strcpy(prog->words[1],"2");
+   strcpy(prog->words[2],"-"); //0
+   strcpy(prog->words[3],"1");
+   strcpy(prog->words[4],"+"); // 1
+   strcpy(prog->words[5],"4");
+   strcpy(prog->words[6],"*"); // 4
+   strcpy(prog->words[7],"2");
+   strcpy(prog->words[8],"/"); // 2
+   strcpy(prog->words[9],")");
+   run_pfix(prog);
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,2));
+   prog->curr_word=0;
+
+
+
+   stack_free(prog->stck);
+   free(prog);
    // test that various expressions add the correct result to the stack.
 }
 
 // <OP> ::= + - / *
+// takes two numbers on the stack and performs the op.
 bool run_op(Program *p)
 {
    DEBUG
    if(strlen(CURRENT_WORD)!=1){
       return false;
    }
+   // this check I believe is redundant.
    if(!is_operator(FIRST_LETTER)){
       return false;
    }
+   
+   double second_num;
+   double first_num;
+   stack_pop(p->stck, &second_num); 
+   stack_pop(p->stck, &first_num); 
+   if(FIRST_LETTER=='+'){
+      stack_push(p->stck, first_num+second_num);
+   }
+   if(FIRST_LETTER=='-'){
+      stack_push(p->stck, first_num-second_num);
+   }
+   if(FIRST_LETTER=='*'){
+      stack_push(p->stck, first_num*second_num);
+   }
+   if(FIRST_LETTER=='/'){
+      // catch attempts to divide by zero.
+      if(fequal(second_num,0)){
+         return false;
+      }
+      stack_push(p->stck, first_num/second_num);
+   }
+
    p->curr_word++;
    return true;
 }
 
 void test_op(void)
 {
-
+   // test divide by zero
 }
 
 // <SET> ::= "SET" <LTR> "(" <PFIX>
@@ -215,6 +307,7 @@ bool run_set(Program *p)
    if(!check_ltr(CURRENT_WORD)){
       return false;
    }
+   char letter = CURRENT_WORD[0];
    // go past the letter.
    p->curr_word++;
    if(!strsame(CURRENT_WORD, "(")){
@@ -226,10 +319,10 @@ bool run_set(Program *p)
    if(!run_pfix(p)){
       return false;
    }
-
-   // TODO
-   // after pfix is run, there should be a result at the top
-   // of the stack. pop it off and set the var in variables to that number.
+   // after pfix is run, a number is left on the stack.
+   double num;
+   stack_pop(p->stck, &num);
+   set_variable_to_num(letter,p,num);
 
    return true;
 }
@@ -254,7 +347,9 @@ bool run_var(Program *p)
    if(!check_ltr(&CURRENT_WORD[1])){
       return false;
    }
-   get_var_from_variables(CURRENT_WORD[1], p);
+   if(!get_var_from_variables(CURRENT_WORD[1], p)){
+      return false;
+   }
 
    p->curr_word++;
    return true;
@@ -262,6 +357,7 @@ bool run_var(Program *p)
 
 void test_run_var(void)
 {
+   // todo check for the unused variable beheviour.
 }
 
 // <LST> ::= "{" <ITEMS>
@@ -349,21 +445,38 @@ bool run_word(Program *p)
 {
    DEBUG
    int len = strlen(CURRENT_WORD);
+   int start_index = 1;
+   int end_index = len-1;
+   // todo magic number.
    if(len<3){
       return false;
    }
    if(FIRST_LETTER != '"'){
       return false;
    }
-   if(CURRENT_WORD[len-1] != '"'){
+   if(CURRENT_WORD[end_index] != '"'){
       return false;
    }
+   p->curr_var.var_type=STRING;
+
+   // copy the word (eg: RED no quotes into the current variable.)
+   strncpy(p->curr_var.str_var, CURRENT_WORD + start_index, end_index - start_index);
    p->curr_word++;
    return true;
 }
 
 void test_run_word(void)
 {
+   Program* prog = calloc(1, sizeof(Program));
+
+   strcpy(prog->words[0],"\"RED\"");
+   run_word(prog);
+   assert(prog->curr_var.var_type==STRING);
+   assert(strsame(prog->curr_var.str_var,"RED"));
+
+   prog->curr_word=0;
+
+   free(prog);
 }
 
 // <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
@@ -382,6 +495,33 @@ bool run_col(Program *p)
       if(!run_word(p)){
          return false;
       }
+   }
+   // at this point, current var should be set to a string.
+   // so we can update ttl->col to be this colour.
+   // todo add error checks if no valid color is found?
+   if(strsame(p->curr_var.str_var,"BLACK")){
+      p->ttl.col=black;
+   }
+   if(strsame(p->curr_var.str_var,"RED")){
+      p->ttl.col=red;
+   }
+   if(strsame(p->curr_var.str_var,"GREEN")){
+      p->ttl.col=green;
+   }
+   if(strsame(p->curr_var.str_var,"BLUE")){
+      p->ttl.col=blue;
+   }
+   if(strsame(p->curr_var.str_var,"YELLOW")){
+      p->ttl.col=yellow;
+   }
+   if(strsame(p->curr_var.str_var,"CYAN")){
+      p->ttl.col=cyan;
+   }
+   if(strsame(p->curr_var.str_var,"MAGENTA")){
+      p->ttl.col=magenta;
+   }
+   if(strsame(p->curr_var.str_var,"WHITE")){
+      p->ttl.col=white;
    }
 
    return true;

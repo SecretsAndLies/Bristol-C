@@ -1,6 +1,7 @@
 START
-  SET A ( 45 )
+  SET A ( 22.5 2 * )
   SET B ( 5 )
+  COLOUR "BLUE"
   FORWARD $B
   RIGHT $A
   FORWARD $B
@@ -17,4 +18,5 @@ START
   RIGHT $A
   FORWARD $B
   RIGHT $A
+  SET C ( 22.5 0 / )
 END

@@ -2,7 +2,7 @@ START
   SET A ( 45 )
   SET B ( 5 )
   FORWARD $B
-  RIGHT $A
+  RIGHT $A 45 +_
   FORWARD $B
   RIGHT $A
   FORWARD $B
