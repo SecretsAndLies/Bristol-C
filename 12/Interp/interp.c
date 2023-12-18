@@ -558,15 +558,30 @@ bool run_loop(Program *p)
    if(!check_ltr(CURRENT_WORD)){
       return false;
    }
-   // go past the letter.
+   // save and go past the letter.
+   char letter = FIRST_LETTER;
    p->curr_word++;
    if(!strsame(CURRENT_WORD, "OVER")){
       return false;
    }
    // go past OVER
    p->curr_word++;
+
+   // save what the current word index is +1 (ie where the first var should be)
+   int first_var_index = p->curr_word+1;
    if(!run_lst(p)){
       return false;
+      // todo, this hsould be a function.
+      // now your current word is on the first inslist, so you need to go 2 back to get
+      // the last_var_index
+      // num_items_in_loop = (last_var_index - first_var_index) + 1
+      // you plus one because of not counting from zero weirdness.
+
+      // then loop num_items_in_loop times
+      // get the string at index, and set variable to what's in that index. (could be string or num) so run the respective function.
+      // increment the index
+      // run ins list
+
    }
    if(!run_inslst(p)){
       return false;
@@ -899,12 +914,6 @@ Program * get_program(char * prog_name)
    
 
    return prog;
-}
-
-/* Issue ANSI Codes to move cursor to the given position */
-void cursor_goto(int row, int col)
-{
-   printf("\033[%i;%iH",row,col);
 }
 
 

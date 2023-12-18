@@ -136,11 +136,6 @@ void test_run_op(void);
 void test_get_number(void);
 bool get_number(char * str, double * num);
 
-
-
-void cursor_goto(int row, int col);
-// no testing needed. pretty sure i can delte.
-
 void check_args_valid(int argc, char *argv[]);
 
 bool is_valid_filename(char * filename, char * ext);

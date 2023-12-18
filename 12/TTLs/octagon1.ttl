@@ -18,5 +18,4 @@ START
   RIGHT $A
   FORWARD $B
   RIGHT $A
-  SET C ( 22.5 0 / )
 END
