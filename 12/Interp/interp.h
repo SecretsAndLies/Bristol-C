@@ -41,6 +41,8 @@
 
 #define MAX_DEGREES 360.0
 
+#define LOOP_BACK_OFFSET 2
+
 typedef enum {
   SCREEN,
   PS,
@@ -76,7 +78,7 @@ typedef struct Program{
    Variable variables[NUM_VARIABLES];
    Variable curr_var;
    File_Type output_location;
-   char * output_file_name;
+   char output_file_name[MAXTOKENSIZE];
    stack * stck;
 } Program;
 
@@ -136,7 +138,8 @@ void test_run_op(void);
 void test_get_number(void);
 bool get_number(char * str, double * num);
 
-void check_args_valid(int argc, char *argv[]);
+void eval_args(int argc, char *argv[], File_Type * ft);
+void test_eval_args(void);
 
 bool is_valid_filename(char * filename, char * ext);
 void test_is_valid_filename(void);
@@ -170,3 +173,5 @@ void free_prog(Program * p);
 
 bool run_pfix(Program *p);
 void test_run_pfix(void);
+
+void print_arr_to_txt_file(Program * p);
