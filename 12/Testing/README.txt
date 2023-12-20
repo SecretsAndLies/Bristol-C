@@ -11,3 +11,14 @@ scripts exit with the correct error code.
 - fequal to handle floating point imprecision
 
 - added a add_to_angle and subtract from angle to avoid overflow issues.
+
+
+== INTERP ==
+- Tried downarrow and saw that I wasn't executing the rest of the program 
+if the loop was defined at the start of the prog.
+
+- wrote a bash script to verify that the outputs of the program matched yours, 
+but they were sublty different. I eventually decided that I would check each one
+and decide if it looked right. Then in future, I tested against this output.
+This allowed me to tell if the output had changed in a significant way, while I 
+did my refactoring.

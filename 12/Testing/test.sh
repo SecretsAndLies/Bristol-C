@@ -21,6 +21,26 @@ check_exit_sucess() {
     fi
 }
 
+check_output_match() {
+    extension=$3
+    filename=$2
+    program=$1
+
+    ./$program "TTLs/$filename.ttl" out_$filename.$extension
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: expected exit code 0 for $filename but got $?"
+        exit 1
+    fi
+
+    # Compare the output file with the expected results
+    if ! diff -q out_$filename.$extension results/out_$filename.$extension > /dev/null; then
+        echo "ERROR: Output mismatch for $filename"
+        exit 1
+    fi
+
+}
+
 check_exit_fail parse_s fail_parse_ok_interp.ttl
 check_exit_sucess parse_s empty.ttl
 check_exit_sucess parse_s forward.ttl
@@ -36,7 +56,31 @@ check_exit_sucess parse_s labyrinth.ttl
 check_exit_sucess parse_s 5x5.ttl
 check_exit_sucess parse_s downarrow.ttl
 check_exit_sucess parse_s ok_parse_fail_interp.ttl
+#interp stuff.
+check_exit_fail interp_s ok_parse_fail_interp.ttl
+#wrong extension
+check_exit_fail interp_s ok_parse_fail_interp.ttl blah.doc
+#no extension
+check_exit_fail interp_s ok_parse_fail_interp.ttl blah
+#too many args.
+check_exit_fail interp_s ok_parse_fail_interp.ttl blah.txt blah.ps 
+#invalid file
+check_exit_fail interp_s fakefile.ttl 
 
-# test extension with invalid filename args
+check_output_match interp_s forward txt
+check_output_match interp_s empty txt
+check_output_match interp_s donothing txt
+check_output_match interp_s fail_parse_ok_interp txt
+check_output_match interp_s set1 txt
+check_output_match interp_s set2 txt
+check_output_match interp_s turn txt
+check_output_match interp_s octagon1 txt
+check_output_match interp_s octagon2 txt
+check_output_match interp_s spiral txt
+check_output_match interp_s tunnel txt
+check_output_match interp_s labyrinth txt
+check_output_match interp_s 5x5 txt
+check_output_match interp_s downarrow txt
+
 
 exit 0

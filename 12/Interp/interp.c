@@ -1,6 +1,7 @@
 #include "interp.h"
 
 // TODO delete debug
+// todo you're outputting an extra line to the terminal on the TXT output.
 int main( int argc, char *argv[] )  
 {
    test();
@@ -29,6 +30,7 @@ int main( int argc, char *argv[] )
 
 void test(void)
 {
+   test_run_fwd();
    test_eval_args();
    test_add_to_angle();
    test_run_pfix();
@@ -58,15 +60,17 @@ void print_arr_to_txt_file(Program * p)
       }  
       fprintf(fp, "\n");
    }  
-
+   fprintf(fp, "\n"); 
 }
 
 void free_prog(Program * p)
 {
+   if(p->output_location==SCREEN){
+      neillreset(); 
+      printf("\n"); // you need this or reset doesn't work.
+   }
    stack_free(p->stck);
    free(p);
-   neillreset(); 
-   printf("\n"); // you need this or reset doesn't work.
 }
 
 void test_get_and_set_variables(void)
@@ -128,37 +132,47 @@ bool get_var_from_variables(char var, Program * prog)
 
 void eval_args(int argc, char *argv[], File_Type * ft)
 {
-   if(argc!=MAX_ARGS){
+   if(argc>MAX_ARGS){
       on_error("Wrong number of arguments.");
    }
-   if(!is_valid_filename(argv[INPUT_FILE_INDEX], ".ttl")){
-      on_error("Invalid filename for arg 1, expected a .ttl file");
-   }
-   // todo it's more like is_valid_filename that ends with ext
-   bool is_txt = is_valid_filename(argv[OUTPUT_FILE_INDEX], ".txt");
-   bool is_ps = is_valid_filename(argv[OUTPUT_FILE_INDEX], ".ps");
+   if(argc==MAX_ARGS){
+      if(!is_valid_filename(argv[INPUT_FILE_INDEX], ".ttl")){
+         on_error("Invalid filename for arg 1, expected a .ttl file");
+      }
+      // todo it's more like is_valid_filename that ends with ext
+      bool is_txt = is_valid_filename(argv[OUTPUT_FILE_INDEX], ".txt");
+      bool is_ps = is_valid_filename(argv[OUTPUT_FILE_INDEX], ".ps");
 
-   if(!is_ps && !is_txt){
-      on_error("Invalid filename for arg 2, expected a .ps or .txt file");
+      if(!is_ps && !is_txt){
+         on_error("Invalid filename for arg 2, expected a .ps or .txt file");
+      }
+      if(is_ps){
+         *ft = PS;
+         return;
+      }
+      if(is_txt){
+         *ft = TXT;
+         return;
+      }
    }
-   if(is_ps){
-      *ft = PS;
-   }
-   if(is_txt){
-      *ft = TXT;
-   }
+   // otherwise we output to screen.
+   *ft = SCREEN;
 }
 
 void test_eval_args(void)
 {   
-   char * argv[] = {"./interp_s", "TTLs/octagon1.ttl", "out_octagon1.txt"};
+   char * argv3[] = {"./interp_s", "TTLs/octagon1.ttl"};
    File_Type ft;
+   eval_args(2, argv3, &ft);
+   assert(ft==SCREEN);
+
+   char * argv[] = {"./interp_s", "TTLs/octagon1.ttl", "out_octagon1.txt"};
    eval_args(3, argv, &ft);
-   assert(ft=TXT);
+   assert(ft==TXT);
 
    char * argv2[] = {"./interp_s", "TTLs/octagon1.ttl", "out_octagon1.ps"};
    eval_args(3, argv2, &ft);
-   assert(ft=PS);
+   assert(ft==PS);
 
 }
 
@@ -659,12 +673,19 @@ bool run_loop(Program *p)
          p->curr_word = start_of_ins_list;
       }
    }
+   // now we run inslist again - this could be just the END of the prog, or lots more.
+   p->curr_word++;
+   if(!run_inslst(p)){
+      return false;
+   }
 
    return true;
 }
 
 void test_run_loop(void)
 {
+   // write a a test that covers downarrow 
+   // (ie the thing where the loop is defined at the top of the function.)
 }
 
 // <NUM>    ::= 10 or -17.99 etc.
@@ -716,6 +737,18 @@ bool run_fwd(Program *p)
 
 }
 
+void test_run_fwd(void)
+{
+   Program* prog = calloc(1, sizeof(Program));
+
+   // out of bounds error.
+   strcpy(prog->words[0],"FORWARD");
+   strcpy(prog->words[1],"17");
+   assert(!run_fwd(prog));
+
+   free(prog);
+}
+
 // this is the MAGIC. Takes the x, y, angle and distance
 // and writes to the array.
 bool go_fwd(Program * p)
@@ -755,6 +788,7 @@ bool go_fwd(Program * p)
 bool is_out_of_bounds(int r, int c)
 {
    if (r < 0 || r >= SCREEN_HEIGHT || c < 0 || c >= SCREEN_WIDTH) {
+      puts("OUT OF BOUNDS");
       return true;
    }
    return false;

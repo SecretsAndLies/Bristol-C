@@ -27,11 +27,13 @@ extension_v: Extension/extension.h Extension/extension.c neillsimplescreen.c nei
 	$(CC) neillsimplescreen.c Extension/extension.c -o extension_v -I./Extension $(VALGRIND) -lm
 
 run: all
-	./interp_s TTLs/octagon1.ttl out_octagon1.txt
+	./Testing/test.sh
 
 clean:
 	rm -f parse_s interp_s out_*.txt out_*.ps out_*.pdf
 
+
+# 	./interp_s TTLs/downarrow.ttl out_downarrow.txt
 
 	# ./parse_s TTLs/empty.ttl
 	# ./parse_s TTLs/forward.ttl

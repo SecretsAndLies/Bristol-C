@@ -31,7 +31,7 @@
 
 #define START_ANGLE 90
 
-#define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
+#define DEBUG printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
 #define NUM_VARIABLES 26 //num letters in alpabet
 
@@ -97,7 +97,7 @@ bool run_rgt(Program *p);
 // tested in test_ins
 
 bool run_fwd(Program *p);
-// tested in test_ins 
+void test_run_fwd(void);
 
 bool run_num(Program *p);
 void test_run_num(void);
