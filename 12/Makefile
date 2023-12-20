@@ -20,16 +20,14 @@ interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.
 interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h Interp/Stack/realloc.c
 	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_v -I./Interp $(VALGRIND) -lm
 
-## An example : you may wish to adapt this slightly
 extension_s: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h
 	$(CC) neillsimplescreen.c Extension/extension.c -o extension_s -I./Extension $(SANITIZE) -lm
 
 extension_v: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h
-	$(CC) neillsimplescreen.c Extension/extension.c -o extension_v -I./Extension $(SANITIZE) -lm
+	$(CC) neillsimplescreen.c Extension/extension.c -o extension_v -I./Extension $(VALGRIND) -lm
 
 run: all
 	./interp_s TTLs/octagon1.ttl out_octagon1.txt
-
 
 clean:
 	rm -f parse_s interp_s out_*.txt out_*.ps out_*.pdf
@@ -82,3 +80,8 @@ clean:
 	# ./interp_s TTLs/hypno.ttl out_hypno.ps
 	# ./interp_s TTLs/5x5.ttl out_5x5.ps
 	# ./interp_s TTLs/downarrow.ttl out_downarrow.ps
+
+
+#valgrind --leak-check=full ./interp_v TTLs/octagon1.ttl out_octagon1.txt
+#todo check valgrind on things that should exit in failure?
+# valgrind --leak-check=full ./parse_v TTLs/octagon1.ttl
