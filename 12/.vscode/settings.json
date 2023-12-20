@@ -6,6 +6,7 @@
         "time.h": "c",
         "iterator": "c",
         "cmath": "c",
-        "random": "c"
+        "random": "c",
+        "complex": "c"
     }
 }

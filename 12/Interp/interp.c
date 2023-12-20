@@ -1,30 +1,18 @@
 #include "interp.h"
 
 // TODO delete debug
-// todo you're outputting an extra line to the terminal on the TXT output.
 int main( int argc, char *argv[] )  
 {
    test();
-   File_Type ft;
-   eval_args(argc, argv, &ft);
-   Program * prog = get_program(argv[INPUT_FILE_INDEX]);
-   prog->output_location = ft; // todo put in func?
-   if(prog->output_location!=SCREEN){
-      strcpy(prog->output_file_name, argv[OUTPUT_FILE_INDEX]);
-   }
+   Program * prog = init_program(argv, argc);
    if(!run_program(prog)){
       free_prog(prog);
-   // todo - potentially we could have an error message stored in our struct,
-   // and print that here so we get more detailed info about what failed.
       on_error("Error - cannot interpret program.");
    }
-
    if(prog->output_location==TXT){
       print_arr_to_txt_file(prog);
    }
-
    free_prog(prog);
-
    exit(EXIT_SUCCESS);
 }
 
@@ -47,6 +35,7 @@ void test(void)
    test_run_program();
    test_get_number();
    test_run_loop();
+   test_run_op();
 }
 
 // todo this is similar the other print arr thing. Refactor?
@@ -130,6 +119,7 @@ bool get_var_from_variables(char var, Program * prog)
    return true;
 }
 
+// todo this is still a tiny bit too long.
 void eval_args(int argc, char *argv[], File_Type * ft)
 {
    if(argc>MAX_ARGS){
@@ -139,10 +129,8 @@ void eval_args(int argc, char *argv[], File_Type * ft)
       if(!is_valid_filename(argv[INPUT_FILE_INDEX], ".ttl")){
          on_error("Invalid filename for arg 1, expected a .ttl file");
       }
-      // todo it's more like is_valid_filename that ends with ext
       bool is_txt = is_valid_filename(argv[OUTPUT_FILE_INDEX], ".txt");
       bool is_ps = is_valid_filename(argv[OUTPUT_FILE_INDEX], ".ps");
-
       if(!is_ps && !is_txt){
          on_error("Invalid filename for arg 2, expected a .ps or .txt file");
       }
@@ -155,7 +143,6 @@ void eval_args(int argc, char *argv[], File_Type * ft)
          return;
       }
    }
-   // otherwise we output to screen.
    *ft = SCREEN;
 }
 
@@ -173,7 +160,6 @@ void test_eval_args(void)
    char * argv2[] = {"./interp_s", "TTLs/octagon1.ttl", "out_octagon1.ps"};
    eval_args(3, argv2, &ft);
    assert(ft==PS);
-
 }
 
 bool is_valid_filename(char * filename, char * ext)
@@ -200,7 +186,6 @@ void test_is_valid_filename(void)
    assert(is_valid_filename("v.txt",".txt"));
    //wrong ext
    assert(!is_valid_filename("v.txt",".ttl"));
-
 }
 
 bool is_operator(char c)
@@ -210,6 +195,11 @@ bool is_operator(char c)
 
 void test_is_operator(void)
 {
+   assert(is_operator('+'));
+   assert(is_operator('-'));
+   assert(is_operator('/'));
+   assert(is_operator('*'));
+   assert(!is_operator('a'));
 }
 
 
@@ -308,11 +298,8 @@ void test_run_pfix(void)
    assert(fequal(res,2));
    prog->curr_word=0;
 
-
-
    stack_free(prog->stck);
    free(prog);
-   // test that various expressions add the correct result to the stack.
 }
 
 // <OP> ::= + - / *
@@ -323,39 +310,71 @@ bool run_op(Program *p)
    if(strlen(CURRENT_WORD)!=1){
       return false;
    }
-   // this check I believe is redundant.
+   // this check I believe is redundant. why? todo?
    if(!is_operator(FIRST_LETTER)){
       return false;
    }
    
+   if(!eval_operator(FIRST_LETTER, p)){
+      return false;
+   }
+   
+   p->curr_word++;
+   return true;
+}
+
+bool eval_operator(char op, Program * p)
+{
    double second_num;
    double first_num;
    stack_pop(p->stck, &second_num); 
    stack_pop(p->stck, &first_num); 
-   if(FIRST_LETTER=='+'){
+   if(op=='+'){
       stack_push(p->stck, first_num+second_num);
    }
-   if(FIRST_LETTER=='-'){
+   if(op=='-'){
       stack_push(p->stck, first_num-second_num);
    }
-   if(FIRST_LETTER=='*'){
+   if(op=='*'){
       stack_push(p->stck, first_num*second_num);
    }
-   if(FIRST_LETTER=='/'){
+   if(op=='/'){
       // catch attempts to divide by zero.
       if(fequal(second_num,0)){
          return false;
       }
       stack_push(p->stck, first_num/second_num);
    }
-
-   p->curr_word++;
    return true;
 }
 
-void test_op(void)
+void test_run_op(void)
 {
-   // test divide by zero
+   Program* prog = calloc(1, sizeof(Program));
+   prog->stck = stack_init();
+   stack_push(prog->stck, 2);
+   stack_push(prog->stck, 2);
+   strcpy(prog->words[0],"+");
+
+   double res;
+   assert(run_op(prog));
+   stack_pop(prog->stck, &res);
+   assert(fequal(res,4));
+   prog->curr_word=0;
+
+
+   stack_push(prog->stck, 2);
+   stack_push(prog->stck, 0);
+   strcpy(prog->words[0],"/");
+   assert(!run_op(prog));
+   // two numbers are left untouched on the stack, removing.
+   stack_pop(prog->stck, &res);
+   stack_pop(prog->stck, &res);
+
+   prog->curr_word=0;
+
+   stack_free(prog->stck);
+   free(prog);
 }
 
 // <SET> ::= "SET" <LTR> "(" <PFIX>
@@ -367,11 +386,10 @@ bool run_set(Program *p)
    if(!check_ltr(CURRENT_WORD)){
       return false;
    }
-   char letter = CURRENT_WORD[0];
+   char letter = FIRST_LETTER;
    // go past the letter.
    p->curr_word++;
    if(!strsame(CURRENT_WORD, "(")){
-      DEBUG
       return false;
    }
    // go past the open bracket.
@@ -383,7 +401,6 @@ bool run_set(Program *p)
    double num;
    stack_pop(p->stck, &num);
    set_variable_to_num(letter,p,num);
-
    return true;
 }
 
@@ -478,7 +495,6 @@ bool run_varnum(Program * p)
          return false;
       }
    }
-
    return true;
 }
 
@@ -561,31 +577,42 @@ bool run_col(Program *p)
    // at this point, current var should be set to a string.
    // so we can update ttl->col to be this colour.
    // todo add error checks if no valid color is found?
+   if(!set_col(p)){
+      return false;
+   }
+
+   return true;
+}
+
+bool set_col(Program * p)
+{
    if(strsame(p->curr_var.str_var,"\"BLACK\"")){
       p->ttl.col=black;
    }
-   if(strsame(p->curr_var.str_var,"\"RED\"")){
+   else if(strsame(p->curr_var.str_var,"\"RED\"")){
       p->ttl.col=red;
    }
-   if(strsame(p->curr_var.str_var,"\"GREEN\"")){
+   else if(strsame(p->curr_var.str_var,"\"GREEN\"")){
       p->ttl.col=green;
    }
-   if(strsame(p->curr_var.str_var,"\"BLUE\"")){
+   else if(strsame(p->curr_var.str_var,"\"BLUE\"")){
       p->ttl.col=blue;
    }
-   if(strsame(p->curr_var.str_var,"\"YELLOW\"")){
+   else if(strsame(p->curr_var.str_var,"\"YELLOW\"")){
       p->ttl.col=yellow;
    }
-   if(strsame(p->curr_var.str_var,"\"CYAN\"")){
+   else if(strsame(p->curr_var.str_var,"\"CYAN\"")){
       p->ttl.col=cyan;
    }
-   if(strsame(p->curr_var.str_var,"\"MAGENTA\"")){
+   else if(strsame(p->curr_var.str_var,"\"MAGENTA\"")){
       p->ttl.col=magenta;
    }
-   if(strsame(p->curr_var.str_var,"\"WHITE\"")){
+   else if(strsame(p->curr_var.str_var,"\"WHITE\"")){
       p->ttl.col=white;
    }
-
+   else {
+      return false;
+   }
    return true;
 }
 
@@ -615,63 +642,18 @@ void test_check_ltr(void)
 bool run_loop(Program *p)
 {
    DEBUG
-   // skip "LOOP"
    p->curr_word++;
    if(!check_ltr(CURRENT_WORD)){
       return false;
    }
-   // save and go past the letter.
    char letter = FIRST_LETTER;
    p->curr_word++;
    if(!strsame(CURRENT_WORD, "OVER")){
       return false;
    }
-   // go past OVER
    p->curr_word++;
-
-   // save what the current word index is +1 (ie where the first loop item is)
-   int first_item_index = p->curr_word+1;
-   if(!run_lst(p)){
+   if(!execute_loop(p,letter)){
       return false;
-   }
-
-      // now your current word is on the first inslist, 
-      // so you need to go 2 back to get last item in the loop.
-   int last_item_index = p->curr_word-LOOP_BACK_OFFSET;
-      // num_items_in_loop = (last_var_index - first_var_index) + 1
-      // you plus one because of not counting from zero weirdness.
-   int num_items_in_loop = (last_item_index-first_item_index)+1;
-
-   int start_of_ins_list = p->curr_word;
-
-   for (int i=0; i<num_items_in_loop; i++)
-   {
-      int current_item_index = first_item_index+i;
-
-      // printf(" RUNNING INSLIST WITH WORD: %s\n", p->words[current_item_index]);
-      // get the string at index, and set variable to 
-      // what's in that index. 
-      // (could be string or num) 
-      // so run the respective function.
-      //  p->words[current_item_index]
-      double num;
-      if(get_number(p->words[current_item_index], &num)){
-         set_variable_to_num(letter,p,num);
-      }
-      else{
-         set_variable_to_string(letter,p,p->words[current_item_index]);
-      }
-      // run ins list
-      if(!run_inslst(p)){
-         return false;
-      }
-      // printf("the current col is %i \n",p->ttl.col);
-
-      // if not the last loop. reset current_word to start of ins list
-      // otherwise leave it where inslst set it.
-      if(i!=num_items_in_loop-1){
-         p->curr_word = start_of_ins_list;
-      }
    }
    // now we run inslist again - this could be just the END of the prog, or lots more.
    p->curr_word++;
@@ -679,6 +661,35 @@ bool run_loop(Program *p)
       return false;
    }
 
+   return true;
+}
+
+bool execute_loop(Program * p, char letter)
+{
+   int first_item_index = p->curr_word+1;
+   if(!run_lst(p)){
+      return false;
+   }
+   int last_item_index = p->curr_word-LOOP_BACK_OFFSET;
+   int num_items_in_loop = (last_item_index-first_item_index)+1;
+   int start_of_ins_list = p->curr_word;
+   for (int i=0; i<num_items_in_loop; i++)
+   {
+      int current_item_index = first_item_index+i;
+      double num;
+      if(get_number(p->words[current_item_index], &num)){
+         set_variable_to_num(letter,p,num);
+      }
+      else{
+         set_variable_to_string(letter,p,p->words[current_item_index]);
+      }
+      if(!run_inslst(p)){
+         return false;
+      }
+      if(i!=num_items_in_loop-1){
+         p->curr_word = start_of_ins_list;
+      }
+   }
    return true;
 }
 
@@ -714,85 +725,71 @@ void test_run_num(void)
 bool run_fwd(Program *p)
 {
    DEBUG
-
    // advance past FORWARD
    p->curr_word++;
-
    if(!run_varnum(p)){
       return false;
    }
-
    // check we've got a number we can use.
    if(p->curr_var.var_type!=NUM){
       return false;
    }
-
    p->ttl.distance=p->curr_var.num_var;
-
    if(!go_fwd(p)){
       return false;
    }
-   
    return true;
-
 }
 
 void test_run_fwd(void)
 {
    Program* prog = calloc(1, sizeof(Program));
-
    // out of bounds error.
    strcpy(prog->words[0],"FORWARD");
    strcpy(prog->words[1],"17");
    assert(!run_fwd(prog));
-
    free(prog);
 }
 
-// this is the MAGIC. Takes the x, y, angle and distance
-// and writes to the array.
+// todo too long and repetitive.
 bool go_fwd(Program * p)
 {
-
-   // calculate ending cord.
+   // first we write to the location we're already in.
+   int c = round(p->ttl.x);
+   int r = round(p->ttl.y); 
+   if(!write_turtle_to_arr(p,r,c)){
+      return false;
+   }
    double angle_in_radians = DEGREES_TO_RADIANS(p->ttl.angle);
-
-// change to do while
-      int c = round(p->ttl.x);
-      int r = round(p->ttl.y); 
-      if(!write_turtle_to_arr(p,r,c)){
-         return false;
-      }
+   double x_move = cos(angle_in_radians);
+   double y_move = sin(angle_in_radians);
    // convert X,Y into actual r c
-   for (int i=1; i<=p->ttl.distance; i++){
+   for (int i=0; i<p->ttl.distance; i++){
       // note that we have to - here because of array index weirdness
-      p->ttl.x -= cos(angle_in_radians);
-      p->ttl.y -= sin(angle_in_radians);
-
+      p->ttl.x -= x_move;
+      p->ttl.y -= y_move;
       int c = round(p->ttl.x);
       int r = round(p->ttl.y); 
-
       if(!write_turtle_to_arr(p,r,c)){
          return false;
       }
    }
-   
    if(p->output_location==SCREEN){
-      // todo reenable.
       print_arr_to_screen(p);
    }
-
+   // finally we round the coordinates
+   p->ttl.x=round(p->ttl.x);
+   p->ttl.y=round(p->ttl.y);
    return true;
 }
 
 bool is_out_of_bounds(int r, int c)
 {
    if (r < 0 || r >= SCREEN_HEIGHT || c < 0 || c >= SCREEN_WIDTH) {
-      puts("OUT OF BOUNDS");
+      puts("OUT OF BOUNDS"); // todo remove? Or just print to stderr
       return true;
    }
    return false;
-
 }
 
 bool write_turtle_to_arr(Program * p, int r, int c)
@@ -836,7 +833,7 @@ void print_letter_w_colour_code(char letter)
    if(letter == 'W'){
       neillfgcol(white);
    }
-   if(letter == 'B'){
+   if(letter == 'K'){
       neillfgcol(black);
    }
    if(letter == 'R'){
@@ -857,14 +854,12 @@ void print_letter_w_colour_code(char letter)
    if(letter == 'C'){
       neillfgcol(cyan);
    }
-
-
    printf("%c",letter);
 }
 
 void print_arr_to_screen(Program * p)
 {
-   neillclrscrn(); 
+   // neillclrscrn(); // todo add back in.
    for(int r=0; r<SCREEN_HEIGHT; r++){
       for(int c=0; c<SCREEN_WIDTH; c++){
          char letter = p->output[r][c];
@@ -873,7 +868,7 @@ void print_arr_to_screen(Program * p)
       printf("\n");
    }  
    printf("\n");
-   neillbusywait(1);
+   // neillbusywait(1);
 }
 
 // <RGT> ::= "RIGHT" <VARNUM>
@@ -893,6 +888,7 @@ void test_add_to_angle(void)
 {
    assert(fequal(add_to_angle(30.0, 40.0), 70.0));
    assert(fequal(add_to_angle(350.0, 20.0), 10.0));
+   assert(fequal(add_to_angle(350.0, 10.0), 0.0));
    assert(fequal(add_to_angle(10.0, -20.0), 350.0));
    assert(fequal(add_to_angle(0.0, 720.0), 0.0));
    assert(fequal(add_to_angle(-30.0, 60.0), 30.0));
@@ -902,10 +898,10 @@ double add_to_angle(double current_angle, double add_value)
 {
    double new_angle = fmod(current_angle + add_value, 360.0);
 
-    // Handling negative angles
-    if (new_angle < 0) {
+  // Handling negative angles
+   if (new_angle < 0) {
       new_angle += 360.0;
-      }
+   }
    return new_angle;
 }
 
@@ -995,36 +991,49 @@ void test_run_program(void)
 
 }
 
-Program * get_program(char * prog_name)
+Program * init_program(char * argv[], int argc)
 {
-   FILE * f = nfopen(prog_name,"r");
+   File_Type ft;
+   eval_args(argc, argv, &ft);
    Program* prog = calloc(1, sizeof(Program));
+   get_prog_from_file(argv[INPUT_FILE_INDEX], prog);
+   init_prog_variables(prog);
+   prog->output_location = ft; 
+   if(prog->output_location!=SCREEN){
+      strcpy(prog->output_file_name, argv[OUTPUT_FILE_INDEX]);
+   }
+   return prog;
+}
+
+void init_prog_variables(Program * prog)
+{
+   set_prog_output_to_spaces(prog);
+   prog->ttl.angle=START_ANGLE;
+   prog->ttl.x = START_X;
+   prog->ttl.y = START_Y;
+   prog->ttl.col=white;
+   prog->stck = stack_init();
+}
+
+void set_prog_output_to_spaces(Program * p)
+{
+   for(int r=0; r<SCREEN_HEIGHT; r++){
+         for(int c=0; c<SCREEN_WIDTH; c++){
+            p->output[r][c]=' '; 
+         }  
+      }  
+}
+
+void get_prog_from_file(char * filename, Program * prog)
+{
+   FILE * f = nfopen(filename,"r");
    int i=0;
    while(fscanf(f, "%s", prog->words[i++])==1 && i<MAXNUMTOKENS);
    if(i>=MAXNUMTOKENS){
       on_error("File contains too many tokens to parse.");
    }
    fclose(f);
-   prog->output_location=SCREEN; // TODO take in the other args.
-   
-   // set the output to spaces,
-   for(int r=0; r<SCREEN_HEIGHT; r++){
-      for(int c=0; c<SCREEN_WIDTH; c++){
-          prog->output[r][c]=' '; 
-      }  
-   }  
-
-   // start angle
-   prog->ttl.angle=START_ANGLE;
-   prog->ttl.x = START_X;
-   prog->ttl.y = START_Y;
-   prog->ttl.col=white;
-
-   // stack
-   prog->stck = stack_init();
-   
-
-   return prog;
+   prog->output_location=SCREEN;
 }
 
 

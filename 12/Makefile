@@ -32,7 +32,7 @@ run: all
 clean:
 	rm -f parse_s interp_s out_*.txt out_*.ps out_*.pdf
 
-
+# ./interp_s TTLs/spiral.ttl
 # 	./interp_s TTLs/downarrow.ttl out_downarrow.txt
 
 	# ./parse_s TTLs/empty.ttl

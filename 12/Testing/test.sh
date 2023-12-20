@@ -74,13 +74,13 @@ check_output_match interp_s fail_parse_ok_interp txt
 check_output_match interp_s set1 txt
 check_output_match interp_s set2 txt
 check_output_match interp_s turn txt
+check_output_match interp_s tunnel txt
 check_output_match interp_s octagon1 txt
 check_output_match interp_s octagon2 txt
-check_output_match interp_s spiral txt
-check_output_match interp_s tunnel txt
-check_output_match interp_s labyrinth txt
-check_output_match interp_s 5x5 txt
+#todo I can't get these to work.
 check_output_match interp_s downarrow txt
-
+check_output_match interp_s 5x5 txt
+check_output_match interp_s spiral txt
+check_output_match interp_s labyrinth txt
 
 exit 0

@@ -31,12 +31,12 @@
 
 #define START_ANGLE 90
 
-#define DEBUG printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
+#define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
 #define NUM_VARIABLES 26 //num letters in alpabet
 
 #define PI 3.14159265358979
-#define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / PI));
+#define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / PI))
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * (PI / 180.0))
 
 #define MAX_DEGREES 360.0
@@ -82,7 +82,11 @@ typedef struct Program{
    stack * stck;
 } Program;
 
-Program * get_program(char * prog_name);
+Program * init_program(char * argv[], int argc);
+
+void get_prog_from_file(char * filename, Program * prog);
+void init_prog_variables(Program * prog);
+void set_prog_output_to_spaces(Program * p);
 
 bool run_program(Program *p);
 void test_run_program(void);
@@ -135,6 +139,8 @@ void test_is_operator(void);
 bool run_op(Program *p);
 void test_run_op(void);
 
+bool eval_operator(char op, Program * p);
+
 void test_get_number(void);
 bool get_number(char * str, double * num);
 
@@ -175,3 +181,7 @@ bool run_pfix(Program *p);
 void test_run_pfix(void);
 
 void print_arr_to_txt_file(Program * p);
+
+bool set_col(Program * p);
+
+bool execute_loop(Program * p, char letter);

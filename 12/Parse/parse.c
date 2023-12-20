@@ -84,12 +84,9 @@ bool parse_pfix(Program *p)
          return false;
       }
    }
-
-   // in both cases you need to prefix.
    if(!parse_pfix(p)){
       return false;
    }
-
    return true;
 }
 
@@ -255,19 +252,36 @@ bool parse_items(Program *p)
 
 bool is_number(char * str)
 {
-   double a;
-   if(sscanf(str,"%lf", &a)!=1){
-      return false;
-   }
-   a=0; // switching off warnings :-(
-   return true;
+   int str_index = 0;
+    if (str[str_index] == '-' || str[str_index] == '+') {
+        str_index++;
+    }
+    if (!isdigit(str[str_index]) && str[str_index] != '.') {
+        return false;
+    }
+    while (isdigit((str[str_index]))) {
+        str_index++;
+    }
+    if (str[str_index] == '.') {
+        str_index++;
+        if (!isdigit((str[str_index])) && str[str_index] != '\0') {
+            return false;
+        }
+        while (isdigit((str[str_index]))) {
+            str_index++;
+        }
+    }
+    return str[str_index] == '\0';
 }
 
 void test_is_number(void)
 {
    assert(is_number("7"));
+   assert(is_number("-17123212"));
    assert(is_number("-7.0"));
    assert(!is_number("t"));
+   assert(!is_number("81f"));
+   assert(!is_number("as8"));
 }
 
 // <VARNUM> ::= <VAR> | <NUM>
