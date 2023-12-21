@@ -14,11 +14,14 @@
 #define FIRST_LETTER CURRENT_WORD[0]
 #define strsame(A,B) (strcmp(A, B)==0)
 
-#define MAXNUMTOKENS 1000
-#define MAXTOKENSIZE 100
+#define MAXNUMTOKENS 10000
+#define MAXTOKENSIZE 1000
 #define MAX_ARGS 3
 #define INPUT_FILE_INDEX 1
 #define OUTPUT_FILE_INDEX 2
+#define OUTPUTCOMMANDLEN 250
+#define MEDIUMSTR 500
+#define SMALLSTR 100
 
 #define TIME_TO_WAIT 1
 
@@ -26,6 +29,12 @@
 #define SCREEN_WIDTH 51
 #define START_Y SCREEN_HEIGHT/2
 #define START_X SCREEN_WIDTH/2
+
+#define A4_HEIGHT 80
+#define A4_WIDTH 60
+
+#define START_Y_PS A4_HEIGHT/2
+#define START_X_PS A4_WIDTH/2
 
 #define FLOAT_PRECISION 0.0000001
 
@@ -78,8 +87,10 @@ typedef struct Program{
    Variable variables[NUM_VARIABLES];
    Variable curr_var;
    File_Type output_location;
-   char output_file_name[MAXTOKENSIZE];
+   char output_file_name[SMALLSTR];
    stack * stck;
+   char ps_output[MAXNUMTOKENS][MAXTOKENSIZE];
+   int ps_num_words;
 } Program;
 
 Program * init_program(char * argv[], int argc);
@@ -166,7 +177,7 @@ void print_arr_to_screen(Program * p);
 
 bool write_turtle_to_arr(Program * p, int r, int c);
 
-bool is_out_of_bounds(int r, int c);
+bool is_out_of_bounds(Program * p);
 
 void print_letter_w_colour_code(char letter);
 
@@ -185,3 +196,10 @@ void print_arr_to_txt_file(Program * p);
 bool set_col(Program * p);
 
 bool execute_loop(Program * p, char letter);
+
+void append_to_file(char * filename, char * content);
+void write_start_text_to_ps(char * filename);
+
+void write_prog_text_to_ps(Program * prog);
+
+void handle_ps_output(Program * prog);

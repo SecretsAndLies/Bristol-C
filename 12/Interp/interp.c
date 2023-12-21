@@ -1,5 +1,10 @@
 #include "interp.h"
 
+// todo, you're still going out of bounds on labrinth in basic mdoe I believe.
+// your line drawing algo doesn't match Neils (but is close enough for goverment work)
+// you lack tests baby.
+// other than that, congratulations on architecutre. You're doing awesome. Just do this gently. You'll be fine!
+
 // TODO delete debug
 int main( int argc, char *argv[] )  
 {
@@ -11,6 +16,9 @@ int main( int argc, char *argv[] )
    }
    if(prog->output_location==TXT){
       print_arr_to_txt_file(prog);
+   }
+   if(prog->output_location==PS){
+      handle_ps_output(prog);
    }
    free_prog(prog);
    exit(EXIT_SUCCESS);
@@ -38,10 +46,52 @@ void test(void)
    test_run_op();
 }
 
+void handle_ps_output(Program * prog)
+{
+   write_start_text_to_ps(prog->output_file_name);
+   write_prog_text_to_ps(prog);
+   append_to_file(prog->output_file_name, "showpage");
+   // creating the command string could be a func in itself I think, then you can strtest it. todo.
+   char command[MEDIUMSTR];
+   int len = strlen(prog->output_file_name);
+   char file_name_no_ext[SMALLSTR];
+   strcpy(file_name_no_ext, prog->output_file_name);
+   file_name_no_ext[len - 3] = '\0';
+   sprintf(command, "ps2pdf %s %s.pdf", prog->output_file_name, file_name_no_ext);
+   system(command);
+}
+
+void write_prog_text_to_ps(Program * prog)
+{
+   int i=0;
+   while(i<prog->ps_num_words){
+      if(prog->ps_output[i][0]!='\0'){
+         append_to_file(prog->output_file_name, prog->ps_output[i]);
+      }
+      i++;
+   }
+}
+
+void write_start_text_to_ps(char * filename)
+{
+   char * content = "0.2 setlinewidth \n"
+                     "10 10 scale";
+   FILE * fp = nfopen(filename, "w");
+   fprintf(fp, "%s\n", content);
+   fclose(fp);
+}
+
+void append_to_file(char * filename, char * content)
+{
+   FILE * fp = nfopen(filename, "a");
+   fprintf(fp, "%s\n", content);
+   fclose(fp);
+}
+
 // todo this is similar the other print arr thing. Refactor?
 void print_arr_to_txt_file(Program * p)
 {
-   FILE *fp = fopen(p->output_file_name, "w");
+   FILE *fp = nfopen(p->output_file_name, "w");
    for(int r=0; r<SCREEN_HEIGHT; r++){
       for(int c=0; c<SCREEN_WIDTH; c++){
          char letter = p->output[r][c];
@@ -50,6 +100,7 @@ void print_arr_to_txt_file(Program * p)
       fprintf(fp, "\n");
    }  
    fprintf(fp, "\n"); 
+   fclose(fp);
 }
 
 void free_prog(Program * p)
@@ -64,7 +115,7 @@ void free_prog(Program * p)
 
 void test_get_and_set_variables(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    // intially no variables are set.
    assert(!get_var_from_variables('A', prog));
    assert(prog->curr_var.var_type==NOT_SET);
@@ -236,7 +287,7 @@ bool run_pfix(Program *p)
 
 void test_run_pfix(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    prog->stck = stack_init();
 
    double res;
@@ -350,7 +401,7 @@ bool eval_operator(char op, Program * p)
 
 void test_run_op(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    prog->stck = stack_init();
    stack_push(prog->stck, 2);
    stack_push(prog->stck, 2);
@@ -545,7 +596,7 @@ bool run_word(Program *p)
 
 void test_run_word(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
 
    strcpy(prog->words[0],"\"RED\"");
    run_word(prog);
@@ -743,12 +794,41 @@ bool run_fwd(Program *p)
 
 void test_run_fwd(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    // out of bounds error.
    strcpy(prog->words[0],"FORWARD");
    strcpy(prog->words[1],"17");
    assert(!run_fwd(prog));
    free(prog);
+}
+
+// populates the colour string.
+// todo, you'll need to hash define these strings.
+void get_ps_colour(char * colour, Program * p){
+   if(p->ttl.col==white){
+      sprintf(colour,"0.8 0.8 0.8");
+   }
+   if(p->ttl.col==black){
+      sprintf(colour,"1 1 1");
+   }
+   if(p->ttl.col==red){
+      sprintf(colour,"1 0 0");
+   }
+   if(p->ttl.col==green){
+      sprintf(colour,"0 1 0");
+   }
+   if(p->ttl.col==yellow){
+      sprintf(colour,"1 1 0");
+   }
+   if(p->ttl.col==blue){
+      sprintf(colour,"0 0 1");
+   }
+   if(p->ttl.col==magenta){
+      sprintf(colour,"1 0 1");
+   }
+   if(p->ttl.col==cyan){
+      sprintf(colour,"0 1 1");
+   }
 }
 
 // todo too long and repetitive.
@@ -760,32 +840,72 @@ bool go_fwd(Program * p)
    if(!write_turtle_to_arr(p,r,c)){
       return false;
    }
+   double orig_x = p->ttl.x;
+   double orig_y = p->ttl.y;
+   
+   char move_str[MEDIUMSTR];
+   char colour[SMALLSTR];
+   get_ps_colour(colour, p);
+
    double angle_in_radians = DEGREES_TO_RADIANS(p->ttl.angle);
    double x_move = cos(angle_in_radians);
    double y_move = sin(angle_in_radians);
    // convert X,Y into actual r c
    for (int i=0; i<p->ttl.distance; i++){
       // note that we have to - here because of array index weirdness
-      p->ttl.x -= x_move;
-      p->ttl.y -= y_move;
-      int c = round(p->ttl.x);
-      int r = round(p->ttl.y); 
-      if(!write_turtle_to_arr(p,r,c)){
-         return false;
+      if(p->output_location!=PS){
+         p->ttl.x -= x_move;
+         p->ttl.y -= y_move;
+         int c = round(p->ttl.x);
+         int r = round(p->ttl.y); 
+         if(!write_turtle_to_arr(p,r,c)){
+            return false;
+         }
       }
+      // special case for post script.
+      else{
+         p->ttl.x -= x_move;
+         p->ttl.y += y_move;
+      }
+   
    }
    if(p->output_location==SCREEN){
       print_arr_to_screen(p);
    }
+
    // finally we round the coordinates
    p->ttl.x=round(p->ttl.x);
    p->ttl.y=round(p->ttl.y);
+
+   // and output to ps.
+   sprintf(move_str, "newpath\n"
+            "%lf %lf moveto\n" //orig xy
+            "%lf %lf lineto\n" // final xy
+            "%s setrgbcolor\n"
+            "stroke", 
+            orig_x,orig_y,
+            p->ttl.x,p->ttl.y,
+            colour);
+
+   strcpy(p->ps_output[p->ps_num_words], move_str);
+   p->ps_num_words++;
+
    return true;
 }
 
-bool is_out_of_bounds(int r, int c)
+bool is_out_of_bounds(Program * p)
 {
-   if (r < 0 || r >= SCREEN_HEIGHT || c < 0 || c >= SCREEN_WIDTH) {
+   int height;
+   int width;
+   if(p->output_location==PS){
+      height=A4_HEIGHT;
+      width=A4_WIDTH;
+   }
+   else{
+      height=SCREEN_HEIGHT;
+      width=SCREEN_WIDTH;
+   }
+   if (p->ttl.y < 0 || p->ttl.y >= height || p->ttl.x < 0 || p->ttl.x >= width) {
       puts("OUT OF BOUNDS"); // todo remove? Or just print to stderr
       return true;
    }
@@ -794,7 +914,11 @@ bool is_out_of_bounds(int r, int c)
 
 bool write_turtle_to_arr(Program * p, int r, int c)
 {
-   if(is_out_of_bounds(r,c)){
+   // we don't write to the array in this case.
+   if(p->output_location==PS){
+      return true;
+   }
+   if(is_out_of_bounds(p)){
       return false;
    }
    else if(p->ttl.col==white){
@@ -907,7 +1031,7 @@ double add_to_angle(double current_angle, double add_value)
 
 void test_run_rgt(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
 
    strcpy(prog->words[0],"RIGHT");
    strcpy(prog->words[1],"45");
@@ -995,10 +1119,10 @@ Program * init_program(char * argv[], int argc)
 {
    File_Type ft;
    eval_args(argc, argv, &ft);
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    get_prog_from_file(argv[INPUT_FILE_INDEX], prog);
-   init_prog_variables(prog);
    prog->output_location = ft; 
+   init_prog_variables(prog);
    if(prog->output_location!=SCREEN){
       strcpy(prog->output_file_name, argv[OUTPUT_FILE_INDEX]);
    }
@@ -1009,8 +1133,14 @@ void init_prog_variables(Program * prog)
 {
    set_prog_output_to_spaces(prog);
    prog->ttl.angle=START_ANGLE;
-   prog->ttl.x = START_X;
-   prog->ttl.y = START_Y;
+   if(prog->output_location==PS){
+      prog->ttl.x = START_X_PS;
+      prog->ttl.y = START_Y_PS;
+   }
+   else{
+      prog->ttl.x = START_X;
+      prog->ttl.y = START_Y;
+   }
    prog->ttl.col=white;
    prog->stck = stack_init();
 }
