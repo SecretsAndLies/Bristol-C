@@ -1,10 +1,5 @@
 #include "interp.h"
 
-// todo, you're still going out of bounds on labrinth in basic mdoe I believe.
-// your line drawing algo doesn't match Neils (but is close enough for goverment work)
-// you lack tests baby.
-// other than that, congratulations on architecutre. You're doing awesome. Just do this gently. You'll be fine!
-
 // TODO delete debug
 int main( int argc, char *argv[] )  
 {

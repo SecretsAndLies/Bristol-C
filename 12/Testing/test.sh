@@ -29,7 +29,7 @@ check_output_match() {
     ./$program "TTLs/$filename.ttl" out_$filename.$extension
 
     if [ $? -ne 0 ]; then
-        echo "ERROR: expected exit code 0 for $filename but got $?"
+        echo "ERROR: expected exit code 0 for $filename $program $extension but got $?"
         exit 1
     fi
 
@@ -39,6 +39,28 @@ check_output_match() {
         exit 1
     fi
 
+}
+
+check_exit_fail_with_string() {
+    program=$1
+    filename=$2
+    expected_string=$3
+    extra_arg=$4
+    if [ -n "$extra_arg" ]; then
+        output=$("./$program" "$filename" "$extra_arg" 2>&1)
+        exit_code=$?
+    else
+        output=$("./$program" "$filename" 2>&1)
+        exit_code=$?
+    fi
+    if [ $exit_code -ne 1 ]; then
+        echo "ERROR: expected non 0 exit code for $filename $program but got $exit_code"
+        exit 1
+    fi
+    if [[ "$output" != *"$expected_string"* ]]; then
+        echo "ERROR: expected string '$expected_string' not found in the output for $filename"
+        exit 1
+    fi
 }
 
 check_exit_fail parse_s fail_parse_ok_interp.ttl
@@ -56,7 +78,18 @@ check_exit_sucess parse_s labyrinth.ttl
 check_exit_sucess parse_s 5x5.ttl
 check_exit_sucess parse_s downarrow.ttl
 check_exit_sucess parse_s ok_parse_fail_interp.ttl
-#interp stuff.
+
+check_exit_fail_with_string parse_s "forward.ttl" "Wrong number of arguments" "test.ps"
+check_exit_fail_with_string parse_s ".ttl" "Invalid filename: too short" ""
+check_exit_fail_with_string parse_s "aaa.tt" "Invalid filename: must end with .ttl" ""
+#open non existant file
+check_exit_fail_with_string parse_s "aaa.ttl" "Cannot open file" ""
+# File contains words that are too long.
+check_exit_fail_with_string parse_s "TTLs/too_long_word.ttl" "File contains words that are too long" ""
+# File is too long (too many words).
+check_exit_fail_with_string parse_s "TTLs/too_long_file.ttl" "File is too long (too many words)" ""
+
+#INTERP TESTS:
 check_exit_fail interp_s ok_parse_fail_interp.ttl
 #wrong extension
 check_exit_fail interp_s ok_parse_fail_interp.ttl blah.doc
@@ -78,9 +111,9 @@ check_output_match interp_s tunnel txt
 check_output_match interp_s octagon1 txt
 check_output_match interp_s octagon2 txt
 #todo I can't get these to work.
-check_output_match interp_s downarrow txt
 check_output_match interp_s 5x5 txt
 check_output_match interp_s spiral txt
+check_output_match interp_s downarrow txt
 check_output_match interp_s labyrinth txt
 
 exit 0

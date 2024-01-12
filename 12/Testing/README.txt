@@ -1,17 +1,23 @@
 ==PARSE==
 - wrote tests for each function testing the basic functionality.
 
-- created a #define #define DEBUG printf("%s %s %s\n",CURRENT_WORD, __func__, __LINE__);
-to help with debugging the parser. adding debug at the top of every function
-helped identify where things were going wrong (and then I could write tests to catch errors)
+- During development I created a #define:
+ DEBUG printf("%s %s %s\n",CURRENT_WORD, __func__, __LINE__);
+to help with debugging the parser. 
+I added this line at the top of every function to
+ identify in which function things were going wrong.
+TODO ASK NEIL IF HE CONSIDERS THIS A TEST.
 
-- wrote a bash script (test.sh) that determines that each of the provided example 
-scripts exit with the correct error code.
+- I wrote my own .TTL files to test sprecific functionality that was 
+ cumbersome to test using inline functions. For example:
+* file contains too many words
+* file contains word that's too long.
+* incorrect arguments.
 
-- fequal to handle floating point imprecision
-
-- added a add_to_angle and subtract from angle to avoid overflow issues.
-
+- I wrote a bash script (test.sh) that determines that .TTL files
+ exit with the correct error code. This was useful for testing
+ specific failure conditions (eg: too many arguments) or 
+ automatically checking sucess of valid files.
 
 == INTERP ==
 - Tried downarrow and saw that I wasn't executing the rest of the program 
@@ -22,3 +28,6 @@ after changing how I rounded, I was able to get all but four to perfectly match.
 Most likely because of the same bug, labyrinth was going out of bounds.
 
 
+- fequal to handle floating point imprecision
+
+- added a add_to_angle and subtract from angle to avoid overflow issues.

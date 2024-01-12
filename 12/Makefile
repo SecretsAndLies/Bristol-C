@@ -9,10 +9,10 @@ PRODUCTION= $(COMMON) -O3
 all: parse_s interp_s parse_v
 
 parse_s: Parse/parse.h Parse/parse.c
-	$(CC) Parse/parse.c -o parse_s -I./Parse $(SANITIZE) -lm
+	$(CC) Parse/parse.c General/general.c -o parse_s -I./Parse $(SANITIZE) -lm
 
 parse_v: Parse/parse.h Parse/parse.c
-	$(CC) Parse/parse.c -o parse_v -I./Parse $(VALGRIND) -lm
+	$(CC) Parse/parse.c General/general.c -o parse_v -I./Parse $(VALGRIND) -lm
 
 interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
 	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_s -I./Interp $(SANITIZE) -lm
