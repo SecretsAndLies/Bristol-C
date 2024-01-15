@@ -435,6 +435,8 @@ void test_run_pfix(void)
    // TODO: test 4+ fails - you should never dip below the
    // current working stack.
 
+   // TODO test ) empty?
+
    stack_free(prog->stck);
    free(prog);
 }
@@ -514,7 +516,6 @@ void test_run_op(void)
    stack_free(prog->stck);
    free(prog);
 }
-
 // <SET> ::= "SET" <LTR> "(" <PFIX>
 bool run_set(Program *p)
 {
@@ -1236,9 +1237,10 @@ bool run_loop(Program *p)
       return false;
    }
    p->curr_word++;
-   // skip empty loops.  TODO HAVE A THINK ABOUT THIS.
+   // skip empty loops. 
    if(strsame(p->words[p->curr_word+1],"}")){
-      DEBUG
+      // TODO this will fail on nested loops (you need to count the number of LOOP)
+      // and then you should skip forward until you get the correct number of END
       while(!strsame(CURRENT_WORD,"END")){
          p->curr_word++;
       }
@@ -1321,6 +1323,8 @@ void test_run_loop(void)
    Program* p = ncalloc(1, sizeof(Program));
    init_prog_variables(p);
    p->output_location=TXT;
+   p->curr_word=0;
+   set_variable_to_num('D',p,0);
    // LOOP A {1,10}
    strcpy(p->words[0],"LOOP");
    strcpy(p->words[1],"A");
@@ -1356,19 +1360,20 @@ void test_run_loop(void)
    strcpy(p->words[28],"+");
    strcpy(p->words[29],"+");
    strcpy(p->words[30],"+");
+   strcpy(p->words[31],")");
 
    // END END END END
-   strcpy(p->words[31],"END");
    strcpy(p->words[32],"END");
    strcpy(p->words[33],"END");
    strcpy(p->words[34],"END");
+   strcpy(p->words[35],"END");
 
    assert(run_loop(p));
 
-   assert(p->curr_word==34);
+   assert(p->curr_word==35);
    get_var_from_variables('D',p);
    assert(p->curr_var.var_type==NUM);
-   assert(fequal(p->curr_var.num_var,5210));
+   assert(fequal(p->curr_var.num_var,22924));
    
    get_var_from_variables('A',p);
    assert(p->curr_var.var_type==NUM);
