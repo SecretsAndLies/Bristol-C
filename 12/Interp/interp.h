@@ -22,6 +22,7 @@
 #define OUTPUTCOMMANDLEN 250
 #define MEDIUMSTR 500
 #define SMALLSTR 100
+#define MIN_WORD_LEN 3
 
 #define TIME_TO_WAIT 1
 
@@ -40,7 +41,7 @@
 
 #define START_ANGLE 90
 
-#define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
+#define DEBUG printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
 #define NUM_VARIABLES 26 //num letters in alpabet
 
@@ -51,6 +52,15 @@
 #define MAX_DEGREES 360.0
 
 #define LOOP_BACK_OFFSET 2
+
+#define WHITE_PS "0.8 0.8 0.8"
+#define BLACK_PS "1 1 1"
+#define RED_PS "1 0 0"
+#define GREEN_PS "0 1 0"
+#define YELLOW_PS "1 1 0"
+#define BLUE_PS "0 0 1"
+#define MAGENTA_PS "1 0 1"
+#define CYAN_PS "0 1 1"
 
 typedef enum {
   SCREEN,
@@ -93,11 +103,15 @@ typedef struct Program{
    int ps_num_words;
 } Program;
 
+// tested in the bash script.
 Program * init_program(char * argv[], int argc);
-
 void get_prog_from_file(char * filename, Program * prog);
+
 void init_prog_variables(Program * prog);
+void test_init_prog_variables(void);
+
 void set_prog_output_to_spaces(Program * p);
+void test_set_prog_output_to_spaces(void);
 
 bool run_program(Program *p);
 void test_run_program(void);
@@ -109,10 +123,7 @@ bool run_ins(Program *p);
 void test_run_ins(void);
 
 bool run_rgt(Program *p);
-// tested in test_ins
-
-bool run_fwd(Program *p);
-void test_run_fwd(void);
+void test_run_rgt(void);
 
 bool run_num(Program *p);
 void test_run_num(void);
@@ -137,30 +148,33 @@ bool run_word(Program *p);
 void test_run_word(void);
 
 bool run_lst(Program *p);
+void test_run_lst(void);
 
 bool run_items(Program *p);
+void test_run_items(void);
 
 bool run_item(Program *p);
+void test_run_item(void);
 
 bool run_varnum(Program * p);
+void test_run_varnum(void);
 
 bool is_operator(char c);
 void test_is_operator(void);
 
 bool run_op(Program *p);
-void test_run_op(void);
-
 bool eval_operator(char op, Program * p);
+void test_run_op(void);
 
 void test_get_number(void);
 bool get_number(char * str, double * num);
 
 void eval_args(int argc, char *argv[], File_Type * ft);
+void set_file_type(int argc, char *argv[], File_Type * ft);
 void test_eval_args(void);
 
-bool is_valid_filename(char * filename, char * ext);
-void test_is_valid_filename(void);
-
+bool is_filetype(char * filename, char * ext);
+void test_is_filetype(void);
 
 void set_variable_to_string(char var, Program * p, char * str);
 void set_variable_to_num(char var, Program * p, double num);
@@ -170,23 +184,31 @@ void test_get_and_set_variables(void);
 bool fequal(double a, double b);
 void test_fequal(void);
 
+// these are tested together.
 bool go_fwd(Program * p);
+bool execute_move(Program * p);
+bool run_fwd(Program *p);
+void test_run_fwd(void);
 
 void print_arr_to_screen(Program * p);
 // no tests needed.
 
-bool write_turtle_to_arr(Program * p, int r, int c);
+bool write_turtle_to_arr(Program * p);
+void test_write_turtle_to_arr(void);
 
 bool is_out_of_bounds(Program * p);
+void test_is_out_of_bounds(void);
 
 void print_letter_w_colour_code(char letter);
+// no tests needed.
 
 void test_add_to_angle(void);
 double add_to_angle(double current_angle, double add_value);
 
 void test_run_set(void);
 
-void free_prog(Program * p);
+bool free_prog(Program * p);
+void test_free_prog(void);
 
 bool run_pfix(Program *p);
 void test_run_pfix(void);
@@ -194,8 +216,7 @@ void test_run_pfix(void);
 void print_arr_to_txt_file(Program * p);
 
 bool set_col(Program * p);
-
-bool execute_loop(Program * p, char letter);
+void test_set_col(void);
 
 void append_to_file(char * filename, char * content);
 void write_start_text_to_ps(char * filename);
@@ -203,3 +224,26 @@ void write_start_text_to_ps(char * filename);
 void write_prog_text_to_ps(Program * prog);
 
 void handle_ps_output(Program * prog);
+
+void create_command(Program * prog, char command[MEDIUMSTR]);
+void test_create_command(void);
+
+void test_is_number(void);
+bool is_number(char * str);
+
+// TODO TEST THESE.
+bool run_one_loop(Program * p, int i, char letter, 
+               int first_item_index, int num_items_in_loop, 
+               int start_of_ins_list);
+void test_run_one_loop(void);
+bool execute_loop(Program * p, char letter);
+void test_execute_loop(void);
+
+bool get_ps_colour(char * colour, Program * p);
+void test_get_ps_colour(void);
+
+void write_ps_move(char move_str[MEDIUMSTR],
+                           double orig_x, double orig_y, 
+                           Program * p,   
+                           char colour[SMALLSTR]);
+void test_write_ps_move(void);

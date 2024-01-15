@@ -35,6 +35,7 @@ void test(void)
    test_parse_rgt();
    test_parse_fwd();
    test_parse_inslst();
+   test_parse_rgt();
 }
 
 void check_args_valid(int argc, char *argv[])
@@ -72,7 +73,6 @@ void test_is_operator(void)
 // <PFIX> ::= ")" | <OP> <PFIX> | <VARNUM> <PFIX>
 bool parse_pfix(Program *p)
 {
-   DEBUG
    if(strsame(CURRENT_WORD, ")")){
       p->curr_word++;
       return true;
@@ -104,7 +104,7 @@ void test_parse_pfix(void)
    prog->curr_word = 0;
    // invalid varnum $AA + )
    strcpy(prog->words[0],"$AA");
-   strcpy(prog->words[1],"+a");
+   strcpy(prog->words[1],"+");
    strcpy(prog->words[2],")");
    assert(!parse_pfix(prog));
    prog->curr_word = 0;
@@ -433,7 +433,7 @@ void test_parse_items(void)
 bool is_number(char * str)
 {
    int str_index = 0;
-   if(str[str_index] == '-' || str[str_index] == '+'){
+   if(str[str_index] == '-'){
       str_index++;
    }
    if(!isdigit(str[str_index]) && str[str_index] != '.'){
@@ -895,7 +895,7 @@ bool parse_rgt(Program *p)
 
 void test_parse_rgt(void)
 {
-      Program* prog = ncalloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
 
    strcpy(prog->words[0],"RIGHT");
    strcpy(prog->words[1],"$A");
@@ -915,7 +915,7 @@ void test_parse_rgt(void)
    assert(prog->curr_word == 2);
    prog->curr_word = 0;
 
-   // forward missing.
+   // right missing.
    strcpy(prog->words[0],"fads");
    strcpy(prog->words[1],"3.0");
    assert(!parse_rgt(prog));
@@ -1091,7 +1091,7 @@ void test_parse_program(void)
    assert(prog->curr_word==18);
    prog->curr_word = 0;
 
-   // testing failure when one variable is modified.
+   // testing failure when one string is modified.
    strcpy(prog->words[0],"START");
    strcpy(prog->words[1],"FORWARD");
    strcpy(prog->words[2],"5");

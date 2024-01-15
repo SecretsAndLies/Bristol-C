@@ -27,7 +27,14 @@ if the loop was defined at the start of the prog.
 after changing how I rounded, I was able to get all but four to perfectly match.
 Most likely because of the same bug, labyrinth was going out of bounds.
 
-
 - fequal to handle floating point imprecision
 
 - added a add_to_angle and subtract from angle to avoid overflow issues.
+
+- As above, created functions to test the main functionality. 
+Occasionally it was simpler to have a function test bevhiour of multiple functions,
+for example, test_get_and_set_variables tests the beheviour of three functions.
+
+- out of bounds causes error and exit.
+
+- all globals, no loop scoping.
