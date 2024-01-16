@@ -9,6 +9,7 @@
         "random": "c",
         "complex": "c",
         "stdbool.h": "c",
-        "assert.h": "c"
+        "assert.h": "c",
+        "neillsdl2.h": "c"
     }
 }

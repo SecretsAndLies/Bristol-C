@@ -1,10 +1,11 @@
 #include <SDL.h>
 #include <math.h>
+#include "extra_sdl.h"
 
-#define WWIDTH 800
-#define WHEIGHT 600
+#define WWIDTH 1020
+#define WHEIGHT 660
 #define RECTSIZE 20
-#define MILLISECONDDELAY 5
+#define MILLISECONDDELAY 25
 
 /* Font stuff */
 typedef unsigned short fntrow;
@@ -18,15 +19,6 @@ typedef unsigned short fntrow;
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-/* All info required for windows / renderer & event loop */
-struct SDL_Simplewin {
-   SDL_bool finished;
-   SDL_Window *win;
-   SDL_Renderer *renderer;
-   SDL_Texture *display;
-};
-typedef struct SDL_Simplewin SDL_Simplewin;
 
 void Neill_SDL_Init(SDL_Simplewin *sw);
 void Neill_SDL_Events(SDL_Simplewin *sw);

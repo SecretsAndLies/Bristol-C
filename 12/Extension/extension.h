@@ -14,12 +14,8 @@
 #define BLACK 0, 0, 0
 #define GREEN 0, 100, 0
 
-typedef struct {
-	int up;
-	int right;
-} app;
+void do_input(SDL_Simplewin *sw);
+void do_key_down(SDL_KeyboardEvent *event, SDL_Simplewin *sw);
+void do_key_up(SDL_KeyboardEvent *event, SDL_Simplewin *sw);
+void set_draw_colour(SDL_Simplewin *sw, int red, int green, int blue);
 
-void doInput(void);
-
-void doKeyDown(SDL_KeyboardEvent *event);
-void doKeyUp(SDL_KeyboardEvent *event);
