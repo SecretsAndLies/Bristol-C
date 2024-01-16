@@ -6,6 +6,15 @@ SANITIZE= $(COMMON) -fsanitize=undefined -fsanitize=address $(DEBUG)
 VALGRIND= $(COMMON) $(DEBUG)
 PRODUCTION= $(COMMON) -O3
 
+## EXTENSION FLAGS:
+BASEFLAGS=-Wall -Wextra -Wpedantic -std=c99 -Wvla -Wfloat-equal
+PRODFLAGS=$(BASEFLAGS) -O1 -Werror `pkg-config sdl2 --cflags`
+DEVFLAGS=$(BASEFLAGS) -fsanitize=address -fsanitize=undefined -g3 
+LDLIBS= -lm
+LIBS =  -lm `pkg-config sdl2 --libs`
+
+
+
 all: parse_s interp_s parse_v
 
 parse_s: Parse/parse.h Parse/parse.c
@@ -20,11 +29,11 @@ interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.
 interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h Interp/Stack/realloc.c
 	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_v -I./Interp $(VALGRIND) -lm
 
-extension_s: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h
-	$(CC) neillsimplescreen.c Extension/extension.c -o extension_s -I./Extension $(SANITIZE) -lm
+extension: Extension/extension.h Extension/extension.c Extension/nsdl/neillsdl2.c
+	$(CC) Extension/nsdl/neillsdl2.c Extension/extension.c -o extension -I./Extension $(PRODFLAGS) $(LIBS)
 
-extension_v: Extension/extension.h Extension/extension.c neillsimplescreen.c neillsimplescreen.h
-	$(CC) neillsimplescreen.c Extension/extension.c -o extension_v -I./Extension $(VALGRIND) -lm
+ext_run: extension
+		./extension
 
 clean:
 	rm -f parse_s interp_s out_*.txt out_*.ps out_*.pdf out.pdf out.ps out.txt
