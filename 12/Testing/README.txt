@@ -1,3 +1,10 @@
+==OVERALL==
+Intergration tests can be run with
+make test
+
+Function tests are run on any run of the program eg:
+./interp_s TTLs/skip_nested_loop.ttl
+
 ==PARSE==
 - wrote tests for each function testing the basic functionality.
 
@@ -38,3 +45,13 @@ for example, test_get_and_set_variables tests the beheviour of three functions.
 - out of bounds causes error and exit.
 
 - all globals, no loop scoping.
+
+- To avoid code like SET A ( 5 + + * ) causing errors, I added a check that ensures that
+the stack should always have only one value after executing an expression. This also causes
+SET A (5 5) to throw an error. These were tested in their respective functions.
+
+- Functions involving files were tested with the bash script.
+
+- ARguments were tested with the bash script (For example, calling wih incorrect arguments.)
+
+- 

@@ -1,5 +1,4 @@
 #include "interp.h"
-// TODO: add 2 second timings back in.
 
 int main( int argc, char *argv[] )  
 {
@@ -21,6 +20,7 @@ int main( int argc, char *argv[] )
 
 void test(void)
 {
+   test_skip_empty_loops();
    test_run_fwd();
    test_eval_args();
    test_add_to_angle();
@@ -35,7 +35,6 @@ void test(void)
    test_run_var();
    test_run_col();
    test_is_operator();
-   test_run_program();
    test_get_number();
    test_run_loop();
    test_run_op();
@@ -56,9 +55,11 @@ void test(void)
    test_set_prog_output_to_spaces();
    test_init_prog_variables();
    test_write_ps_move();
+   test_set_var_to_stck();
+   test_run_set();
+
 }
 
-// todo untested. test with a bash script that this results in a file being created?
 void handle_ps_output(Program * prog)
 {
    write_start_text_to_ps(prog->output_file_name);
@@ -88,7 +89,6 @@ void test_create_command(void)
    assert(strsame(command,"ps2pdf test.ps test.pdf"));
 }
 
-// todo untested. (it's basically tested with the bash script...)
 void write_prog_text_to_ps(Program * prog)
 {
    int i=0;
@@ -100,7 +100,6 @@ void write_prog_text_to_ps(Program * prog)
    }
 }
 
-// todo untested. (it's basically tested with the bash script...)
 void write_start_text_to_ps(char * filename)
 {
    char * content = "0.2 setlinewidth \n"
@@ -110,7 +109,6 @@ void write_start_text_to_ps(char * filename)
    fclose(fp);
 }
 
-// todo untested. (it's basically tested with the bash script...)
 void append_to_file(char * filename, char * content)
 {
    FILE * fp = nfopen(filename, "a");
@@ -118,7 +116,6 @@ void append_to_file(char * filename, char * content)
    fclose(fp);
 }
 
-// todo untested.
 void print_arr_to_txt_file(Program * p)
 {
    FILE *fp = nfopen(p->output_file_name, "w");
@@ -209,7 +206,6 @@ bool get_var_from_variables(char var, Program * prog)
    return true;
 }
 
-// todo, ensure this is all tested in the bash script.
 void eval_args(int argc, char *argv[], File_Type * ft)
 {
    if(argc>MAX_ARGS){
@@ -310,7 +306,7 @@ bool run_pfix(Program *p)
       p->curr_word++;
       return true;
    }
-   if(is_operator(FIRST_LETTER))
+   if(strlen(CURRENT_WORD)==1 && is_operator(FIRST_LETTER))
    {
       if(!run_op(p)){
          return false;
@@ -432,11 +428,6 @@ void test_run_pfix(void)
    assert(fequal(res,2));
    prog->curr_word=0;
 
-   // TODO: test 4+ fails - you should never dip below the
-   // current working stack.
-
-   // TODO test ) empty?
-
    stack_free(prog->stck);
    free(prog);
 }
@@ -462,8 +453,12 @@ bool eval_operator(char op, Program * p)
 {
    double second_num;
    double first_num;
-   stack_pop(p->stck, &second_num); 
-   stack_pop(p->stck, &first_num); 
+   if(!stack_pop(p->stck, &second_num)){
+      return false;
+   }
+   if(!stack_pop(p->stck, &first_num)){
+      return false;
+   }
    if(op=='+'){
       stack_push(p->stck, first_num+second_num);
    }
@@ -538,17 +533,49 @@ bool run_set(Program *p)
    if(!run_pfix(p)){
       return false;
    }
-   // after pfix is run, a number is left on the stack.
-   double num;
-   stack_pop(p->stck, &num);
-   set_variable_to_num(letter,p,num);
+   if(!set_var_to_stck(p,letter)){
+      return false;
+   }
    return true;
+}
+
+// sets variable to what's in the stack.
+// returns false if the stack contains >1 item.
+bool set_var_to_stck(Program * p, char letter)
+{
+   double num;
+   if(!stack_pop(p->stck, &num)){
+      return false;
+   }
+   set_variable_to_num(letter,p,num);
+   double fake;
+   if(stack_peek(p->stck, &fake)){
+      return false;
+   }
+   return true;
+}
+
+void test_set_var_to_stck(void)
+{
+   Program* p = ncalloc(1, sizeof(Program));
+   init_prog_variables(p);
+   stack_push(p->stck, 2);
+   assert(set_var_to_stck(p,'A'));
+   assert(fequal(p->variables[0].num_var,2));
+   stack_push(p->stck, 2);
+   stack_push(p->stck, 2);
+   assert(!set_var_to_stck(p,'A'));
+
+   stack_free(p->stck);
+   free(p);
+
 }
 
 void test_run_set(void)
 {
    Program* prog = ncalloc(1, sizeof(Program));
    // SET B ( -5.3 $A + )
+   init_prog_variables(prog);
    set_variable_to_num('A', prog, 1);
    strcpy(prog->words[0],"SET");
    strcpy(prog->words[1],"B");
@@ -565,7 +592,6 @@ void test_run_set(void)
    prog->curr_word = 0;
 
    // SET B ( -5.3 )
-   set_variable_to_num('A', prog, 1);
    strcpy(prog->words[0],"SET");
    strcpy(prog->words[1],"B");
    strcpy(prog->words[2],"(");
@@ -576,6 +602,36 @@ void test_run_set(void)
    get_var_from_variables('B',prog);
    assert(prog->curr_var.var_type==NUM);
    assert(fequal(prog->curr_var.num_var,-5.3));
+   prog->curr_word = 0;
+
+   // empty should fail (overpopping stack)
+   strcpy(prog->words[0],"SET");
+   strcpy(prog->words[1],"C");
+   strcpy(prog->words[2],"(");
+   strcpy(prog->words[3],")");
+   assert(!run_set(prog));
+   prog->curr_word = 0;
+
+   // other overpop test.
+   strcpy(prog->words[0],"SET");
+   strcpy(prog->words[1],"A");
+   strcpy(prog->words[2],"(");
+   strcpy(prog->words[3],"-5.3");
+   strcpy(prog->words[4],"3");
+   strcpy(prog->words[5],"+");
+   strcpy(prog->words[6],"+");
+   strcpy(prog->words[7],")");
+   assert(!run_set(prog));
+   prog->curr_word = 0;
+
+   // leaving too much on the stack
+   strcpy(prog->words[0],"SET");
+   strcpy(prog->words[1],"A");
+   strcpy(prog->words[2],"(");
+   strcpy(prog->words[3],"-5.3");
+   strcpy(prog->words[4],"3");
+   strcpy(prog->words[5],")");
+   assert(!run_set(prog));
    prog->curr_word = 0;
 
    // set misspelled.
@@ -614,10 +670,13 @@ void test_run_set(void)
    strcpy(prog->words[2],"(");
    strcpy(prog->words[3],"-5.3");
    strcpy(prog->words[4],"$A");
-   strcpy(prog->words[5],"+");
+   strcpy(prog->words[5],"5");
    strcpy(prog->words[6],"+");
+   strcpy(prog->words[7],"+");
    assert(!run_set(prog));
    prog->curr_word = 0;
+
+   stack_free(prog->stck);
    free(prog);
 }
 
@@ -1237,23 +1296,74 @@ bool run_loop(Program *p)
       return false;
    }
    p->curr_word++;
-   // skip empty loops. 
-   if(strsame(p->words[p->curr_word+1],"}")){
-      // TODO this will fail on nested loops (you need to count the number of LOOP)
-      // and then you should skip forward until you get the correct number of END
-      while(!strsame(CURRENT_WORD,"END")){
-         p->curr_word++;
-      }
+   if(skip_empty_loops(p)){
+      p->curr_word--;
    }
    else if (!execute_loop(p,letter)){
       return false;
    }
-
    p->curr_word++;
    if(!run_inslst(p)){
       return false;
    }
    return true;
+}
+
+bool skip_empty_loops(Program * p)
+{
+   if(strsame(p->words[p->curr_word+1],"}")){
+      int loop_c = 1;
+      while(loop_c!=0){
+         if(p->curr_word==MAXNUMTOKENS){
+            return false;
+         }
+         if(strsame(CURRENT_WORD,"LOOP")){
+            loop_c++;
+         }
+         if(strsame(CURRENT_WORD,"END")){
+            loop_c--;
+         }         
+         p->curr_word++;
+      }
+      return true;
+   }
+   return false;
+}
+
+void test_skip_empty_loops(void)
+{
+   Program* prog = ncalloc(1, sizeof(Program));
+   init_prog_variables(prog);
+   prog->output_location=TXT;
+
+   // unterminated end loop doesn't cause segfault.
+   prog->curr_word=3;
+   strcpy(prog->words[0],"LOOP");
+   strcpy(prog->words[1],"H");
+   strcpy(prog->words[2],"OVER");
+   strcpy(prog->words[3],"{");
+   strcpy(prog->words[4],"}");
+   strcpy(prog->words[5],"FORWARD");
+   strcpy(prog->words[6],"AS");
+   assert(!skip_empty_loops(prog));
+   prog->curr_word=0;
+
+   prog->curr_word=3;
+   strcpy(prog->words[0],"LOOP");
+   strcpy(prog->words[1],"H");
+   strcpy(prog->words[2],"OVER");
+   strcpy(prog->words[3],"{");
+   strcpy(prog->words[4],"}");
+   strcpy(prog->words[5],"FORWARD");
+   strcpy(prog->words[6],"AS");
+   strcpy(prog->words[7],"END");
+   strcpy(prog->words[8],"END");
+   assert(skip_empty_loops(prog));
+   assert(prog->curr_word==8);
+   prog->curr_word=0;
+   stack_free(prog->stck);
+   free(prog);
+
 }
 
 void test_run_loop(void)
@@ -1390,9 +1500,38 @@ void test_run_loop(void)
    p->curr_word=0;
    stack_free(p->stck);
    free(p);
+
+   // loop involving a set.
+   Program* pr = ncalloc(1, sizeof(Program));
+   init_prog_variables(pr);
+   pr->output_location=TXT;
+   strcpy(pr->words[0],"LOOP");
+   strcpy(pr->words[1],"A");
+   strcpy(pr->words[2],"OVER");
+   strcpy(pr->words[3],"{");
+   strcpy(pr->words[4],"1");
+   strcpy(pr->words[5],"}");
+   strcpy(pr->words[6],"SET");
+   strcpy(pr->words[7],"C");
+   strcpy(pr->words[8],"(");
+   strcpy(pr->words[9],"$A");
+   strcpy(pr->words[10],"1.25");
+   strcpy(pr->words[11],"*");
+   strcpy(pr->words[12],")");
+   strcpy(pr->words[13],"END");
+   strcpy(pr->words[14],"END");
+   assert(run_loop(pr));
+   get_var_from_variables('A',pr);
+   assert(pr->curr_word==14);
+   assert(fequal(pr->curr_var.num_var,1));
+   get_var_from_variables('C',pr);
+   assert(fequal(pr->curr_var.num_var,1.25));
+   pr->curr_word=0;
+   stack_free(pr->stck);
+   free(pr);
+
 }
 
-// var names too long? todo
 bool execute_loop(Program * p, char letter)
 {
    int first_item_index = p->curr_word+1;
@@ -1909,7 +2048,7 @@ void print_letter_w_colour_code(char letter)
 
 void print_arr_to_screen(Program * p)
 {
-   neillclrscrn(); // todo add back in.
+   neillclrscrn();
    for(int r=0; r<SCREEN_HEIGHT; r++){
       for(int c=0; c<SCREEN_WIDTH; c++){
          char letter = p->output[r][c];
@@ -2193,30 +2332,29 @@ void test_run_program(void)
    init_prog_variables(prog);
 
    // testing that a  recursive function suceeds.
-   // TODO ADD BACK IN.
-   // strcpy(prog->words[0],"START");
-   // strcpy(prog->words[1],"FORWARD");
-   // strcpy(prog->words[2],"5");
-   // strcpy(prog->words[3],"LOOP");
-   // strcpy(prog->words[4],"C");
-   // strcpy(prog->words[5],"OVER");
-   // strcpy(prog->words[6],"{");
-   // strcpy(prog->words[7],"\"RED\"");
-   // strcpy(prog->words[8],"\"GREEN\"");
-   // strcpy(prog->words[9],"\"YELLOW\"");
-   // strcpy(prog->words[10],"\"BLUE\"");
-   // strcpy(prog->words[11],"}");
-   // strcpy(prog->words[12],"COLOUR");
-   // strcpy(prog->words[13],"$C");
-   // strcpy(prog->words[14],"FORWARD");
-   // strcpy(prog->words[15],"0");
-   // strcpy(prog->words[16],"RIGHT");
-   // strcpy(prog->words[17],"90");
-   // strcpy(prog->words[18],"END");
-   // strcpy(prog->words[19],"END");
-   // assert(run_program(prog));
-   // assert(prog->curr_word==19);
-   // prog->curr_word = 0;
+   strcpy(prog->words[0],"START");
+   strcpy(prog->words[1],"FORWARD");
+   strcpy(prog->words[2],"5");
+   strcpy(prog->words[3],"LOOP");
+   strcpy(prog->words[4],"C");
+   strcpy(prog->words[5],"OVER");
+   strcpy(prog->words[6],"{");
+   strcpy(prog->words[7],"\"RED\"");
+   strcpy(prog->words[8],"\"GREEN\"");
+   strcpy(prog->words[9],"\"YELLOW\"");
+   strcpy(prog->words[10],"\"BLUE\"");
+   strcpy(prog->words[11],"}");
+   strcpy(prog->words[12],"COLOUR");
+   strcpy(prog->words[13],"$C");
+   strcpy(prog->words[14],"FORWARD");
+   strcpy(prog->words[15],"0");
+   strcpy(prog->words[16],"RIGHT");
+   strcpy(prog->words[17],"90");
+   strcpy(prog->words[18],"END");
+   strcpy(prog->words[19],"END");
+   assert(run_program(prog));
+   assert(prog->curr_word==19);
+   prog->curr_word = 0;
 
    // testing failure when one string is modified.
    strcpy(prog->words[0],"START");

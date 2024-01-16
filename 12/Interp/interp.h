@@ -41,7 +41,7 @@
 
 #define START_ANGLE 90
 
-#define DEBUG printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
+#define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
 
 #define NUM_VARIABLES 26 //num letters in alpabet
 
@@ -247,3 +247,9 @@ void write_ps_move(char move_str[MEDIUMSTR],
                            Program * p,   
                            char colour[SMALLSTR]);
 void test_write_ps_move(void);
+
+bool set_var_to_stck(Program * p, char letter);
+void test_set_var_to_stck(void);
+
+bool skip_empty_loops(Program * p);
+void test_skip_empty_loops(void);
