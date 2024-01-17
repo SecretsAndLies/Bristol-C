@@ -1,5 +1,21 @@
-==HOW TO RUN==
+==HOW TO PLAY==
 Run this with:
 make ext_run
+Use the right arrow to rotate right. 
+Use the forward arrow to go forward.
+Press Q to quit (you must press this or "END" will not be generated).
+Change the turtle colour with 'W' for white, 'G' for green,
+'M' for magenta etc.
+
+==OPTIMIZER==
+I also implemented an optimizer. This takes the output and 
+converts it into a more compressed form, for example 
+taking RIGHT 5 RIGHT 5 and turning it into RIGHT 10.
 
 ==SOURCES==
+I referenced an SDL game tutorial, but it ended up being
+easier to use your code and the documentation.
+https://www.parallelrealities.co.uk/tutorials/#shooter
+
+
+./extension > test.ttl && ./interp_s test.ttl test.ps

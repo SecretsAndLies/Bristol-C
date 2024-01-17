@@ -6,14 +6,15 @@ Function tests are run on any run of the program eg:
 ./interp_s TTLs/skip_nested_loop.ttl
 
 ==PARSE==
-- wrote tests for each function testing the basic functionality.
+- Had functions return booleans as exit failures are difficult to test.
+
+- Wrote tests for each function testing the basic functionality.
 
 - During development I created a #define:
  DEBUG printf("%s %s %s\n",CURRENT_WORD, __func__, __LINE__);
 to help with debugging the parser. 
 I added this line at the top of every function to
  identify in which function things were going wrong.
-TODO ASK NEIL IF HE CONSIDERS THIS A TEST.
 
 - I wrote my own .TTL files to test sprecific functionality that was 
  cumbersome to test using inline functions. For example:
@@ -53,5 +54,3 @@ SET A (5 5) to throw an error. These were tested in their respective functions.
 - Functions involving files were tested with the bash script.
 
 - ARguments were tested with the bash script (For example, calling wih incorrect arguments.)
-
-- 

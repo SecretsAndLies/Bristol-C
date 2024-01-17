@@ -38,6 +38,28 @@ void Neill_SDL_Init(SDL_Simplewin *sw)
    }
    SDL_SetRenderTarget(sw->renderer, sw->display);
 
+    /* Create texture for back buffer */
+    sw->backBuffer = SDL_CreateTexture(sw->renderer, SDL_PIXELFORMAT_RGBA8888,
+                                       SDL_TEXTUREACCESS_TARGET, WWIDTH, WHEIGHT);
+    if(sw->backBuffer == NULL){
+        ON_ERROR("Unable to initialize back buffer texture");
+    }
+
+   /* Create texture for back buffer */
+    sw->midBuffer = SDL_CreateTexture(sw->renderer, SDL_PIXELFORMAT_RGBA8888,
+                                       SDL_TEXTUREACCESS_TARGET, WWIDTH, WHEIGHT);
+    if(sw->midBuffer == NULL){
+        ON_ERROR("Unable to initialize back buffer texture");
+    }
+
+    /* Set render target to back buffer and clear */
+    SDL_SetRenderTarget(sw->renderer, sw->backBuffer);
+    SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(sw->renderer);
+
+    /* Reset render target */
+    SDL_SetRenderTarget(sw->renderer, NULL);
+
    /* Clear screen, & set draw colour to black */
    SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, 255);
    SDL_RenderClear(sw->renderer);

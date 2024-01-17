@@ -1,15 +1,16 @@
 {
     "files.associations": {
-        "cstdlib": "c",
-        "stdio.h": "c",
-        "string.h": "c",
-        "time.h": "c",
-        "iterator": "c",
-        "cmath": "c",
-        "random": "c",
-        "complex": "c",
-        "stdbool.h": "c",
-        "assert.h": "c",
-        "neillsdl2.h": "c"
-    }
+      "cstdlib": "c",
+      "stdio.h": "c",
+      "string.h": "c",
+      "time.h": "c",
+      "iterator": "c",
+      "cmath": "c",
+      "random": "c",
+      "complex": "c",
+      "stdbool.h": "c",
+      "assert.h": "c",
+      "neillsdl2.h": "c",
+      "general.h": "c"
+   }
 }
