@@ -2,29 +2,40 @@
 
 int main(void) 
 {
+   test();
    SDL_Simplewin sw;
    Neill_SDL_Init(&sw);
    printf("START\n");
-   init_ttl_vars(&sw);
+   Turtle * ttl = init_ttl_vars();
    do {
       SDL_Delay(MILLISECONDDELAY);
-      draw(&sw);
-   } while (!sw.finished);
-
-   SDL_Quit();
-   atexit(SDL_Quit);
+      draw(&sw, ttl);
+   } while (!ttl->finished);
+   free(ttl);
    return 0;
 }
 
-// todo this is testable.
-void init_ttl_vars(SDL_Simplewin *sw)
+void test(void)
 {
-   sw->ttl.x = START_X;
-   sw->ttl.y = START_Y;
-   sw->ttl.colour=white;
-   sw->ttl.angle=START_ANGLE;
-   sw->ttl.ins_amount=0;
-   sw->ttl.instruction[0]='\0';
+   Turtle * ttl = init_ttl_vars();
+   assert(ttl->angle==START_ANGLE);
+   assert(ttl->x==START_X);
+   assert(ttl->y==START_Y);
+   assert(ttl->ins_amount==0);
+   assert(ttl->instruction[0]=='\0');
+   free(ttl);
+}
+
+Turtle * init_ttl_vars(void)
+{
+   Turtle * ttl = calloc(1, sizeof(Turtle));
+   ttl->x = START_X;
+   ttl->y = START_Y;
+   ttl->colour=white;
+   ttl->angle=START_ANGLE;
+   ttl->ins_amount=0;
+   ttl->instruction[0]='\0';
+   return ttl;
 }
 
 void set_draw_colour(SDL_Simplewin *sw, neillcol colour)
@@ -61,85 +72,84 @@ void set_draw_colour(SDL_Simplewin *sw, neillcol colour)
    }
 }
 
-void draw(SDL_Simplewin *sw)
+void draw(SDL_Simplewin *sw, Turtle * ttl)
 {
-   // Set render target to back buffer
-   SDL_SetRenderTarget(sw->renderer, sw->backBuffer);
+   draw_ttl(sw,ttl);
+   do_input(ttl);
+   int orig_x = ttl->x;
+   int orig_y = ttl->y;
+   move_ttl(ttl);
+   draw_trail(sw,orig_x,orig_y,ttl);
+}
 
-   /* Clear back renderer, & set draw colour to black */
+void draw_ttl(SDL_Simplewin *sw, Turtle * ttl)
+{
+   SDL_SetRenderTarget(sw->renderer, sw->backBuffer);
    Neill_SDL_SetDrawColour(sw, BLACK);
    SDL_RenderClear(sw->renderer);
-
-   // Render midBuffer onto backBuffer
    SDL_RenderCopy(sw->renderer, sw->midBuffer, NULL, NULL);
-
-    // Draw turtle the back buffer
-   set_draw_colour(sw, dark_green); // todo this is where I was changing the colour to what's in the struct.
-   Neill_SDL_RenderFillCircle(sw->renderer, sw->ttl.x, sw->ttl.y, 10); // todo magic.
-
-   // draw a line on the turtle to give viewers direction sense.
-   double radians_2 = DEGREES_TO_RADIANS(sw->ttl.angle % DEGREES_IN_CIRC);
+   set_draw_colour(sw, dark_green);
+   Neill_SDL_RenderFillCircle(sw->renderer, ttl->x, ttl->y, CIRCLE_RAD);
+   double radians_2 = 
+   DEGREES_TO_RADIANS(ttl->angle % DEGREES_IN_CIRC);
    SDL_SetRenderTarget(sw->renderer, sw->backBuffer);
-   set_draw_colour(sw, sw->ttl.colour);
-   SDL_RenderDrawLine(sw->renderer, sw->ttl.x, sw->ttl.y, 
-                     sw->ttl.x-10 * cos(radians_2), 
-                     sw->ttl.y-10 * sin(radians_2));
-
-   // Reset render target to default (to render to the screen)
+   set_draw_colour(sw, ttl->colour);
+   SDL_RenderDrawLine(sw->renderer, ttl->x, ttl->y, 
+                     ttl->x-10 * cos(radians_2), 
+                     ttl->y-10 * sin(radians_2));
    SDL_SetRenderTarget(sw->renderer, NULL);
-
-   // Swap the back buffer with the front buffer
    SDL_RenderCopy(sw->renderer, sw->backBuffer, NULL, NULL);
    SDL_RenderPresent(sw->renderer);
-
-   do_input(sw);
-   int orig_x = sw->ttl.x;
-   int orig_y = sw->ttl.y;
-   move_ttl(sw);
-   draw_trail(sw,orig_x,orig_y);
 }
 
-void draw_trail(SDL_Simplewin *sw, int orig_x, int orig_y)
+void draw_trail(SDL_Simplewin *sw, int orig_x, int orig_y, Turtle * ttl)
 {
    SDL_SetRenderTarget(sw->renderer, sw->midBuffer);
-   set_draw_colour(sw, sw->ttl.colour);
-   SDL_RenderDrawLine(sw->renderer, orig_x, orig_y, sw->ttl.x, sw->ttl.y);
+   set_draw_colour(sw, ttl->colour);
+   SDL_RenderDrawLine(sw->renderer, orig_x, orig_y, ttl->x, ttl->y);
 }
 
-void move_ttl(SDL_Simplewin *sw)
+void move_ttl(Turtle * ttl)
 {
-   double radians = DEGREES_TO_RADIANS(sw->ttl.angle % DEGREES_IN_CIRC);
-   if (sw->ctl.up == 1) {
-      sw->ttl.x -= STEP_SIZE * cos(radians);
-      sw->ttl.y -= STEP_SIZE * sin(radians);
-      if(strcmp(sw->ttl.instruction, "FORWARD")==0){
-         sw->ttl.ins_amount++;
-      }
-      else{ 
-         if(sw->ttl.ins_amount){
-            printf("%s %i\n",sw->ttl.instruction, sw->ttl.ins_amount);
-         }
-         sprintf(sw->ttl.instruction,"FORWARD");
-         sw->ttl.ins_amount=1;
-      }
+   double radians = 
+   DEGREES_TO_RADIANS(ttl->angle % DEGREES_IN_CIRC);
+   if (ttl->ctl.up == 1) {
+      go_fwd(ttl, radians);
   }
-   if (sw->ctl.right == 1) {
-      sw->ttl.angle += STEP_SIZE;
-      // duplicate code.TODO
-      if(strcmp(sw->ttl.instruction, "RIGHT")==0){
-         sw->ttl.ins_amount=(sw->ttl.ins_amount+STEP_SIZE)%DEGREES_IN_CIRC;
-      }
-      else{ 
-         if(sw->ttl.ins_amount){
-            printf("%s %i\n",sw->ttl.instruction, sw->ttl.ins_amount);
-         }
-         sprintf(sw->ttl.instruction,"RIGHT");
-         sw->ttl.ins_amount=STEP_SIZE;
-      }
+   if (ttl->ctl.right == 1) {
+      go_rgt(ttl);
    }
 }
 
-void do_input(SDL_Simplewin *sw)
+void go_rgt(Turtle * ttl)
+{
+   ttl->angle += STEP_SIZE;
+   if(strcmp(ttl->instruction, "RIGHT")==0){
+      ttl->ins_amount=
+      (ttl->ins_amount+STEP_SIZE)%DEGREES_IN_CIRC;
+   }
+   else{ 
+      print_inst_if_exists(ttl);
+      sprintf(ttl->instruction,"RIGHT");
+      ttl->ins_amount=STEP_SIZE;
+   }
+}
+
+void go_fwd(Turtle * ttl, double radians)
+{
+   ttl->x -= STEP_SIZE * cos(radians);
+   ttl->y -= STEP_SIZE * sin(radians);
+   if(strcmp(ttl->instruction, "FORWARD")==0){
+      ttl->ins_amount++;
+   }
+   else{ 
+      print_inst_if_exists(ttl);
+      sprintf(ttl->instruction,"FORWARD");
+      ttl->ins_amount=1;
+   }
+}
+
+void do_input(Turtle * ttl)
 {
    SDL_Event event;
 
@@ -150,11 +160,11 @@ void do_input(SDL_Simplewin *sw)
             break;
 
          case SDL_KEYDOWN:
-            do_key_down(&event.key, sw);
+            do_key_down(&event.key, ttl);
             break;
 
          case SDL_KEYUP:
-            do_key_up(&event.key, sw);
+            do_key_up(&event.key, ttl);
             break;
 
          default:
@@ -163,65 +173,72 @@ void do_input(SDL_Simplewin *sw)
    }
 }
 
-void do_key_down(SDL_KeyboardEvent *event, SDL_Simplewin *sw)
+void do_key_down(SDL_KeyboardEvent *event, Turtle * ttl)
 {
    if (event->repeat == 0) {
       if (event->keysym.scancode == SDL_SCANCODE_UP) {
-         sw->ctl.up = 1;
+         ttl->ctl.up = 1;
       }
       if (event->keysym.scancode == SDL_SCANCODE_RIGHT) {
-         sw->ctl.right = 1;
+         ttl->ctl.right = 1;
       }
       if (event->keysym.scancode == SDL_SCANCODE_W) {
          printf("COLOUR \"WHITE\"\n");
-         sw->ttl.colour=white;
+         ttl->colour=white;
       }
       if (event->keysym.scancode == SDL_SCANCODE_G) {
          printf("COLOUR \"GREEN\"\n");
-         sw->ttl.colour=green;
+         ttl->colour=green;
       }
       if (event->keysym.scancode == SDL_SCANCODE_R) {
          printf("COLOUR \"RED\"\n");
-         sw->ttl.colour=red;
+         ttl->colour=red;
       }
       if (event->keysym.scancode == SDL_SCANCODE_Y) {
          printf("COLOUR \"YELLOW\"\n");
-         sw->ttl.colour=yellow;
+         ttl->colour=yellow;
       }
       if (event->keysym.scancode == SDL_SCANCODE_B) {
          printf("COLOUR \"BLUE\"\n");
-         sw->ttl.colour=blue;
+         ttl->colour=blue;
       }
       if (event->keysym.scancode == SDL_SCANCODE_M) {
          printf("COLOUR \"MAGENTA\"\n");
-         sw->ttl.colour=magenta;
+         ttl->colour=magenta;
       }
       if (event->keysym.scancode == SDL_SCANCODE_C) {
          printf("COLOUR \"CYAN\"\n");
-         sw->ttl.colour=cyan;
+         ttl->colour=cyan;
       }
       if (event->keysym.scancode == SDL_SCANCODE_K) {
+         ttl->colour=black;
          printf("COLOUR \"BLACK\"\n");
-         sw->ttl.colour=black;
       }
       if (event->keysym.scancode == SDL_SCANCODE_Q) {
-         if(sw->ttl.ins_amount){
-            printf("%s %i\n",sw->ttl.instruction, sw->ttl.ins_amount);
-         }
-         sw->finished = 1;
+         print_inst_if_exists(ttl);
+         ttl->finished = 1;
+         SDL_Quit();
+         atexit(SDL_Quit);
          printf("END\n");
       }
    }
 }
 
-void do_key_up(SDL_KeyboardEvent *event, SDL_Simplewin *sw)
+void print_inst_if_exists(Turtle * ttl)
+{
+   if(ttl->ins_amount){
+      printf("%s %i\n",ttl->instruction, ttl->ins_amount);
+   }
+}
+
+void do_key_up(SDL_KeyboardEvent *event, Turtle * ttl)
 {
    if (event->repeat == 0) {
       if (event->keysym.scancode == SDL_SCANCODE_UP) {
-         sw->ctl.up = 0;
+         ttl->ctl.up = 0;
       }
       if (event->keysym.scancode == SDL_SCANCODE_RIGHT) {
-         sw->ctl.right = 0;
+         ttl->ctl.right = 0;
       }
    }
 }

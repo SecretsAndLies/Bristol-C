@@ -32,8 +32,14 @@ interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.
 extension: Extension/extension.h Extension/extension.c Extension/nsdl/neillsdl2.c
 	$(CC) Extension/nsdl/neillsdl2.c Extension/extension.c -o extension -I./Extension $(PRODFLAGS) $(LIBS)
 
+ext_val: Extension/extension.h Extension/extension.c Extension/nsdl/neillsdl2.c
+	$(CC) Extension/nsdl/neillsdl2.c Extension/extension.c -o extension_v -I./Extension $(PRODFLAGS) $(VALGRIND) $(LIBS)
+
 ext_run: extension
 		./extension
+
+ext_run_val: ext_val
+		valgrind --leak-check=full ./extension_v
 
 clean:
 	rm -f parse_s interp_s out_*.txt out_*.ps out_*.pdf out.pdf out.ps out.txt
