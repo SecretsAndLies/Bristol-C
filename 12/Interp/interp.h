@@ -12,7 +12,7 @@
 
 #define CURRENT_WORD p->words[p->curr_word]
 #define FIRST_LETTER CURRENT_WORD[0]
-#define strsame(A,B) (strcmp(A, B)==0)
+#define STRSAME(A,B) (strcmp(A, B)==0)
 
 #define MAXNUMTOKENS 10000
 #define MAXTOKENSIZE 1000

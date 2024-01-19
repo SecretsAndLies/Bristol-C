@@ -47,7 +47,7 @@ void check_args_valid(int argc, char *argv[])
    if(len<=MIN_FILENAME_LEN){
       on_error("Invalid filename: too short");
    }
-   if(!strsame(&argv[1][len-MIN_FILENAME_LEN],".ttl")){
+   if(!STRSAME(&argv[1][len-MIN_FILENAME_LEN],".ttl")){
       on_error("Invalid filename: must end with .ttl");
    }
 }
@@ -73,7 +73,7 @@ void test_is_operator(void)
 // <PFIX> ::= ")" | <OP> <PFIX> | <VARNUM> <PFIX>
 bool parse_pfix(Program *p)
 {
-   if(strsame(CURRENT_WORD, ")")){
+   if(STRSAME(CURRENT_WORD, ")")){
       p->curr_word++;
       return true;
    }
@@ -167,7 +167,7 @@ void test_parse_op(void)
 bool parse_set(Program *p)
 {
    // go past set.
-   if(!strsame(CURRENT_WORD,"SET")){
+   if(!STRSAME(CURRENT_WORD,"SET")){
       return false;
    }
    p->curr_word++;
@@ -176,7 +176,7 @@ bool parse_set(Program *p)
    }
    // go past the letter.
    p->curr_word++;
-   if(!strsame(CURRENT_WORD, "(")){
+   if(!STRSAME(CURRENT_WORD, "(")){
       return false;
    }
    // go past the open bracket.
@@ -304,10 +304,9 @@ void test_parse_var(void)
 // <LST> ::= "{" <ITEMS>
 bool parse_lst(Program *p)
 {
-   if(!strsame(CURRENT_WORD, "{")){
+   if(!STRSAME(CURRENT_WORD, "{")){
       return false;
    }
-   // pass {
    p->curr_word++;
    if(!parse_items(p)){
       return false;
@@ -362,7 +361,7 @@ void test_parse_lst(void)
 // <ITEMS> ::= "}" | <ITEM> <ITEMS>
 bool parse_items(Program *p)
 {
-   if(strsame(CURRENT_WORD, "}")){
+   if(STRSAME(CURRENT_WORD, "}")){
       p->curr_word++;
       return true;
    }
@@ -626,7 +625,7 @@ void test_parse_word(void)
 // <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
 bool parse_col(Program *p)
 {
-   if(!strsame(CURRENT_WORD,"COLOUR")){
+   if(!STRSAME(CURRENT_WORD,"COLOUR")){
       return false;
    }
    p->curr_word++;
@@ -718,7 +717,7 @@ void test_check_ltr(void)
 bool parse_loop(Program *p)
 {
    // skip "LOOP"
-   if(!strsame(CURRENT_WORD,"LOOP")){
+   if(!STRSAME(CURRENT_WORD,"LOOP")){
       return false;
    }
    p->curr_word++;
@@ -727,7 +726,7 @@ bool parse_loop(Program *p)
    }
    // go past the letter.
    p->curr_word++;
-   if(!strsame(CURRENT_WORD, "OVER")){
+   if(!STRSAME(CURRENT_WORD, "OVER")){
       return false;
    }
    // go past OVER
@@ -844,7 +843,7 @@ void test_parse_num(void)
 bool parse_fwd(Program *p)
 {
    // advance past FORWARD
-   if(!strsame(CURRENT_WORD,"FORWARD")){
+   if(!STRSAME(CURRENT_WORD,"FORWARD")){
       return false;
    }
    p->curr_word++;
@@ -886,7 +885,7 @@ void test_parse_fwd(void)
 // <RGT> ::= "RIGHT" <VARNUM>
 bool parse_rgt(Program *p)
 {
-   if(!strsame(CURRENT_WORD,"RIGHT")){
+   if(!STRSAME(CURRENT_WORD,"RIGHT")){
       return false;
    }
    p->curr_word++;
@@ -927,19 +926,19 @@ void test_parse_rgt(void)
 // <INS> ::= <FWD> | <RGT> | <COL> | <LOOP> | <SET>
 bool parse_ins(Program *p)
 {
-   if(strsame(CURRENT_WORD, "FORWARD")){
+   if(STRSAME(CURRENT_WORD, "FORWARD")){
       return parse_fwd(p);
    }
-   else if(strsame(CURRENT_WORD, "RIGHT")){
+   else if(STRSAME(CURRENT_WORD, "RIGHT")){
       return parse_rgt(p);
    }
-   else if(strsame(CURRENT_WORD, "COLOUR")){
+   else if(STRSAME(CURRENT_WORD, "COLOUR")){
       return parse_col(p);
    }
-   else if(strsame(CURRENT_WORD, "LOOP")){
+   else if(STRSAME(CURRENT_WORD, "LOOP")){
       return parse_loop(p);
    }
-   else if(strsame(CURRENT_WORD, "SET")){
+   else if(STRSAME(CURRENT_WORD, "SET")){
       return parse_set(p);
    }
    return false;
@@ -977,7 +976,7 @@ void test_parse_ins(void)
 // <INSLST> ::= "END" | <INS> <INSLST>
 bool parse_inslst(Program *p)
 {
-   if(strsame(CURRENT_WORD, "END")){
+   if(STRSAME(CURRENT_WORD, "END")){
       return true;
    }
    if(!parse_ins(p)){
@@ -1028,7 +1027,7 @@ void test_parse_inslst(void)
 // <PROG>   ::= "START" <INSLST>
 bool parse_program(Program *p)
 {
-   if(!strsame(CURRENT_WORD, "START")){
+   if(!STRSAME(CURRENT_WORD, "START")){
       return false;
    }
    p->curr_word++;
@@ -1124,11 +1123,15 @@ Program * get_program(char * prog_name)
    int i=0;
    while(fscanf(f, "%s", prog->words[i])==1 && i<MAXNUMTOKENS){
       if(strlen(prog->words[i])>=MAXTOKENSIZE-1){
+         fclose(f);
+         free(prog);
          on_error("File contains words that are too long.");
       }
       i++;
    };
    if(i>=MAXNUMTOKENS){
+      fclose(f);
+      free(prog);
       on_error("File is too long (too many words).");
    }
    fclose(f);

@@ -184,8 +184,9 @@ check_exit_success_ps interp_s downarrow
 check_output_match interp_s loop_and_extra txt
 check_output_match interp_s skip_nested_loop txt
 check_exit_fail interp_s unterminated_loop
+check_exit_success_txt interp_s weirdnums
+check_exit_fail interp_s back
+check_exit_fail interp_s invalid_op
+check_exit_fail parse_s invalid_op
 
 exit 0
-
-# TODO validate that post script results in files being created
-# and those files match some output.

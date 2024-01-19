@@ -1,14 +1,12 @@
 ==OVERALL==
-Intergration tests can be run with
+Integration tests can be run with
 make test
 
 Function tests are run on any run of the program eg:
 ./interp_s TTLs/skip_nested_loop.ttl
 
 ==PARSE==
-- Had functions return booleans as exit failures are difficult to test.
-
-- Wrote tests for each function testing the basic functionality.
+- I wrote the code to return booleans as exit failures are difficult to test.
 
 - During development I created a #define:
  DEBUG printf("%s %s %s\n",CURRENT_WORD, __func__, __LINE__);
@@ -16,41 +14,103 @@ to help with debugging the parser.
 I added this line at the top of every function to
  identify in which function things were going wrong.
 
-- I wrote my own .TTL files to test sprecific functionality that was 
- cumbersome to test using inline functions. For example:
+- Wrote tests for each function
+(for example, does adding invalid variables into a lst result in failure.)
+To avoid too much repetition, my testing mostly checks the special cases
+that that function is designed to catch (for example, SET checks for invalid
+sets, but not every possible invalid pfix, which is tested in pfix.)
+To avoid errors involving a recursive function not being called, I
+check that the current_word is correctly set at the end of the program,
+and also validated with bash script testing.
+
+- I wrote my own .TTL files to test specific functionality that was 
+ tricky to test using inline functions. For example:
 * file contains too many words
 * file contains word that's too long.
 * incorrect arguments.
 
-- I wrote a bash script (test.sh) that determines that .TTL files
- exit with the correct error code. This was useful for testing
- specific failure conditions (eg: too many arguments) or 
- automatically checking sucess of valid files.
-
+- I also used the script to test that every file exits with the
+error code that I expected.
+ 
 == INTERP ==
-- Tried downarrow and saw that I wasn't executing the rest of the program 
-if the loop was defined at the start of the prog.
+As above, each function is tested with individual assert tests. 
+Primarily I tested the cases like ensuring variables are being set when
+set is run, forward results in Ws being written to my array etc.
 
-- wrote a bash script to verify that the outputs of the program matched yours. 
-after changing how I rounded, I was able to get all but four to perfectly match.
-Most likely because of the same bug, labyrinth was going out of bounds.
+As of edge cases I discovered and tested for are:
+- attempting to overpop the stack: SET ( 1 +)
+- Empty loops are correctly skipped (including when an empty
+loop contains an inner loop.)
+- Attempting to go out of bounds causes an error. (NOTE: this is
+potentially )
 
-- fequal to handle floating point imprecision
+My bash script does several additional pieces of testing, including: 
+* Checking the output files (txt,ps,pdf) 
+are created and that they contain expected text.
+(this including checking that the output of all but 4 files 
+perfectly match the given
+txt files.) For .ps files I check that expected instructions are included
+(eg: setlinewidth, moveto).
 
-- added a add_to_angle and subtract from angle to avoid overflow issues.
+- I added a helper function, fequal to handle floating point imprecision.
 
-- As above, created functions to test the main functionality. 
-Occasionally it was simpler to have a function test bevhiour of multiple functions,
-for example, test_get_and_set_variables tests the beheviour of three functions.
+- I added additional checks for the operator, as my initial code
+failed when I tested a string that started with an operator.
 
-- out of bounds causes error and exit.
+- added a add_to_angle and subtract 
+from angle to avoid overflow issues
+(since negative angles are possible, 
+this isn't as simple as I first thought, 
+something I caught during testing.)
 
-- all globals, no loop scoping.
+- To avoid repetition, occasionally it was simpler 
+to have a function test behavior of multiple functions,
+for example, test_get_and_set_variables tests the 
+behavior of three functions that are
+very related to each other. I often relied on 
+manually setting variables in later
+functions as this reduced the amount of code I had to write.
 
-- To avoid code like SET A ( 5 + + * ) causing errors, I added a check that ensures that
-the stack should always have only one value after executing an expression. This also causes
-SET A (5 5) to throw an error. These were tested in their respective functions.
+- I explicitly check that going out of bounds causes an 
+error to be raised.
 
-- Functions involving files were tested with the bash script.
+- I didn't implement loop scope. This means
+that variables set for a loop are accessible outside of the loop.
+This was useful, as it allowed for my loop testing to 
+test that a value is set to the last value of the loop. 
 
-- ARguments were tested with the bash script (For example, calling wih incorrect arguments.)
+- I also tested loops worked by
+ensuring that nested loops result in mathematical operations running 
+successfully.
+
+- To avoid code like SET A ( 5 + + * ) causing errors, 
+I added a check that ensures that
+the stack should always have only one value after executing
+ an expression. This also causes
+SET A (5 5) and SET A () to throw an error. 
+These were tested in their respective functions.
+
+- I experimented with adding an additional check for 
+if a user had entered instructions after END
+eg: START END FORWARD 4. But I decided to take it out.
+
+- I tested that empty nested loops are skipped by using 
+TTLs/skip_nested_loop.ttl. I then check that the instruction 
+I expected to run has correctly run.
+
+- I tested that attempting to divide by zero causes an error.
+
+- I tested that accessing unaccessible variables throws an error.
+
+- For the ps output file, I added a check that the filename isn't longer
+than 100 characters, since that would overflow the string I'm attempting
+to write it into.
+
+- My is_number function is one of the more complicated functions.
+I tested it to ensure that it correctly matches, minus numbers, positive
+numbers. I made the decision that .1 is a valid number (without the leading 0)
+this is integration tested the bash script with weirdnums.ttl
+
+- I tested that going FORWARD -1 results in a failure. I decided
+that forwards must involve instructions >=0.
+

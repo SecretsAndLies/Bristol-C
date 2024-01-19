@@ -7,8 +7,6 @@ Use the right arrow to rotate right.
 Use the forward arrow to go forward.
 Change the turtle colour with 'W' for white, 'G' for green,
 'M' for magenta, 'K' for black etc.
-Press Q to quit (you must press this or "END" will not be generated
-and the output will not be a valid ttl file.)
 
 A white line is used to indicate the direction your turtle is
 currently facing.
@@ -27,9 +25,14 @@ out in real time, this is a useful way to demonstrate the
 turtle language - a child who cannot yet type 
 could press the arrow keys and see the resulting instruction.
 
-==OPTIMIZER==
+==UNDERSTANDING OF SOFTWARE ENGINEERING CONCEPTS==
 The output of this program is optimized on the fly. 
 This means that "FORWARD 1, FORWARD 1" is converted into the
-simpler "FORWARD 2". This is done without storing the program
+simpler "FORWARD 2". This is done only using two additional variables, 
+rather than storing the program
 in a two dimensional array, which saves space and
 allows me to print the output in real time (one step behind).
+
+Additionally, I use multiple SDL textures. This allows me 
+to persist the trail, while redrawing the tutle (copying)
+and swapping as needed.

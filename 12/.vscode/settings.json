@@ -11,6 +11,7 @@
       "stdbool.h": "c",
       "assert.h": "c",
       "neillsdl2.h": "c",
-      "general.h": "c"
+      "general.h": "c",
+      "stack.h": "c"
    }
 }

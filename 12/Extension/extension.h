@@ -59,3 +59,4 @@ void draw_ttl(SDL_Simplewin *sw, Turtle * ttl);
 void test(void);
 void go_rgt(Turtle * ttl);
 void go_fwd(Turtle * ttl, double radians);
+void* acalloc(int n, size_t size);

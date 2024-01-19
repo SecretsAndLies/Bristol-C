@@ -1,6 +1,5 @@
-#todo before submission, test with clang, remove warn error, and check your valgrinds.
 CC=gcc
-COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 #-Werror
+COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 -Werror
 DEBUG= -g3
 SANITIZE= $(COMMON) -fsanitize=undefined -fsanitize=address $(DEBUG)
 VALGRIND= $(COMMON) $(DEBUG)
@@ -22,6 +21,12 @@ parse_s: Parse/parse.h Parse/parse.c
 
 parse_v: Parse/parse.h Parse/parse.c
 	$(CC) Parse/parse.c General/general.c -o parse_v -I./Parse $(VALGRIND) -lm
+
+run_parse_v: parse_v
+			valgrind --leak-check=full ./parse_v TTLs/octagon2.ttl
+
+run_interp_v: interp_v
+			valgrind --leak-check=full ./interp_v TTLs/octagon2.ttl out_octagon2s.txt
 
 interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
 	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_s -I./Interp $(SANITIZE) -lm
@@ -46,7 +51,3 @@ clean:
 
 test: clean all 
 	./Testing/test.sh
-
-#valgrind --leak-check=full ./interp_v TTLs/octagon1.ttl out_octagon1.txt
-#todo check valgrind on things that should exit in failure?
-# valgrind --leak-check=full ./parse_v TTLs/octagon1.ttl

@@ -8,14 +8,12 @@
 
 #define CURRENT_WORD p->words[p->curr_word]
 #define FIRST_LETTER CURRENT_WORD[0]
-#define strsame(A,B) (strcmp(A, B)==0)
+#define STRSAME(A,B) (strcmp(A, B)==0)
 
 #define MAXNUMTOKENS 10000
 #define MAXTOKENSIZE 1000
 #define MAX_ARGS 2
-#define MIN_FILENAME_LEN 4    // must be at least 4 characters (ie: a.ttl)
-
-#define DEBUG //printf("%s %s %i\n",CURRENT_WORD, __func__, __LINE__);
+#define MIN_FILENAME_LEN 4
 
 typedef struct Program{
    char words[MAXNUMTOKENS][MAXTOKENSIZE];

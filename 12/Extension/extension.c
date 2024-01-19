@@ -26,9 +26,24 @@ void test(void)
    free(ttl);
 }
 
+void* acalloc(int n, size_t size)
+{
+   void* v = calloc(n, size);
+   if(v==NULL){
+      on_error("Cannot calloc() space");
+   }
+   return v;
+}
+
+void on_error(const char* s)
+{
+   fprintf(stderr, "%s\n", s);
+   exit(EXIT_FAILURE);
+}
+
 Turtle * init_ttl_vars(void)
 {
-   Turtle * ttl = calloc(1, sizeof(Turtle));
+   Turtle * ttl = acalloc(1, sizeof(Turtle));
    ttl->x = START_X;
    ttl->y = START_Y;
    ttl->colour=white;
@@ -115,7 +130,7 @@ void move_ttl(Turtle * ttl)
    DEGREES_TO_RADIANS(ttl->angle % DEGREES_IN_CIRC);
    if (ttl->ctl.up == 1) {
       go_fwd(ttl, radians);
-  }
+   }
    if (ttl->ctl.right == 1) {
       go_rgt(ttl);
    }
@@ -124,11 +139,11 @@ void move_ttl(Turtle * ttl)
 void go_rgt(Turtle * ttl)
 {
    ttl->angle += STEP_SIZE;
-   if(strcmp(ttl->instruction, "RIGHT")==0){
+   if(strcmp(ttl->instruction, "RIGHT")==0) {
       ttl->ins_amount=
       (ttl->ins_amount+STEP_SIZE)%DEGREES_IN_CIRC;
    }
-   else{ 
+   else { 
       print_inst_if_exists(ttl);
       sprintf(ttl->instruction,"RIGHT");
       ttl->ins_amount=STEP_SIZE;
@@ -139,10 +154,10 @@ void go_fwd(Turtle * ttl, double radians)
 {
    ttl->x -= STEP_SIZE * cos(radians);
    ttl->y -= STEP_SIZE * sin(radians);
-   if(strcmp(ttl->instruction, "FORWARD")==0){
+   if(strcmp(ttl->instruction, "FORWARD")==0) {
       ttl->ins_amount++;
    }
-   else{ 
+   else { 
       print_inst_if_exists(ttl);
       sprintf(ttl->instruction,"FORWARD");
       ttl->ins_amount=1;
@@ -156,7 +171,11 @@ void do_input(Turtle * ttl)
    while (SDL_PollEvent(&event)) {
       switch (event.type) {
          case SDL_QUIT:
-            exit(0);
+            print_inst_if_exists(ttl);
+            ttl->finished = 1;
+            SDL_Quit();
+            atexit(SDL_Quit);
+            printf("END\n");
             break;
 
          case SDL_KEYDOWN:
@@ -214,19 +233,12 @@ void do_key_down(SDL_KeyboardEvent *event, Turtle * ttl)
          ttl->colour=black;
          printf("COLOUR \"BLACK\"\n");
       }
-      if (event->keysym.scancode == SDL_SCANCODE_Q) {
-         print_inst_if_exists(ttl);
-         ttl->finished = 1;
-         SDL_Quit();
-         atexit(SDL_Quit);
-         printf("END\n");
-      }
    }
 }
 
 void print_inst_if_exists(Turtle * ttl)
 {
-   if(ttl->ins_amount){
+   if(ttl->ins_amount) {
       printf("%s %i\n",ttl->instruction, ttl->ins_amount);
    }
 }

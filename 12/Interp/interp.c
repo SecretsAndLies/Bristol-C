@@ -57,7 +57,6 @@ void test(void)
    test_write_ps_move();
    test_set_var_to_stck();
    test_run_set();
-
 }
 
 void handle_ps_output(Program * prog)
@@ -86,7 +85,7 @@ void test_create_command(void)
    char command[MEDIUMSTR];
    create_command(prog, command);
    free(prog);
-   assert(strsame(command,"ps2pdf test.ps test.pdf"));
+   assert(STRSAME(command,"ps2pdf test.ps test.pdf"));
 }
 
 void write_prog_text_to_ps(Program * prog)
@@ -168,13 +167,13 @@ void test_get_and_set_variables(void)
    set_variable_to_string('Z',prog,"TEST2");
    assert(get_var_from_variables('Z', prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"TEST2"));
+   assert(STRSAME(prog->curr_var.str_var,"TEST2"));
    
    // reset A to a different type (overwting)
    set_variable_to_string('A',prog,"TEST");
    assert(get_var_from_variables('A', prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"TEST"));
+   assert(STRSAME(prog->curr_var.str_var,"TEST"));
 
    free(prog);
 }
@@ -266,7 +265,7 @@ bool is_filetype(char * filename, char * ext)
    if(len<ext_len+1){
       return false;
    }
-   if(!strsame(&filename[len-ext_len],ext)){
+   if(!STRSAME(&filename[len-ext_len],ext)){
       return false;
    }
    return true;
@@ -302,7 +301,7 @@ void test_is_operator(void)
 // <PFIX> ::= ")" | <OP> <PFIX> | <VARNUM> <PFIX>
 bool run_pfix(Program *p)
 {
-   if(strsame(CURRENT_WORD, ")")){
+   if(STRSAME(CURRENT_WORD, ")")){
       p->curr_word++;
       return true;
    }
@@ -316,15 +315,11 @@ bool run_pfix(Program *p)
       if(!run_varnum(p)){
          return false;
       }
-      // after varnum runs, current var is filled. (potentially it could do the stack directly?)
       stack_push(p->stck, p->curr_var.num_var);
    }
-
-   // in both cases you need to prefix.
    if(!run_pfix(p)){
       return false;
    }
-
    return true;
 }
 
@@ -514,8 +509,7 @@ void test_run_op(void)
 // <SET> ::= "SET" <LTR> "(" <PFIX>
 bool run_set(Program *p)
 {
-   // go past set.
-   if(!strsame(CURRENT_WORD,"SET")){
+   if(!STRSAME(CURRENT_WORD,"SET")){
       return false;
    }
    p->curr_word++;
@@ -523,12 +517,10 @@ bool run_set(Program *p)
       return false;
    }
    char letter = FIRST_LETTER;
-   // go past the letter.
    p->curr_word++;
-   if(!strsame(CURRENT_WORD, "(")){
+   if(!STRSAME(CURRENT_WORD, "(")){
       return false;
    }
-   // go past the open bracket.
    p->curr_word++;
    if(!run_pfix(p)){
       return false;
@@ -744,7 +736,7 @@ void test_run_var(void)
 // <LST> ::= "{" <ITEMS>
 bool run_lst(Program *p)
 {
-   if(!strsame(CURRENT_WORD, "{")){
+   if(!STRSAME(CURRENT_WORD, "{")){
       return false;
    }
    // pass {
@@ -812,7 +804,7 @@ void test_run_lst(void)
 // <ITEMS> ::= "}" | <ITEM> <ITEMS>
 bool run_items(Program *p)
 {
-   if(strsame(CURRENT_WORD, "}")){
+   if(STRSAME(CURRENT_WORD, "}")){
       p->curr_word++;
       return true;
    }
@@ -944,6 +936,7 @@ void test_is_number(void)
    assert(!is_number("t"));
    assert(!is_number("81f"));
    assert(!is_number("as8"));
+   assert(!is_number("8.a0"));
 }
 
 // <VARNUM> ::= <VAR> | <NUM>
@@ -1025,7 +1018,7 @@ void test_run_item(void)
    assert(run_item(prog));
    assert(prog->curr_word==1);
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"RED\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"RED\""));
    prog->curr_word = 0;
 
    strcpy(prog->words[0],"1");
@@ -1045,7 +1038,7 @@ void test_run_item(void)
    strcpy(prog->words[0],"\"RED\"");
    assert(run_item(prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"RED\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"RED\""));
    prog->curr_word = 0;
 
    strcpy(prog->words[0],"a1");
@@ -1074,8 +1067,6 @@ bool run_word(Program *p)
       return false;
    }
    p->curr_var.var_type=STRING;
-
-   // copy the word (eg: "RED" WITH quotes into the current variable.)
    strcpy(p->curr_var.str_var, CURRENT_WORD);
    p->curr_word++;
    return true;
@@ -1088,19 +1079,19 @@ void test_run_word(void)
    strcpy(prog->words[0],"\"RED\"");
    assert(run_word(prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"RED\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"RED\""));
    prog->curr_word=0;
 
    strcpy(prog->words[0],"\"HELLO!\"");
    assert(run_word(prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"HELLO!\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"HELLO!\""));
    prog->curr_word=0;
 
    strcpy(prog->words[0],"\"178\"");
    assert(run_word(prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"178\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"178\""));
    prog->curr_word=0;
 
    //missing open
@@ -1124,7 +1115,7 @@ void test_run_word(void)
 // <COL> ::= "COLOUR" <VAR> | "COLOUR" <WORD>
 bool run_col(Program *p)
 {
-   if(!strsame(CURRENT_WORD,"COLOUR")){
+   if(!STRSAME(CURRENT_WORD,"COLOUR")){
       return false;
    }
    p->curr_word++;
@@ -1133,7 +1124,6 @@ bool run_col(Program *p)
          return false;
       }
    }
-   // otherwise, it's a word.
    else{
       if(!run_word(p)){
          return false;
@@ -1153,7 +1143,7 @@ void test_run_col(void)
    strcpy(prog->words[1],"\"RED\"");
    assert(run_col(prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"RED\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"RED\""));
    assert(prog->ttl.col==red);
    prog->curr_word=0;
 
@@ -1162,7 +1152,7 @@ void test_run_col(void)
    strcpy(prog->words[1],"$H");
    assert(run_col(prog));
    assert(prog->curr_var.var_type==STRING);
-   assert(strsame(prog->curr_var.str_var,"\"YELLOW\""));
+   assert(STRSAME(prog->curr_var.str_var,"\"YELLOW\""));
    assert(prog->ttl.col==yellow);
    prog->curr_word=0;
 
@@ -1182,28 +1172,28 @@ void test_run_col(void)
 
 bool set_col(Program * p)
 {
-   if(strsame(p->curr_var.str_var,"\"BLACK\"")){
+   if(STRSAME(p->curr_var.str_var,"\"BLACK\"")){
       p->ttl.col=black;
    }
-   else if(strsame(p->curr_var.str_var,"\"RED\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"RED\"")){
       p->ttl.col=red;
    }
-   else if(strsame(p->curr_var.str_var,"\"GREEN\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"GREEN\"")){
       p->ttl.col=green;
    }
-   else if(strsame(p->curr_var.str_var,"\"BLUE\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"BLUE\"")){
       p->ttl.col=blue;
    }
-   else if(strsame(p->curr_var.str_var,"\"YELLOW\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"YELLOW\"")){
       p->ttl.col=yellow;
    }
-   else if(strsame(p->curr_var.str_var,"\"CYAN\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"CYAN\"")){
       p->ttl.col=cyan;
    }
-   else if(strsame(p->curr_var.str_var,"\"MAGENTA\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"MAGENTA\"")){
       p->ttl.col=magenta;
    }
-   else if(strsame(p->curr_var.str_var,"\"WHITE\"")){
+   else if(STRSAME(p->curr_var.str_var,"\"WHITE\"")){
       p->ttl.col=white;
    }
    else{
@@ -1283,7 +1273,7 @@ void test_check_ltr(void)
 // <LOOP> ::= "LOOP" <LTR> "OVER" <LST> <INSLST>
 bool run_loop(Program *p)
 {
-   if(!strsame(CURRENT_WORD,"LOOP")){
+   if(!STRSAME(CURRENT_WORD,"LOOP")){
       return false;
    }
    p->curr_word++;
@@ -1292,7 +1282,7 @@ bool run_loop(Program *p)
    }
    char letter = FIRST_LETTER;
    p->curr_word++;
-   if(!strsame(CURRENT_WORD, "OVER")){
+   if(!STRSAME(CURRENT_WORD, "OVER")){
       return false;
    }
    p->curr_word++;
@@ -1311,16 +1301,16 @@ bool run_loop(Program *p)
 
 bool skip_empty_loops(Program * p)
 {
-   if(strsame(p->words[p->curr_word+1],"}")){
+   if(STRSAME(p->words[p->curr_word+1],"}")){
       int loop_c = 1;
       while(loop_c!=0){
          if(p->curr_word==MAXNUMTOKENS){
             return false;
          }
-         if(strsame(CURRENT_WORD,"LOOP")){
+         if(STRSAME(CURRENT_WORD,"LOOP")){
             loop_c++;
          }
-         if(strsame(CURRENT_WORD,"END")){
+         if(STRSAME(CURRENT_WORD,"END")){
             loop_c--;
          }         
          p->curr_word++;
@@ -1676,7 +1666,7 @@ void test_run_num(void)
 // <FWD> ::= "FORWARD" <VARNUM>
 bool run_fwd(Program *p)
 {
-   if(!strsame(CURRENT_WORD,"FORWARD")){
+   if(!STRSAME(CURRENT_WORD,"FORWARD")){
       return false;
    }
    p->curr_word++;
@@ -1688,6 +1678,9 @@ bool run_fwd(Program *p)
       return false;
    }
    p->ttl.distance=p->curr_var.num_var;
+   if(p->ttl.distance<0){
+      return false;
+   }
    if(!go_fwd(p)){
       return false;
    }
@@ -1728,6 +1721,18 @@ void test_run_fwd(void)
    assert(prog->output[START_Y][START_X]=='K');
    assert(prog->output[START_Y-15][START_X]=='K');
    assert(prog->output[START_Y][START_X+1]==' ');
+   prog->curr_word = 0;
+
+   // test that negative numbers fail.
+   strcpy(prog->words[0],"FORWARD");
+   strcpy(prog->words[1],"-1");
+   assert(!run_fwd(prog));
+   prog->curr_word = 0;
+
+   set_variable_to_num('A', prog, -0.1);
+   strcpy(prog->words[0],"FORWARD");
+   strcpy(prog->words[1],"$A");
+   assert(!run_fwd(prog));
    prog->curr_word = 0;
 
    stack_free(prog->stck);
@@ -1774,11 +1779,11 @@ void test_get_ps_colour(void)
    char colour[MEDIUMSTR];
    prog->ttl.col=cyan;
    assert(get_ps_colour(colour, prog));
-   assert(strsame(colour, CYAN_PS));
+   assert(STRSAME(colour, CYAN_PS));
 
    prog->ttl.col=blue;
    assert(get_ps_colour(colour, prog));
-   assert(strsame(colour, BLUE_PS));
+   assert(STRSAME(colour, BLUE_PS));
 
    free_prog(prog);
 
@@ -1831,7 +1836,7 @@ void test_write_ps_move(void)
    char move_str[MEDIUMSTR];
    write_ps_move(move_str, 0,0, prog, WHITE_PS);
    assert(prog->ps_num_words==1);
-   assert(strsame(move_str,
+   assert(STRSAME(move_str,
    "newpath\n"
    "0.000000 0.000000 moveto\n"
    "1.000000 2.000000 lineto\n"
@@ -1945,7 +1950,6 @@ void test_is_out_of_bounds(void)
    assert(is_out_of_bounds(prog3));
    stack_free(prog3->stck);
    free(prog3);
-
 }
 
 bool write_turtle_to_arr(Program * p)
@@ -2063,7 +2067,7 @@ void print_arr_to_screen(Program * p)
 // <RGT> ::= "RIGHT" <VARNUM>
 bool run_rgt(Program *p)
 {
-   if(!strsame(CURRENT_WORD,"RIGHT")){
+   if(!STRSAME(CURRENT_WORD,"RIGHT")){
       return false;
    }
    p->curr_word++;
@@ -2150,25 +2154,24 @@ void test_run_rgt(void)
    prog->curr_word = 0;
 
    free(prog);
-
 }
 
 // <INS> ::= <FWD> | <RGT> | <COL> | <LOOP> | <SET>
 bool run_ins(Program *p)
 {
-   if(strsame(CURRENT_WORD, "FORWARD")){
+   if(STRSAME(CURRENT_WORD, "FORWARD")){
       return run_fwd(p);
    }
-   else if(strsame(CURRENT_WORD, "RIGHT")){
+   else if(STRSAME(CURRENT_WORD, "RIGHT")){
       return run_rgt(p);
    }
-   else if(strsame(CURRENT_WORD, "COLOUR")){
+   else if(STRSAME(CURRENT_WORD, "COLOUR")){
       return run_col(p);
    }
-   else if(strsame(CURRENT_WORD, "LOOP")){
+   else if(STRSAME(CURRENT_WORD, "LOOP")){
       return run_loop(p);
    }
-   else if(strsame(CURRENT_WORD, "SET")){
+   else if(STRSAME(CURRENT_WORD, "SET")){
       return run_set(p);
    }
    return false;
@@ -2214,7 +2217,7 @@ void test_run_ins(void)
 // <INSLST> ::= "END" | <INS> <INSLST>
 bool run_inslst(Program *p)
 {
-   if(strsame(CURRENT_WORD, "END")){
+   if(STRSAME(CURRENT_WORD, "END")){
       return true;
    }
    if(!run_ins(p)){
@@ -2279,7 +2282,7 @@ void test_run_inslst(void)
 // <PROG>   ::= "START" <INSLST>
 bool run_program(Program *p)
 {
-   if(!strsame(CURRENT_WORD, "START")){
+   if(!STRSAME(CURRENT_WORD, "START")){
       return false;
    }
    p->curr_word++;
@@ -2392,6 +2395,9 @@ Program * init_program(char * argv[], int argc)
    prog->output_location = ft; 
    init_prog_variables(prog);
    if(prog->output_location!=SCREEN){
+      if(strlen(argv[OUTPUT_FILE_INDEX])>=SMALLSTR){
+         on_error("output file too long.");
+      }
       strcpy(prog->output_file_name, argv[OUTPUT_FILE_INDEX]);
    }
    return prog;
@@ -2459,10 +2465,11 @@ void get_prog_from_file(char * filename, Program * prog)
    FILE * f = nfopen(filename,"r");
    int i=0;
    while(fscanf(f, "%s", prog->words[i++])==1 && i<MAXNUMTOKENS);
+   fclose(f);
    if(i>=MAXNUMTOKENS){
+      free(prog);
       on_error("File contains too many tokens to parse.");
    }
-   fclose(f);
    prog->output_location=SCREEN;
 }
 
@@ -2474,5 +2481,7 @@ bool fequal(double a, double b)
 void test_fequal(void)
 {
    assert(fequal(0.01,0.01));
+   assert(fequal(-0.01,-0.01));
    assert(!fequal(0.02,0.01));
+   assert(!fequal(-0.02,-0.01));
 }
