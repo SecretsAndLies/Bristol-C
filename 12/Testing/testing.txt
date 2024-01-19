@@ -90,13 +90,10 @@ the stack should always have only one value after executing
 SET A (5 5) and SET A () to throw an error. 
 These were tested in their respective functions.
 
-- I experimented with adding an additional check for 
-if a user had entered instructions after END
-eg: START END FORWARD 4. But I decided to take it out.
-
 - I tested that empty nested loops are skipped by using 
 TTLs/skip_nested_loop.ttl. I then check that the instruction 
-I expected to run has correctly run.
+I expected to run has correctly run. A user can cause a interp error
+with an unterminated inner loop (unterminated_inner_loop.ttl), and this is expected beheviour.
 
 - I tested that attempting to divide by zero causes an error.
 
@@ -107,10 +104,13 @@ than 100 characters, since that would overflow the string I'm attempting
 to write it into.
 
 - My is_number function is one of the more complicated functions.
-I tested it to ensure that it correctly matches, minus numbers, positive
-numbers. I made the decision that .1 is a valid number (without the leading 0)
-this is integration tested the bash script with weirdnums.ttl
+I tested it to ensure that it correctly matches minus numbers, positive
+numbers and floats. I made the decision that .1 is a valid number (without the leading 0)
+this is integration tested the bash script with weirdnums.ttl and tested in the 
+inline function.
 
-- I tested that going FORWARD -1 results in a failure. I decided
-that forwards must involve instructions >=0.
+- I tested that going FORWARD -1 results in an interp failure (back.ttl). Initially the way
+I coded it resulted in it printing nothing (as the movement loop didn't execute). I decided
+that forwards must involve instructions >=0, since unlike angles, FORWARD is a
+verb with a specific meaning.
 

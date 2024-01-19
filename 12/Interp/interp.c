@@ -74,7 +74,7 @@ void create_command(Program * prog, char command[MEDIUMSTR])
    int len = strlen(prog->output_file_name);
    char file_name_no_ext[SMALLSTR];
    strcpy(file_name_no_ext, prog->output_file_name);
-   file_name_no_ext[len - 3] = '\0';
+   file_name_no_ext[len - PS_EXT_LEN] = '\0';
    sprintf(command, "ps2pdf %s %s.pdf", prog->output_file_name, file_name_no_ext);
 }
 
@@ -749,7 +749,7 @@ bool run_lst(Program *p)
 
 void test_run_lst(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    // test unitialized variable.
    strcpy(prog->words[0],"{");
    strcpy(prog->words[1],"\"RED\"");
@@ -2091,11 +2091,11 @@ void test_add_to_angle(void)
 
 double add_to_angle(double current_angle, double add_value)
 {
-   double new_angle = fmod(current_angle + add_value, 360.0);
+   double new_angle = fmod(current_angle + add_value, MAX_DEGREES);
 
   // Handling negative angles
    if (new_angle < 0) {
-      new_angle += 360.0;
+      new_angle += MAX_DEGREES;
    }
    return new_angle;
 }

@@ -15,17 +15,6 @@ int main(void)
    return 0;
 }
 
-void test(void)
-{
-   Turtle * ttl = init_ttl_vars();
-   assert(ttl->angle==START_ANGLE);
-   assert(ttl->x==START_X);
-   assert(ttl->y==START_Y);
-   assert(ttl->ins_amount==0);
-   assert(ttl->instruction[0]=='\0');
-   free(ttl);
-}
-
 void* acalloc(int n, size_t size)
 {
    void* v = calloc(n, size);
@@ -105,13 +94,13 @@ void draw_ttl(SDL_Simplewin *sw, Turtle * ttl)
    SDL_RenderCopy(sw->renderer, sw->midBuffer, NULL, NULL);
    set_draw_colour(sw, dark_green);
    Neill_SDL_RenderFillCircle(sw->renderer, ttl->x, ttl->y, CIRCLE_RAD);
-   double radians_2 = 
+   double radians = 
    DEGREES_TO_RADIANS(ttl->angle % DEGREES_IN_CIRC);
    SDL_SetRenderTarget(sw->renderer, sw->backBuffer);
    set_draw_colour(sw, ttl->colour);
    SDL_RenderDrawLine(sw->renderer, ttl->x, ttl->y, 
-                     ttl->x-10 * cos(radians_2), 
-                     ttl->y-10 * sin(radians_2));
+                     ttl->x-CIRCLE_RAD * cos(radians), 
+                     ttl->y-CIRCLE_RAD * sin(radians));
    SDL_SetRenderTarget(sw->renderer, NULL);
    SDL_RenderCopy(sw->renderer, sw->backBuffer, NULL, NULL);
    SDL_RenderPresent(sw->renderer);
@@ -253,4 +242,15 @@ void do_key_up(SDL_KeyboardEvent *event, Turtle * ttl)
          ttl->ctl.right = 0;
       }
    }
+}
+
+void test(void)
+{
+   Turtle * ttl = init_ttl_vars();
+   assert(ttl->angle==START_ANGLE);
+   assert(ttl->x==START_X);
+   assert(ttl->y==START_Y);
+   assert(ttl->ins_amount==0);
+   assert(ttl->instruction[0]=='\0');
+   free(ttl);
 }

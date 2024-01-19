@@ -316,7 +316,7 @@ bool parse_lst(Program *p)
 
 void test_parse_lst(void)
 {
-   Program* prog = calloc(1, sizeof(Program));
+   Program* prog = ncalloc(1, sizeof(Program));
    // SET A ( -5.3 $A + )
    strcpy(prog->words[0],"{");
    strcpy(prog->words[1],"\"RED\"");
