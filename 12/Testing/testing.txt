@@ -37,7 +37,7 @@ As above, each function is tested with individual assert tests.
 Primarily I tested the cases like ensuring variables are being set when
 set is run, forward results in Ws being written to my array etc.
 
-As of edge cases I discovered and tested for are:
+Some edge cases I discovered and tested for are:
 - attempting to overpop the stack: SET ( 1 +)
 - Empty loops are correctly skipped (including when an empty
 loop contains an inner loop.)
@@ -46,10 +46,10 @@ potentially )
 
 My bash script does several additional pieces of testing, including: 
 * Checking the output files (txt,ps,pdf) 
-are created and that they contain expected text.
-(this including checking that the output of all but 4 files 
-perfectly match the given
-txt files.) For .ps files I check that expected instructions are included
+are created and if possible that they contain expected text.
+(this includes checking that the output of all but 4 files 
+perfectly match the giventxt files.) For .ps files I check that
+ expected instructions are included
 (eg: setlinewidth, moveto).
 
 - I added a helper function, fequal to handle floating point imprecision.
@@ -57,7 +57,7 @@ txt files.) For .ps files I check that expected instructions are included
 - I added additional checks for the operator, as my initial code
 failed when I tested a string that started with an operator.
 
-- added a add_to_angle and subtract 
+- added an add_to_angle and subtract 
 from angle to avoid overflow issues
 (since negative angles are possible, 
 this isn't as simple as I first thought, 
@@ -69,7 +69,8 @@ for example, test_get_and_set_variables tests the
 behavior of three functions that are
 very related to each other. I often relied on 
 manually setting variables in later
-functions as this reduced the amount of code I had to write.
+functions as this reduced the amount of code I had to write and avoided
+errors in one function causing errors in another as much as possible.
 
 - I explicitly check that going out of bounds causes an 
 error to be raised.
@@ -81,7 +82,7 @@ test that a value is set to the last value of the loop.
 
 - I also tested loops worked by
 ensuring that nested loops result in mathematical operations running 
-successfully.
+sucessfully (they actually match C, which is kinda fun!)
 
 - To avoid code like SET A ( 5 + + * ) causing errors, 
 I added a check that ensures that
@@ -92,8 +93,10 @@ These were tested in their respective functions.
 
 - I tested that empty nested loops are skipped by using 
 TTLs/skip_nested_loop.ttl. I then check that the instruction 
-I expected to run has correctly run. A user can cause a interp error
-with an unterminated inner loop (unterminated_inner_loop.ttl), and this is expected beheviour.
+I expected to run has correctly run. There is one edge case I couldn’t
+Fix, with an unterminated inner loop (unterminated_inner_loop.ttl),
+but since it fails gracefully, I think this is acceptable to call
+Turtle programmer error.
 
 - I tested that attempting to divide by zero causes an error.
 
@@ -111,6 +114,4 @@ inline function.
 
 - I tested that going FORWARD -1 results in an interp failure (back.ttl). Initially the way
 I coded it resulted in it printing nothing (as the movement loop didn't execute). I decided
-that forwards must involve instructions >=0, since unlike angles, FORWARD is a
-verb with a specific meaning.
-
+that forwards must involve instructions >=0.
