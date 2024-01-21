@@ -180,6 +180,18 @@ check_exit_success_txt interp_s hypno
 
 #validate that post script is outputting a file and correct boilerplate
 check_exit_success_ps interp_s downarrow
+#double check that downarrow has 8 moveto instructions.
+# Count the number of lines containing 'moveto'
+count=$(grep -c 'moveto' downarrow.ps)
+
+# The expected count
+expected_count=8
+
+# Check if the actual count matches the expected count
+if [ "$count" -ne "$expected_count" ]; then
+   echo "Error: The downarrow doesn't contain $expected_count moveto's. Has $count"
+   exit 1
+fi
 
 ## these are my tests, designed to probe that specific beheviour works.
 check_output_match interp_s loop_and_extra txt

@@ -675,7 +675,7 @@ void test_run_set(void)
 // <VAR> ::= $<LTR>
 bool run_var(Program *p)
 {
-   if(strlen(CURRENT_WORD)<2){
+   if(strlen(CURRENT_WORD)<VAR_LEN){
       return false;
    }
    if(FIRST_LETTER!='$'){
@@ -739,7 +739,6 @@ bool run_lst(Program *p)
    if(!STRSAME(CURRENT_WORD, "{")){
       return false;
    }
-   // pass {
    p->curr_word++;
    if(!run_items(p)){
       return false;
@@ -1534,8 +1533,7 @@ bool execute_loop(Program * p, char letter)
    for (int i=0; i<num_items_in_loop; i++)
    {
       if(!run_one_loop(p, i, letter, first_item_index, 
-                  num_items_in_loop, start_of_ins_list))
-                  {
+                  num_items_in_loop, start_of_ins_list)){
                      return false;
                   }
    }
@@ -1858,7 +1856,7 @@ void test_write_ps_move(void)
 bool execute_move(Program * p)
 {
    if(p->ttl.back){
-      p->ttl.angle = add_to_angle(p->ttl.angle,180);
+      p->ttl.angle = add_to_angle(p->ttl.angle,HALF_CIRCLE);
    }
    double angle_in_radians = DEGREES_TO_RADIANS(p->ttl.angle);
    double x_move = cos(angle_in_radians);
@@ -1876,6 +1874,12 @@ bool execute_move(Program * p)
          p->ttl.y += y_move;
       }
    }
+   finish_mv_vars(p);
+   return true;
+}
+
+void finish_mv_vars(Program * p)
+{
    if(p->output_location==SCREEN){
       print_arr_to_screen(p);
    }
@@ -1884,10 +1888,9 @@ bool execute_move(Program * p)
       p->ttl.y=round(p->ttl.y);
    }
    if(p->ttl.back){
-      p->ttl.angle = add_to_angle(p->ttl.angle,180);
+      p->ttl.angle = add_to_angle(p->ttl.angle,HALF_CIRCLE);
       p->ttl.back=false;
-   } // todo repetitious.
-   return true;
+   }
 }
 
 bool is_out_of_bounds(Program * p)

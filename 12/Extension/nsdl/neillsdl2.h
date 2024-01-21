@@ -2,8 +2,8 @@
 #include <math.h>
 #include "extra_sdl.h"
 
-#define WWIDTH 255
-#define WHEIGHT 165
+#define WWIDTH 1020
+#define WHEIGHT 660
 #define RECTSIZE 20
 #define MILLISECONDDELAY 25
 

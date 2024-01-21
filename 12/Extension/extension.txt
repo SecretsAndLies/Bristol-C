@@ -1,4 +1,7 @@
 ==HOW TO USE==
+Build with:
+make extension
+
 Run this with:
 
 make ext_run
@@ -8,14 +11,14 @@ Use the forward arrow to go forward.
 Change the turtle colour with 'W' for white, 'G' for green,
 'M' for magenta, 'K' for black etc.
 
-A white line is used to indicate the direction your turtle is
+An additional line is used to indicate the direction your turtle is
 currently facing.
 
 == WHY THIS IS A USEFUL EXTENSION==
 The primary use of this program is that it can be combined with
 the previous program. For example, by running:
 
-./extension > test.ttl && ./interp_s test.ttl test.ps
+./extension > test.ttl && ./interp test.ttl test.ps
 
 You can save the drawing you've made 
 in this program to test.pdf.
@@ -31,8 +34,15 @@ This means that "FORWARD 1, FORWARD 1" is converted into the
 simpler "FORWARD 2". This is done only using two additional variables, 
 rather than storing the program
 in a two dimensional array, which saves space and
-allows me to print the output in real time (one step behind).
+allows me to print the output in almost real time (one step behind).
 
 Additionally, I use multiple SDL textures. This allows me 
 to persist the trail, while redrawing the tutle (copying)
 and swapping as needed.
+
+==TESTING==
+To test this program I used a program on my mac called "Keyboard Maestro"
+to record exact keyboard inputs. It pipes the output
+into my parser to ensure it is a valid .ttl,
+and then it checks that the output is an exact match for 
+the previous run of the program.

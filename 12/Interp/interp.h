@@ -20,10 +20,12 @@
 #define PS_EXT_LEN 3
 #define INPUT_FILE_INDEX 1
 #define OUTPUT_FILE_INDEX 2
+#define VAR_LEN 2
 #define OUTPUTCOMMANDLEN 250
 #define MEDIUMSTR 500
 #define SMALLSTR 100
 #define MIN_WORD_LEN 3
+#define HALF_CIRCLE 180
 
 #define TIME_TO_WAIT 1
 
@@ -191,6 +193,7 @@ bool go_fwd(Program * p);
 bool execute_move(Program * p);
 bool run_fwd(Program *p);
 void test_run_fwd(void);
+void finish_mv_vars(Program * p);
 
 void print_arr_to_screen(Program * p);
 // no tests needed.

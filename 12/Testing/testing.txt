@@ -10,20 +10,20 @@ Function tests are run on any run of the program eg:
 
 - During development I created a #define:
  DEBUG printf("%s %s %s\n",CURRENT_WORD, __func__, __LINE__);
-to help with debugging the parser. 
+to help with debugging. 
 I added this line at the top of every function to
  identify in which function things were going wrong.
 
 - Wrote tests for each function
 (for example, does adding invalid variables into a lst result in failure.)
 To avoid too much repetition, my testing mostly checks the special cases
-that that function is designed to catch (for example, SET checks for invalid
+that the function is designed to catch (for example, SET checks for invalid
 sets, but not every possible invalid pfix, which is tested in pfix.)
-To avoid errors involving a recursive function not being called, I
-check that the current_word is correctly set at the end of the program,
+To avoid errors involving a recursive function causing errors, I
+check that the current_word is correctly set at the end of the function,
 and also validated with bash script testing.
 
-- I wrote my own .TTL files to test specific functionality that was 
+- I wrote my own .ttl files to test specific functionality that was 
  tricky to test using inline functions. For example:
 * file contains too many words
 * file contains word that's too long.
@@ -38,39 +38,40 @@ Primarily I tested the cases like ensuring variables are being set when
 set is run, forward results in Ws being written to my array etc.
 
 Some edge cases I discovered and tested for are:
-- attempting to overpop the stack: SET ( 1 +)
+- attempting to overpop the stack: SET ( 1 + )
 - Empty loops are correctly skipped (including when an empty
 loop contains an inner loop.)
-- Attempting to go out of bounds causes an error. (NOTE: this is
-potentially )
+- Attempting to go out of bounds causes an error.
 
 My bash script does several additional pieces of testing, including: 
 * Checking the output files (txt,ps,pdf) 
 are created and if possible that they contain expected text.
 (this includes checking that the output of all but 4 files 
-perfectly match the giventxt files.) For .ps files I check that
+perfectly match the given txt files.) For .ps files I check that
  expected instructions are included
-(eg: setlinewidth, moveto).
+(eg: setlinewidth, moveto). I also validate that I am getting the number of instructions 
+I expect, using grep (for example, down arrow should contain 8 movetos.)
 
 - I added a helper function, fequal to handle floating point imprecision.
 
 - I added additional checks for the operator, as my initial code
 failed when I tested a string that started with an operator.
 
-- added an add_to_angle and subtract 
+- I added an add_to_angle and subtract 
 from angle to avoid overflow issues
 (since negative angles are possible, 
 this isn't as simple as I first thought, 
 something I caught during testing.)
 
-- To avoid repetition, occasionally it was simpler 
-to have a function test behavior of multiple functions,
+- To avoid repetition, occasionally I have a 
+function test behavior of multiple functions,
 for example, test_get_and_set_variables tests the 
 behavior of three functions that are
-very related to each other. I often relied on 
-manually setting variables in later
-functions as this reduced the amount of code I had to write and avoided
-errors in one function causing errors in another as much as possible.
+highly related to each other. This was useful, as I could
+manually set variables in later
+functions; reducing the amount of .ttkl code I had to write and avoiding
+errors in one (already tested) 
+function causing errors in another as much as possible.
 
 - I explicitly check that going out of bounds causes an 
 error to be raised.
@@ -82,7 +83,7 @@ test that a value is set to the last value of the loop.
 
 - I also tested loops worked by
 ensuring that nested loops result in mathematical operations running 
-sucessfully (they actually match C, which is kinda fun!)
+sucessfully (they actually match C, which is fun!)
 
 - To avoid code like SET A ( 5 + + * ) causing errors, 
 I added a check that ensures that
@@ -94,7 +95,7 @@ These were tested in their respective functions.
 - I tested that empty nested loops are skipped by using 
 TTLs/skip_nested_loop.ttl. I then check that the instruction 
 I expected to run has correctly run. There is one edge case I couldn’t
-Fix, with an unterminated inner loop (unterminated_inner_loop.ttl),
+fix, with an unterminated inner loop (unterminated_inner_loop.ttl),
 but since it fails gracefully, I think this is acceptable to call
 Turtle programmer error.
 
@@ -109,8 +110,8 @@ to write it into.
 - My is_number function is one of the more complicated functions.
 I tested it to ensure that it correctly matches minus numbers, positive
 numbers and floats. I made the decision that .1 is a valid number (without the leading 0)
-this is integration tested the bash script with weirdnums.ttl and tested in the 
-inline function.
+since this is parsed by C also. This is integration tested the bash script with weirdnums.ttl 
+and tested in the inline function.
 
 - I tested that going FORWARD -1 results correctly going backwards. Initially the way
 I coded it resulted in it printing nothing (as the movement loop didn't execute).
@@ -118,6 +119,6 @@ I added a test within the function, and I adapted the octogon.ttl to my bash scr
  test to check drawing a complex object backwards suceeds.
 
  - I encountered an out of bounds error while testing my code. 
- (I wasn't rounding the doubles before checking in the bounds function and this caused
- a C out of bounds error! I wrote a fix and then created out_of_bounds_left.ttl in the
- bash script to make sure it cannot happen again.)
+ I wasn't rounding the doubles before checking in the bounds function! 
+ I wrote a fix and then created out_of_bounds_left.ttl in the
+ bash script to make sure it cannot happen again.
