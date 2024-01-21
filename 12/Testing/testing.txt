@@ -112,6 +112,12 @@ numbers and floats. I made the decision that .1 is a valid number (without the l
 this is integration tested the bash script with weirdnums.ttl and tested in the 
 inline function.
 
-- I tested that going FORWARD -1 results in an interp failure (back.ttl). Initially the way
-I coded it resulted in it printing nothing (as the movement loop didn't execute). I decided
-that forwards must involve instructions >=0.
+- I tested that going FORWARD -1 results correctly going backwards. Initially the way
+I coded it resulted in it printing nothing (as the movement loop didn't execute).
+I added a test within the function, and I adapted the octogon.ttl to my bash script
+ test to check drawing a complex object backwards suceeds.
+
+ - I encountered an out of bounds error while testing my code. 
+ (I wasn't rounding the doubles before checking in the bounds function and this caused
+ a C out of bounds error! I wrote a fix and then created out_of_bounds_left.ttl in the
+ bash script to make sure it cannot happen again.)

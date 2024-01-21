@@ -3,19 +3,6 @@
                                                    
                                                    
                                                    
-                           YYY                     
-                         YY  CCC                   
-                         Y CC YYC                  
-                         YGC MMYCC                 
-                       GGY MMYYMCC                 
-                       G YYMCY MM                  
-                       GGG MYCCCM                  
-                       GRM MMG M                   
-                       GGGMMMMMM                   
-                        RRGGGMM                    
-                        RR   R                     
-                        RRR RR                     
-                           RR                      
                                                    
                                                    
                                                    
@@ -23,7 +10,20 @@
                                                    
                                                    
                                                    
-                                                   
+                WWWWWW                             
+               W      W                            
+              W        W                           
+             W          W                          
+            W            W                         
+            W            W                         
+            W            W                         
+            W            W                         
+            W            W                         
+            W            W                         
+             W          W                          
+              W        W                           
+               W      W                            
+                WWWWWW                             
                                                    
                                                    
                                                    

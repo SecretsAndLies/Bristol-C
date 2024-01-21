@@ -14,7 +14,7 @@ LIBS =  -lm `pkg-config sdl2 --libs`
 
 
 
-all: parse_s interp_s parse_v
+all: parse_s interp_s parse_v parse interp extension
 
 parse_s: Parse/parse.h Parse/parse.c
 	$(CC) Parse/parse.c General/general.c -o parse_s -I./Parse $(SANITIZE) -lm
@@ -40,7 +40,7 @@ interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.
 interp_v: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h Interp/Stack/realloc.c
 	$(CC) neillsimplescreen.c Interp/interp.c General/general.c Interp/Stack/realloc.c -o interp_v -I./Interp $(VALGRIND) -lm
 
-extension: Extension/extension.h Extension/extension.c Extension/nsdl/neillsdl2.c
+extension: Extension/extension.h Extension/extension.c Extension/nsdl/neillsdl2.c Extension/nsdl/neillsdl2.h
 	$(CC) Extension/nsdl/neillsdl2.c Extension/extension.c -o extension -I./Extension $(PRODFLAGS) $(LIBS)
 
 ext_val: Extension/extension.h Extension/extension.c Extension/nsdl/neillsdl2.c
@@ -56,7 +56,7 @@ ext_run_val: ext_val
 		valgrind --leak-check=full ./extension_v
 
 clean:
-	rm -f parse_s interp_s interp_v extension extension_s extension_v parse_v out_*.txt out_*.ps out_*.pdf out.pdf out.ps out.txt *.zip
+	rm -f parse_s interp_s interp_v extension extension_s extension_v parse_v out_*.txt out_*.ps out_*.pdf out.pdf out.ps out.txt *.zip interp parse
 
 test: clean all 
 	./Testing/test.sh

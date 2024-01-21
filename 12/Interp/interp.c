@@ -1679,7 +1679,7 @@ bool run_fwd(Program *p)
    }
    p->ttl.distance=p->curr_var.num_var;
    if(p->ttl.distance<0){
-      return false;
+      p->ttl.back=true;
    }
    if(!go_fwd(p)){
       return false;
@@ -1723,20 +1723,28 @@ void test_run_fwd(void)
    assert(prog->output[START_Y][START_X+1]==' ');
    prog->curr_word = 0;
 
-   // test that negative numbers fail.
-   strcpy(prog->words[0],"FORWARD");
-   strcpy(prog->words[1],"-1");
-   assert(!run_fwd(prog));
-   prog->curr_word = 0;
-
    set_variable_to_num('A', prog, -0.1);
    strcpy(prog->words[0],"FORWARD");
    strcpy(prog->words[1],"$A");
-   assert(!run_fwd(prog));
+   assert(run_fwd(prog));
    prog->curr_word = 0;
 
    stack_free(prog->stck);
    free(prog);   
+
+   Program* prog2 = ncalloc(1, sizeof(Program));
+   init_prog_variables(prog2);
+   prog2->output_location=TXT;
+   strcpy(prog2->words[0],"FORWARD");
+   strcpy(prog2->words[1],"-5");
+   assert(run_fwd(prog2));
+   assert(prog2->output[START_Y+3][START_X]=='W');
+   assert(prog2->output[START_Y+5][START_X]=='W');
+   assert(prog2->output[START_Y][START_X-1]==' ');
+   prog2->curr_word = 0;
+   stack_free(prog2->stck);
+   free(prog2);   
+
 }
 
 // populates the colour string.
@@ -1849,10 +1857,13 @@ void test_write_ps_move(void)
 // printing to the screen on each step.
 bool execute_move(Program * p)
 {
+   if(p->ttl.back){
+      p->ttl.angle = add_to_angle(p->ttl.angle,180);
+   }
    double angle_in_radians = DEGREES_TO_RADIANS(p->ttl.angle);
    double x_move = cos(angle_in_radians);
    double y_move = sin(angle_in_radians);
-   for (int i=0; i<p->ttl.distance; i++){
+   for (int i=0; i<abs(p->ttl.distance); i++){
       if(p->output_location!=PS){
          p->ttl.x -= x_move;
          p->ttl.y -= y_move;
@@ -1872,6 +1883,10 @@ bool execute_move(Program * p)
       p->ttl.x=round(p->ttl.x);
       p->ttl.y=round(p->ttl.y);
    }
+   if(p->ttl.back){
+      p->ttl.angle = add_to_angle(p->ttl.angle,180);
+      p->ttl.back=false;
+   } // todo repetitious.
    return true;
 }
 
@@ -1887,8 +1902,8 @@ bool is_out_of_bounds(Program * p)
       height=SCREEN_HEIGHT;
       width=SCREEN_WIDTH;
    }
-   if (p->ttl.y < 0 || p->ttl.y >= height || 
-      p->ttl.x < 0 || p->ttl.x >= width){
+   if (round(p->ttl.y) < 0 || round(p->ttl.y) >= height || 
+      round(p->ttl.x) < 0 || round(p->ttl.x) >= width){
       return true;
    }
    return false;

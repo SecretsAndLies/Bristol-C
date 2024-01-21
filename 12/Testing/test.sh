@@ -166,6 +166,7 @@ check_output_match interp_s turn txt
 check_output_match interp_s tunnel txt
 check_output_match interp_s octagon1 txt
 check_output_match interp_s octagon2 txt
+check_output_match interp_s back_octagon txt
 
 #My version of these tests go out of bounds.
 check_exit_fail interp_s spiral
@@ -188,5 +189,6 @@ check_exit_success_txt interp_s weirdnums
 check_exit_fail interp_s back
 check_exit_fail interp_s invalid_op
 check_exit_fail parse_s invalid_op
+check_exit_fail interp_s out_of_bounds_left
 
 exit 0

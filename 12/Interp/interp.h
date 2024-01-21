@@ -87,6 +87,7 @@ typedef struct Turtle
    double y;
    double angle;
    double distance;
+   bool back;
    neillcol col;
 } Turtle;
 
